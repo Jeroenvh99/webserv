@@ -1,26 +1,41 @@
-NAME	= webserv
+NAME		:= webserv
 
-CXX			= c++
-CXXFLAGS	= -Wall
-LDFLAGS		= 
-DEBUG_FLAGS	= -g # -fsanitize=address
+SRC_DIR		:= ./source/
+SRC_SUBDIRS	:= network/ network/
+OBJ_DIR		:= ./object/
+HDR_DIR		:= ./include/
 
-SRC_DIR	= ./src
-SRCS	= main.cpp \
+SRC_FILES	:= main.cpp\
+			network/except.cpp\
+			network/Handle.cpp\
+			network/Poller_ctor.cpp\
+			network/Poller_method.cpp\
+			network/Poller_Event.cpp
 
-OBJ_DIR	= ./.obj
-OBJS	= $(SRCS:%.cpp=$(OBJ_DIR)/%.o)
+OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
+
+CXX			:= c++
+CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) -g
+DEPFLAGS	:= -MMD $(@.o=.d) -MP
+DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
+
+.PHONY: all clean fclean re
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) $(OBJS) -o $(NAME) $(LDFLAGS) 
+$(NAME): $(addprefix $(OBJ_DIR),$(OBJ_FILES))
+	@$(CXX) $(CXXFLAGS) $^ -o $@
 
-$(OBJ_DIR)/%.o: src/%.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) -c $< -o $@
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
+	@mkdir -p $(OBJ_DIR) $(addprefix $(OBJ_DIR),$(SRC_SUBDIRS))
+	@$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR) $(NAME)
+	@rm -f $(addprefix $(OBJ_DIR),$(OBJ_FILES))
 
-re: clean all
+fclean: clean
+	@rm -f $(NAME)
+
+re: fclean all
+
+-include $(DEP_FILES)
