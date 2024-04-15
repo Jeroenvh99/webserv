@@ -1,5 +1,6 @@
 #include "webserv.hpp"
 #include "network/Buffer.hpp"
+#include "Logger.hpp"
 
 #include <iostream>
 #include <string>
@@ -8,7 +9,9 @@
 int
 main() {
 	try {
-		Poller	poller;
+		Poller			poller;
+		AccessLogger	alog(std::cout);
+
 		auto	abox = poller.add(
 			IPv4Acceptor(IPv4Acceptor::Address(1100, INADDR_ANY)),
 			{Poller::EventType::read},
@@ -27,7 +30,7 @@ main() {
 					IPv4StreamSocket		client = acceptor.accept(address);
 
 					poller.add(std::move(client), dfl_events, dfl_mode);
-					std::cout << "Connection established at " << std::string(address) << std::endl;
+					alog.log("Connection established");
 				} else {
 					IPv4StreamSocket const&	client = static_cast<IPv4StreamSocket const&>(*handle);
 					network::Buffer<512>	buf;
@@ -35,16 +38,10 @@ main() {
 					if (event.happened(network::Poller::EventType::read)) {
 						client.read(buf);
 						if (buf.len() == 0) { // close host socket automatically?
-							std::cout << "Connection lost." << std::endl;
 							poller.remove(handle);
-							handle->close();
-						} else {
-							std::cout << "Received: " << buf;
-							std::ostringstream	oss;
-							oss << buf;
-							if (oss.str()[0] == 'e')
-								return (0);
-						}
+							alog.log("Connection lost");
+						} else
+							alog.log(std::string(buf));
 					}
 					if (event.happened(network::Poller::EventType::write))
 						client.write(buf);
