@@ -2,4 +2,9 @@
 .cache
 
 webserv
-.obj
+*.o
+*.a
+*.d
+*.gch
+*.backup
+
