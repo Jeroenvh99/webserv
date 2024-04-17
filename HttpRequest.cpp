@@ -123,3 +123,8 @@ bool HttpRequest::isHttpHeader(std::string& header) {
 	}
 	return hasvalue;
 }
+
+const HttpRequest::HeaderMap &HttpRequest::getHeaders() const
+{
+	return _headers;
+}
