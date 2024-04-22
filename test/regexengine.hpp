@@ -3,7 +3,7 @@
 # include <vector>
 # include <string>
 
-namespace engine_utils {
+namespace regex_utils {
 	enum pattern_state {
 		NORMAL,
 		BACKSLASH,

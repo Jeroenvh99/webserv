@@ -42,6 +42,9 @@ void parseHeader(std::string& headers) {
 		std::string value;
 		std::getline(h, value, ':');
 		value.erase(0, value.find_first_not_of(" \n\r\t"));
+		if (value.back() != '\r') {
+			throw std::exception();
+		}
 		value.erase(value.find_last_not_of(" \n\r\t") + 1);
 		std::cout << "Name: " << name << " Value: " << value << "\n";
 	}
@@ -49,7 +52,7 @@ void parseHeader(std::string& headers) {
 }
 
 // int main() {
-// 	std::string in("Host: test.com\r\nContent-Type: app\r\n");
+// 	std::string in("\r\n");
 // 	try {
 // 		parseHeader(in);
 // 	} catch (std::exception &e) {

@@ -10,6 +10,16 @@ const char* HttpRequest::IncorrectHeaderFormatException::what() const throw()
 	return "httpException: Http request header incorrectly formatted";
 }
 
+int countWords(std::string& str) {
+	int words = 0;
+	for (int i = 0; i < str.size(); i++) {
+		if (i > 0 && (std::isspace(str[i]) || str[i] == '\0') && !std::isspace(str[i - 1])) {
+			++words;
+		}
+	}
+	return words;
+}
+
 // when receiving 0 bytes from recv() parsing can begin
 HttpRequest::HttpRequest(char *request) {
 	if (request[0] != '\0') {
@@ -17,6 +27,7 @@ HttpRequest::HttpRequest(char *request) {
 		_buffer.append(temp);
 	}
 	if (!_buffer.empty() && request[0] == '\0') {
+		_contentlength = 0;
 		parse(_buffer);
 	}
 }
@@ -25,8 +36,13 @@ void HttpRequest::parse(std::string& request) {
 	RequestParseStatus status = RequestParseStatus::REQUESTLINE;
 	int bodysize = 0;
 	std::stringstream s(request);
+	std::string requestline;
+	std::stringstream copy(request);
+	std::getline(copy, requestline);
+	if (countWords(requestline) != 3) {
+		throw HttpRequest::IncorrectRequestFormatException();
+	}
 	std::string temp;
-	// cannot use stream extraction and getline together
 	std::getline(s, temp, ' ');
 	std::string methods[requestType::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 	requestType methodtype[requestType::NONE] = {requestType::GET, requestType::HEAD, requestType::POST, requestType::PUT, requestType::DELETE, requestType::CONNECT, requestType::OPTIONS, requestType::TRACE};
@@ -42,19 +58,23 @@ void HttpRequest::parse(std::string& request) {
 	}
 	std::getline(s, _requesturi, ' ');
 	std::getline(s, temp, ' ');
-	std::string versions[httpVersion::NONE] = {"HTTP/1.0", "HTTP/1.1"};
-	httpVersion versiontype[httpVersion::NONE] = {httpVersion::ONE, httpVersion::ONEDOTONE};
-	_version = httpVersion::NONE;
-	for (int i = 0; i < httpVersion::NONE; i++) {
+	if (temp.substr(temp.length() - 2 ) != "\r\n") {
+		throw std::exception();
+	}
+	temp.erase(temp.find_last_not_of(" \n\r\t") + 1);
+	std::string versions[httpVersion::NO] = {"HTTP/1.0", "HTTP/1.1"};
+	httpVersion versiontype[httpVersion::NO] = {httpVersion::ONE, httpVersion::ONEDOTONE};
+	_version = httpVersion::NO;
+	for (int i = 0; i < httpVersion::NO; i++) {
 		if (temp == versions[i]) {
 			_version = versiontype[i];
 			break;
 		}
 	}
-	if (temp.back() != '\r' or _method == httpVersion::NONE) {
+	if (_version == httpVersion::NO) {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
-	status = RequestParseStatus::END;
+
 	while (!s.eof()) {
 		status = RequestParseStatus::HEADERS;
 		std::getline(s, temp);
@@ -73,12 +93,16 @@ void HttpRequest::parse(std::string& request) {
 		std::string value;
 		std::getline(h, value, ':');
 		value.erase(0, value.find_first_not_of(" \n\r\t"));
+		if (value.back() != '\r') {
+			throw HttpRequest::IncorrectHeaderFormatException();
+		}
 		value.erase(value.find_last_not_of(" \n\r\t") + 1);
 		_headers.insert(std::make_pair(name, value));
 		if (caseInsensitiveSearch(name, std::string("Content-Length"))) {
 			_contentlength = std::stoi(value);
 		}
 	}
+
 	while (!s.eof()) {
 		status = RequestParseStatus::BODY;
 		std::getline(s, temp);
@@ -89,7 +113,7 @@ void HttpRequest::parse(std::string& request) {
 		bodysize += temp.length();
 		_message += temp;
 	}
-	if (!(s.eof() && status == RequestParseStatus::END)) {
+	if (!s.eof() || status != RequestParseStatus::END) {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
 }
