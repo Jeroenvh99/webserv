@@ -1,5 +1,6 @@
 #ifndef HTTPREQUEST_C
 # define HTTPREQUEST_C
+# include <vector>
 # include <string>
 # include <iostream>
 # include <sstream>

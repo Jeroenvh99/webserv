@@ -16,9 +16,9 @@ int checkregex(std::string pattern) {
 
 std::vector<std::string> patternToStrings(std::string pattern) {
 	std::vector<std::string> patternArray;
-	engine_utils::pattern_state state = engine_utils::NORMAL;
+regex_utils::pattern_state state = regex_utils::NORMAL;
 	for (int i = 0; i < pattern.length(); i++) {
-		if (state == engine_utils::BACKSLASH) {
+		if (state == regex_utils::BACKSLASH) {
 			if (pattern[i] == 'd') {
 				patternArray.push_back(std::string("0123456789"));
 			} else if (pattern[i] == 'D') {
@@ -59,31 +59,32 @@ std::vector<std::string> patternToStrings(std::string pattern) {
 				patternArray.push_back(s);
 			}
 			++i;
-		} else if (state == engine_utils::SQUAREBRACKETS) {
+		} else if (state == regex_utils::SQUAREBRACKETS) {
 			int allowed = 1;
 			if (pattern[i] == '^') {
 				allowed = 0;
 				++i;
 			}
 			char from = pattern[i];
+			char to = from;
 			if (pattern[i + 1] == '-') {
-				char to = pattern[i + 2];
-				std::string s;
-				for (char c = 0; c < 127; c++) {
-					if (!allowed && (c < from || c > to)) {
-						s.push_back(c);
-					}
-					if (allowed && (c >= from && c <= to)) {
-						s.push_back(c);
-					}
-				}
-				patternArray.push_back(s);
-				i += 3;
+				to = pattern[i + 2];
+				i += 2;
 			}
-			++i;
+			std::string s;
+			for (char c = 0; c < 127; c++) {
+				if (!allowed && (c < from || c > to)) {
+					s.push_back(c);
+				}
+				if (allowed && (c >= from && c <= to)) {
+					s.push_back(c);
+				}
+			}
+			patternArray.push_back(s);
+			i += 2;
 		}
 		if (pattern[i] == '\\') {
-			state = engine_utils::BACKSLASH;
+			state = regex_utils::BACKSLASH;
 		} else if (pattern[i] == '.') {
 			std::string s;
 			for (char c = 0; c < 127; c++) {
@@ -91,9 +92,9 @@ std::vector<std::string> patternToStrings(std::string pattern) {
 			}
 			patternArray.push_back(s);
 		} else if (pattern[i] == '[') {
-			state = engine_utils::SQUAREBRACKETS;
+			state = regex_utils::SQUAREBRACKETS;
 		} else if (pattern[i]) {
-			state = engine_utils::NORMAL;
+			state = regex_utils::NORMAL;
 			std::string s(1, pattern[i]);
 			patternArray.push_back(s);
 		}
