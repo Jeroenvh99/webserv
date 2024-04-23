@@ -17,14 +17,14 @@ enum httpVersion {
 class HttpResponse {
 	using HeaderMap = std::unordered_map<std::string, std::string>;
 	private:
-		std::string _buffer;
+		std::string _response;
 		httpVersion _version;
 		int _statuscode;
 		std::string _statustext;
 		HeaderMap _headers;
 		std::string _message;
 	public:
-		HttpResponse();
+		HttpResponse(httpVersion version, int &status, HeaderMap &headers, std::string &message);
 		HttpResponse(const HttpResponse& src);
 		std::string getResponse();
 		~HttpResponse();
