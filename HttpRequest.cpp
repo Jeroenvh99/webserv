@@ -127,7 +127,6 @@ bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
 	return it != str.end();
 }
 
-
 bool HttpRequest::isHttpHeader(std::string& header) {
 	int colon = header.find(':');
 	if (colon == std::string::npos) {
