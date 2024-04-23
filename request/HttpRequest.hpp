@@ -48,6 +48,11 @@ class HttpRequest {
 		void addBuffer(std::array<char, 512> request);
 		void parse(std::string& request);
 		bool isHttpHeader(std::string& header);
+		const requestType &getRequestType();
+		const httpVersion &getHttpVersion();
+		const std::string &getRequestUri();
+		const HeaderMap &getHeaders();
+		const std::string &getMessage();
 		~HttpRequest();
 		class IncorrectRequestFormatException: public std::exception {
 			virtual const char* what() const throw();

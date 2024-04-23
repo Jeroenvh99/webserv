@@ -121,6 +121,27 @@ void HttpRequest::parse(std::string& request) {
 	}
 }
 
+const requestType &HttpRequest::getRequestType() {
+	return _method;
+}
+
+const httpVersion &HttpRequest::getHttpVersion() {
+	return _version;
+}
+
+const std::string &HttpRequest::getRequestUri() {
+	return _requesturi;
+}
+
+const HeaderMap &HttpRequest::getHeaders() {
+	return _headers;
+}
+
+const std::string &HttpRequest::getMessage() {
+	return _message;
+}
+
+
 bool caseInsensitiveCharCompare(char a, char b) {
 	return std::tolower(a) == std::tolower(b);
 }
