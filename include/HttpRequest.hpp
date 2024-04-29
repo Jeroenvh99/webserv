@@ -25,13 +25,6 @@ enum httpVersion {
 	NO
 };
 
-enum RequestParseStatus {
-	REQUESTLINE,
-	HEADERS,
-	BODY,
-	END
-};
-
 class HttpRequest {
 	using HeaderMap = std::unordered_map<std::string, std::string>;
 	private:
@@ -43,11 +36,15 @@ class HttpRequest {
 		std::string _message;
 		int _contentlength;
 	public:
-		HttpRequest();
+		HttpRequest(int contentlength = -1);
 		HttpRequest(const HttpRequest& src);
+		HttpRequest &operator=(const HttpRequest& src);
 		void addBuffer(std::array<char, 512> request);
 		void parse(std::string& request);
-		bool isHttpHeader(std::string& header);
+		void parseRequestLine(std::stringstream &s);
+		void parseHeaders(std::stringstream &s);
+		void parseBody(std::stringstream &s);
+		static bool isHttpHeader(std::string& header);
 		const requestType &getRequestType();
 		const httpVersion &getHttpVersion();
 		const std::string &getRequestUri();
