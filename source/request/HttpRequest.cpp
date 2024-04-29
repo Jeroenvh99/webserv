@@ -20,7 +20,20 @@ int countWords(std::string& str) {
 	return words;
 }
 
-HttpRequest::HttpRequest() {}
+HttpRequest::HttpRequest(int contentlength) {
+	_contentlength = contentlength;
+	_method = requestType::NONE;
+	_version = httpVersion::NO;
+}
+
+HttpRequest::HttpRequest(const HttpRequest& src) {
+	*this = src;
+}
+
+HttpRequest &HttpRequest::operator=(const HttpRequest& src) {
+	//implement
+	return *this;
+}
 
 // when receiving 0 bytes from recv() parsing can begin
 void HttpRequest::addBuffer(std::array<char, 512> request) {
@@ -35,9 +48,16 @@ void HttpRequest::addBuffer(std::array<char, 512> request) {
 	}
 }
 
+bool caseInsensitiveCharCompare(char a, char b) {
+	return std::tolower(a) == std::tolower(b);
+}
+
+bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
+	auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), caseInsensitiveCharCompare);
+	return it != str.end();
+}
+
 void HttpRequest::parse(std::string& request) {
-	RequestParseStatus status = RequestParseStatus::REQUESTLINE;
-	int bodysize = 0;
 	std::stringstream s(request);
 	std::string requestline;
 	std::stringstream copy(request);
@@ -45,11 +65,19 @@ void HttpRequest::parse(std::string& request) {
 	if (countWords(requestline) != 3) {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
+	parseRequestLine(s);
+	parseHeaders(s);
+	parseBody(s);
+	if (!s.eof()) {
+		throw HttpRequest::IncorrectRequestFormatException();
+	}
+}
+
+void HttpRequest::parseRequestLine(std::stringstream &s) {
 	std::string temp;
 	std::getline(s, temp, ' ');
 	std::string methods[requestType::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 	requestType methodtype[requestType::NONE] = {requestType::GET, requestType::HEAD, requestType::POST, requestType::PUT, requestType::DELETE, requestType::CONNECT, requestType::OPTIONS, requestType::TRACE};
-	_method = requestType::NONE;
 	for (int i = 0; i < requestType::NONE; i++) {
 		if (temp == methods[i]) {
 			_method = methodtype[i];
@@ -62,12 +90,11 @@ void HttpRequest::parse(std::string& request) {
 	std::getline(s, _requesturi, ' ');
 	std::getline(s, temp, ' ');
 	if (temp.substr(temp.length() - 2 ) != "\r\n") {
-		throw std::exception();
+		throw HttpRequest::IncorrectRequestFormatException();
 	}
 	temp.erase(temp.find_last_not_of(" \n\r\t") + 1);
 	std::string versions[httpVersion::NO] = {"HTTP/1.0", "HTTP/1.1"};
 	httpVersion versiontype[httpVersion::NO] = {httpVersion::ONE, httpVersion::ONEDOTONE};
-	_version = httpVersion::NO;
 	for (int i = 0; i < httpVersion::NO; i++) {
 		if (temp == versions[i]) {
 			_version = versiontype[i];
@@ -77,22 +104,23 @@ void HttpRequest::parse(std::string& request) {
 	if (_version == httpVersion::NO) {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
+}
 
+void HttpRequest::parseHeaders(std::stringstream &s) {
+	std::string temp;
 	while (!s.eof()) {
-		status = RequestParseStatus::HEADERS;
 		std::getline(s, temp);
 		if (temp == "\r") {
-			status = RequestParseStatus::END;
-			break;
+			return ;
 		}
 		if (!isHttpHeader(temp)) {
 			throw HttpRequest::IncorrectHeaderFormatException();
 		}
 		std::stringstream h(temp);
 		std::string name;
+		std::getline(h, name, ':');
 		name.erase(0, name.find_first_not_of(" \n\r\t"));
 		name.erase(name.find_last_not_of(" \n\r\t") + 1);
-		std::getline(h, name, ':');
 		std::string value;
 		std::getline(h, value, ':');
 		value.erase(0, value.find_first_not_of(" \n\r\t"));
@@ -105,20 +133,22 @@ void HttpRequest::parse(std::string& request) {
 			_contentlength = std::stoi(value);
 		}
 	}
+	throw HttpRequest::IncorrectRequestFormatException();
+}
 
+void HttpRequest::parseBody(std::stringstream &s) {
+	std::string temp;
+	int bodysize = 0;
 	while (!s.eof()) {
-		status = RequestParseStatus::BODY;
 		std::getline(s, temp);
-		if (temp == "0\r" || bodysize == _contentlength) {
-			status = RequestParseStatus::END;
-			break;
+		temp += '\n';
+		if ((_contentlength > 0 && temp == "0\r\n") || bodysize == _contentlength) {
+			return;
 		}
 		bodysize += temp.length();
 		_message += temp;
 	}
-	if (!s.eof() || status != RequestParseStatus::END) {
-		throw HttpRequest::IncorrectRequestFormatException();
-	}
+	throw HttpRequest::IncorrectRequestFormatException();
 }
 
 const requestType &HttpRequest::getRequestType() {
@@ -133,22 +163,12 @@ const std::string &HttpRequest::getRequestUri() {
 	return _requesturi;
 }
 
-const HeaderMap &HttpRequest::getHeaders() {
+const HttpRequest::HeaderMap &HttpRequest::getHeaders() {
 	return _headers;
 }
 
 const std::string &HttpRequest::getMessage() {
 	return _message;
-}
-
-
-bool caseInsensitiveCharCompare(char a, char b) {
-	return std::tolower(a) == std::tolower(b);
-}
-
-bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
-	auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), caseInsensitiveCharCompare);
-	return it != str.end();
 }
 
 bool HttpRequest::isHttpHeader(std::string& header) {
@@ -170,3 +190,5 @@ bool HttpRequest::isHttpHeader(std::string& header) {
 	}
 	return hasvalue;
 }
+
+HttpRequest::~HttpRequest() {}

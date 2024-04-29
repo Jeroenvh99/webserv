@@ -2,8 +2,6 @@
 # define HTTPRESPONSE_C
 # include <vector>
 # include <string>
-# include <iostream>
-# include <sstream>
 # include <exception>
 # include <algorithm>
 # include <unordered_map>
@@ -26,8 +24,17 @@ class HttpResponse {
 	public:
 		HttpResponse(httpVersion version, int &status, HeaderMap &headers, std::string &message);
 		HttpResponse(const HttpResponse& src);
+		HttpResponse &operator=(const HttpResponse& src);
 		std::string getResponse();
+		httpVersion getHttpVersion() const;
+		int getStatusCode() const;
+		std::string getStatusText() const;
+		HttpResponse::HeaderMap getHeaders() const;
+		std::string getMessage() const;
 		~HttpResponse();
+		class InvalidResponseException: public std::exception {
+			virtual const char* what() const throw();
+		};
 };
 
 #endif
