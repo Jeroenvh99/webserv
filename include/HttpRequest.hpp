@@ -45,11 +45,12 @@ class HttpRequest {
 		void parseHeaders(std::stringstream &s);
 		void parseBody(std::stringstream &s);
 		static bool isHttpHeader(std::string& header);
-		const requestType &getRequestType();
-		const httpVersion &getHttpVersion();
-		const std::string &getRequestUri();
-		const HeaderMap &getHeaders();
-		const std::string &getMessage();
+		const requestType &getRequestType() const;
+		const httpVersion &getHttpVersion() const;
+		const std::string &getRequestUri() const;
+		const HeaderMap &getHeaders() const;
+		const std::string &getMessage() const;
+		const int &getContentLength() const;
 		~HttpRequest();
 		class IncorrectRequestFormatException: public std::exception {
 			virtual const char* what() const throw();
