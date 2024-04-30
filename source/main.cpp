@@ -42,6 +42,7 @@ main() {
 						if (buf.len() == 0) { // close host socket automatically?
 							poller.remove(handle);
 							handle->close();
+							req.addBuffer(buf);
 						} else {
 							std::cout << "Received: " << buf;
 							std::ostringstream	oss;
