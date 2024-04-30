@@ -133,6 +133,7 @@ Test(parserequest, headers1) {
 		cr_assert_str_eq(headers["Content-Type"].c_str(), "app");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
+		cr_assert(0);
 	}
 }
 
@@ -184,6 +185,23 @@ Test(parserequest, headers5) {
 		fflush(stdout);
 		std::unordered_map<std::string, std::string> headers = req.getHeaders();
 		cr_assert_eq(headers.size(), 0);
+	} catch (std::exception &e) {
+		std::cerr << "incorrect format for header\n";
+		cr_assert(0);
+	}
+}
+
+Test(parserequest, headers6) {
+	std::string in("Host: test.com\r\nContent-Length: 25\r\n\r\n");
+	try {
+		std::stringstream s(in);
+		HttpRequest req;
+		req.parseHeaders(s);
+		fflush(stdout);
+		std::unordered_map<std::string, std::string> headers = req.getHeaders();
+		cr_assert_str_eq(headers["Host"].c_str(), "test.com");
+		cr_assert_str_eq(headers["Content-Length"].c_str(), "25");
+		cr_assert_eq(req.getContentLength(), 25);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
 		cr_assert(0);
@@ -257,5 +275,30 @@ Test(parserequest, complete1) {
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
+	}
+}
+
+Test(parserequest, complete2) {
+	std::string in("GET www.test.com HTTP/1.0\r\nHost: test.com\r\nContent-Type: app\r\nContent-Length: 18\r\n\r\nthis is the body\r\n");
+	try {
+		std::array<char, 512> s = {0};
+		std::copy(in.begin(), in.end(), s.begin());
+		HttpRequest req;
+		req.addBuffer(s);
+		std::fill(s.begin(), s.end(), 0);
+		req.addBuffer(s);
+		fflush(stdout);
+		std::unordered_map<std::string, std::string> headers = req.getHeaders();
+		cr_assert_str_eq(req.getRequestUri().c_str(), "www.test.com");
+		cr_assert_eq(req.getRequestType(), requestType::GET);
+		cr_assert_eq(req.getHttpVersion(), httpVersion::ONE);
+		cr_assert_str_eq(headers["Host"].c_str(), "test.com");
+		cr_assert_str_eq(headers["Content-Type"].c_str(), "app");
+		cr_assert_str_eq(headers["Content-Length"].c_str(), "18");
+		cr_assert_eq(req.getContentLength(), 18);
+		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n");
+	} catch (std::exception &e) {
+		std::cerr << "incorrect format for request\n";
+		cr_assert(0);
 	}
 }
