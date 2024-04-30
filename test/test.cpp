@@ -3,6 +3,8 @@
 #include "regexengine.hpp"
 #include "HttpRequest.hpp"
 #include <vector>
+#include <array>
+#include <algorithm>
 #include <string>
 #include <iostream>
 #include <exception>
@@ -239,5 +241,21 @@ Test(parserequest, body4) {
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for body\n";
+	}
+}
+
+Test(parserequest, complete1) {
+	std::string in("\r\n");
+	try {
+		std::array<char, 512> s = {0};
+		std::copy(in.begin(), in.end(), s.begin());
+		HttpRequest req;
+		req.addBuffer(s);
+		std::fill(s.begin(), s.end(), 0);
+		req.addBuffer(s);
+		fflush(stdout);
+		cr_assert(0);
+	} catch (std::exception &e) {
+		std::cerr << "incorrect format for request\n";
 	}
 }
