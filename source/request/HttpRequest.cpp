@@ -13,7 +13,7 @@ const char* HttpRequest::IncorrectHeaderFormatException::what() const throw()
 
 int countWords(std::string& str) {
 	int words = 0;
-	for (int i = 0; i < str.size(); i++) {
+	for (size_t i = 0; i < str.size(); i++) {
 		if (i > 0 && (std::isspace(str[i]) || str[i] == '\0') && !std::isspace(str[i - 1])) {
 			++words;
 		}
@@ -182,28 +182,23 @@ const int &HttpRequest::getContentLength() const {
 }
 
 bool HttpRequest::isHttpHeader(std::string& header) {
-	int colon = header.find(':');
+	size_t colon = header.find(':');
 	if (colon == std::string::npos) {
 		return false;
 	}
-	for (int i = 0; i < colon; i++) {
+	for (size_t i = 0; i < colon; i++) {
 		if (header[i] == ' ') {
 			return false;
 		}
 	}
 	bool hasvalue = false;
-	for (int i = colon; i < header.length(); i++) {
+	for (size_t i = colon; i < header.length(); i++) {
 		if (!std::isspace(header[i])) {
 			hasvalue = true;
 			break;
 		}
 	}
 	return hasvalue;
-}
-
-const HttpRequest::HeaderMap &HttpRequest::getHeaders() const
-{
-	return _headers;
 }
 
 HttpRequest::~HttpRequest() {}
