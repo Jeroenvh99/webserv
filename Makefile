@@ -10,7 +10,8 @@ SRC_FILES	:= main.cpp\
 			network/Handle.cpp\
 			network/Poller_ctor.cpp\
 			network/Poller_method.cpp\
-			network/Poller_Event.cpp
+			network/Poller_Event.cpp\
+			request/HttpRequest.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
