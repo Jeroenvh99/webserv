@@ -40,6 +40,7 @@ main() {
 							std::cout << "Connection lost." << std::endl;
 							poller.remove(handle);
 							handle->close();
+							req.addBuffer(buf);
 						} else {
 							std::cout << "Received: " << buf;
 							std::ostringstream	oss;
