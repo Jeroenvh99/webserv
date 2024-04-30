@@ -1,11 +1,10 @@
 #ifndef HTTPREQUEST_C
 # define HTTPREQUEST_C
-# include <vector>
 # include <string>
-# include <iostream>
 # include <sstream>
 # include <exception>
 # include <algorithm>
+# include <array>
 # include <unordered_map>
 
 enum requestType {
@@ -23,14 +22,7 @@ enum requestType {
 enum httpVersion {
 	ONE,
 	ONEDOTONE,
-	NONE
-};
-
-enum RequestParseStatus {
-	REQUESTLINE,
-	HEADERS,
-	BODY,
-	END
+	NO
 };
 
 class HttpRequest {
@@ -44,12 +36,24 @@ class HttpRequest {
 		std::string _message;
 		int _contentlength;
 	public:
-		HttpRequest(char *request);
+		HttpRequest(int contentlength = -1);
 		HttpRequest(const HttpRequest& src);
-		void parse(std::string& request);
-		bool isHttpHeader(std::string& header);
-		const HeaderMap& getHeaders() const;
+		HttpRequest &operator=(const HttpRequest& src);
 		~HttpRequest();
+
+		void addBuffer(std::array<char, 512> request);
+		void parse(std::string& request);
+		void parseRequestLine(std::stringstream &s);
+		void parseHeaders(std::stringstream &s);
+		void parseBody(std::stringstream &s);
+		static bool isHttpHeader(std::string& header);
+		const requestType &getRequestType() const;
+		const httpVersion &getHttpVersion() const;
+		const std::string &getRequestUri() const;
+		const HeaderMap &getHeaders() const;
+		const std::string &getMessage() const;
+		const int &getContentLength() const;
+
 		class IncorrectRequestFormatException: public std::exception {
 			virtual const char* what() const throw();
 		};
