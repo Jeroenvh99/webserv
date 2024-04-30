@@ -39,6 +39,8 @@ class HttpRequest {
 		HttpRequest(int contentlength = -1);
 		HttpRequest(const HttpRequest& src);
 		HttpRequest &operator=(const HttpRequest& src);
+		~HttpRequest();
+
 		void addBuffer(std::array<char, 512> request);
 		void parse(std::string& request);
 		void parseRequestLine(std::stringstream &s);
@@ -51,7 +53,7 @@ class HttpRequest {
 		const HeaderMap &getHeaders() const;
 		const std::string &getMessage() const;
 		const int &getContentLength() const;
-		~HttpRequest();
+
 		class IncorrectRequestFormatException: public std::exception {
 			virtual const char* what() const throw();
 		};
