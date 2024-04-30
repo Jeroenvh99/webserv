@@ -31,6 +31,8 @@ HttpRequest::HttpRequest(const HttpRequest& src) {
 	*this = src;
 }
 
+HttpRequest::~HttpRequest() {}
+
 HttpRequest &HttpRequest::operator=(const HttpRequest& src) {
 	_method = src.getRequestType();
 	_version = src.getHttpVersion();
@@ -200,5 +202,3 @@ bool HttpRequest::isHttpHeader(std::string& header) {
 	}
 	return hasvalue;
 }
-
-HttpRequest::~HttpRequest() {}
