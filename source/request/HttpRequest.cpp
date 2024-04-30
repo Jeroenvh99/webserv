@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include <iostream>
 
 const char* HttpRequest::IncorrectRequestFormatException::what() const throw()
 {
@@ -31,7 +32,12 @@ HttpRequest::HttpRequest(const HttpRequest& src) {
 }
 
 HttpRequest &HttpRequest::operator=(const HttpRequest& src) {
-	//implement
+	_method = src.getRequestType();
+	_version = src.getHttpVersion();
+	_requesturi = src.getRequestUri();
+	_headers = src.getHeaders();
+	_message = src.getMessage();
+	_contentlength = src.getContentLength();
 	return *this;
 }
 
@@ -59,12 +65,6 @@ bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
 
 void HttpRequest::parse(std::string& request) {
 	std::stringstream s(request);
-	std::string requestline;
-	std::stringstream copy(request);
-	std::getline(copy, requestline);
-	if (countWords(requestline) != 3) {
-		throw HttpRequest::IncorrectRequestFormatException();
-	}
 	parseRequestLine(s);
 	parseHeaders(s);
 	parseBody(s);
@@ -74,8 +74,14 @@ void HttpRequest::parse(std::string& request) {
 }
 
 void HttpRequest::parseRequestLine(std::stringstream &s) {
+	std::string requestline;
+	std::getline(s, requestline);
+	if (countWords(requestline) != 3) {
+		throw HttpRequest::IncorrectRequestFormatException();
+	}
 	std::string temp;
-	std::getline(s, temp, ' ');
+	std::stringstream s2(requestline);
+	std::getline(s2, temp, ' ');
 	std::string methods[requestType::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 	requestType methodtype[requestType::NONE] = {requestType::GET, requestType::HEAD, requestType::POST, requestType::PUT, requestType::DELETE, requestType::CONNECT, requestType::OPTIONS, requestType::TRACE};
 	for (int i = 0; i < requestType::NONE; i++) {
@@ -87,9 +93,9 @@ void HttpRequest::parseRequestLine(std::stringstream &s) {
 	if (_method == requestType::NONE) {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
-	std::getline(s, _requesturi, ' ');
-	std::getline(s, temp, ' ');
-	if (temp.substr(temp.length() - 2 ) != "\r\n") {
+	std::getline(s2, _requesturi, ' ');
+	std::getline(s2, temp, ' ');
+	if (temp.back() != '\r') {
 		throw HttpRequest::IncorrectRequestFormatException();
 	}
 	temp.erase(temp.find_last_not_of(" \n\r\t") + 1);
@@ -111,7 +117,7 @@ void HttpRequest::parseHeaders(std::stringstream &s) {
 	while (!s.eof()) {
 		std::getline(s, temp);
 		if (temp == "\r") {
-			return ;
+			return;
 		}
 		if (!isHttpHeader(temp)) {
 			throw HttpRequest::IncorrectHeaderFormatException();
@@ -151,24 +157,28 @@ void HttpRequest::parseBody(std::stringstream &s) {
 	throw HttpRequest::IncorrectRequestFormatException();
 }
 
-const requestType &HttpRequest::getRequestType() {
+const requestType &HttpRequest::getRequestType() const {
 	return _method;
 }
 
-const httpVersion &HttpRequest::getHttpVersion() {
+const httpVersion &HttpRequest::getHttpVersion() const {
 	return _version;
 }
 
-const std::string &HttpRequest::getRequestUri() {
+const std::string &HttpRequest::getRequestUri() const {
 	return _requesturi;
 }
 
-const HttpRequest::HeaderMap &HttpRequest::getHeaders() {
+const HttpRequest::HeaderMap &HttpRequest::getHeaders() const {
 	return _headers;
 }
 
-const std::string &HttpRequest::getMessage() {
+const std::string &HttpRequest::getMessage() const {
 	return _message;
+}
+
+const int &HttpRequest::getContentLength() const {
+	return _contentlength;
 }
 
 bool HttpRequest::isHttpHeader(std::string& header) {
