@@ -27,4 +27,6 @@ private:
     static const inline StatusMap _statusMap = {
         {200, "OK"}
     };
+
+    void generate();
 };
