@@ -29,4 +29,5 @@ private:
     };
 
     void generate();
+    void readFromFile(const std::string &path);
 };
