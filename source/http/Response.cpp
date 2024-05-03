@@ -1,4 +1,4 @@
-#include "Response.hpp"
+#include "http/Response.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -9,29 +9,35 @@ Response::Response(const HttpRequest &request) :
     _code(StatusCode::OK),
     _body("")
 {
-    readFromFile(request.getRequestUri());
+    (this->*_methodMap.at(request.getRequestType()))(request);
 }
 
- const std::string &Response::get()
- {
+const std::string &Response::get()
+{
     return _response;
- }
+}
 
- void Response::generate()
- {
+void http::Response::getMethod(const HttpRequest &request)
+{
+    readFromFile(request.getRequestUri());
+
+    generate();
+}
+
+void Response::generate()
+{
     _response = "HTTP/1.1 ";
-	_response += std::to_string(static_cast<int>(_code)) + " " + _statusMap.at(static_cast<int>(_code)) + "\r\n";
-	_response += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
-	_response += "Content-Type: text/html\r\n\r\n";
-	_response += _body;
- }
+    _response += std::to_string(static_cast<int>(_code)) + " " + _statusMap.at(static_cast<int>(_code)) + "\r\n";
+    _response += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
+    _response += "Content-Type: text/html\r\n\r\n";
+    _response += _body;
+}
 
- void Response::readFromFile(const std::string &path)
- {
-    std::ifstream       file;
-    std::stringstream   buffer;
+void Response::readFromFile(const std::string &path)
+{
+    std::ifstream file;
+    std::stringstream buffer;
 
-    
     if (!std::filesystem::exists(path))
     {
         _code = StatusCode::NotFound;
@@ -57,6 +63,4 @@ Response::Response(const HttpRequest &request) :
             file.close();
         }
     }
-
-    generate();
 }
