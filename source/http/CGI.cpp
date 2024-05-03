@@ -9,6 +9,8 @@
 #define WRITE_END 1
 #define READ_END 0
 
+using http::CGI;
+
 CGI::CGI(const HttpRequest &request)
 {
     initEnv(request);
@@ -18,7 +20,6 @@ CGI::CGI(const HttpRequest &request)
 void CGI::exec(const HttpRequest &request)
 {
     pid_t pid;
-
 
     int pipefds[2];
     if (pipe(pipefds) == -1)
