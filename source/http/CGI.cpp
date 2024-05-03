@@ -68,4 +68,5 @@ void CGI::initEnv(const HttpRequest &request)
     _env["CONTENT_TYPE"] = headers["Content-Type"];
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "Webserv";
+    // TODO: Other env variables
 }

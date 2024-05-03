@@ -43,7 +43,6 @@ namespace http
             // TODO: {requestType::DELETE, &Response::deleteMethod},
         };
 
-        void generate();
         void readFromFile(const std::string &path);
     };
 }
