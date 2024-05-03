@@ -13,11 +13,6 @@ SRC_FILES	:= main.cpp\
 			network/Handle.cpp\
 			network/Poller_ctor.cpp\
 			network/Poller_method.cpp\
-<<<<<<< HEAD
-			network/Poller_Event.cpp\
-=======
-			network/Poller_Event.cpp \
->>>>>>> 1069e1d (Fix compile errors)
 			request/HttpRequest.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
