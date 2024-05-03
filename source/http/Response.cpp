@@ -14,23 +14,18 @@ Response::Response(const HttpRequest &request) :
 
 const std::string &Response::get()
 {
+    _response = "HTTP/1.1 ";
+    _response += std::to_string(static_cast<int>(_code)) + " " + _statusMap.at(static_cast<int>(_code)) + "\r\n";
+    _response += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
+    _response += "Content-Type: text/html\r\n\r\n";
+    _response += _body;
+
     return _response;
 }
 
 void http::Response::getMethod(const HttpRequest &request)
 {
     readFromFile(request.getRequestUri());
-
-    generate();
-}
-
-void Response::generate()
-{
-    _response = "HTTP/1.1 ";
-    _response += std::to_string(static_cast<int>(_code)) + " " + _statusMap.at(static_cast<int>(_code)) + "\r\n";
-    _response += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
-    _response += "Content-Type: text/html\r\n\r\n";
-    _response += _body;
 }
 
 void Response::readFromFile(const std::string &path)
@@ -41,12 +36,15 @@ void Response::readFromFile(const std::string &path)
     if (!std::filesystem::exists(path))
     {
         _code = StatusCode::NotFound;
+        // TODO: Load 404 page
         _body = "404";
     }
     else if (std::filesystem::is_directory(path))
     {
-        _code = StatusCode::Forbidden;
-        _body = "403";
+        // TODO: list directory
+        _code = StatusCode::NotFound;
+        // TODO: Load 404 page
+        _body = "404";
     }
     else
     {
@@ -54,6 +52,7 @@ void Response::readFromFile(const std::string &path)
         if (!file.is_open())
         {
             _code = StatusCode::Forbidden;
+            // TODO: Load 403 page
             _body = "403";
         }
         else
