@@ -59,4 +59,7 @@ enum ErrorLogger::Level: int {
 	emergency,
 }; // enum ErrorLogger::Level
 
+char const*			level_to_str(ErrorLogger::Level);
+ErrorLogger::Level	level_from_str(char const*);
+
 #endif // LOGGER_HPP
