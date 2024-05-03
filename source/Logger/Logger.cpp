@@ -19,8 +19,8 @@ Logger::log(std::string const& msg) const {
 
 void
 Logger::timestamp() const {
-	std::time_t			now = std::time(nullptr);
-	std::tm*			tm = std::localtime(&now);
+	std::time_t	now = std::time(nullptr);
+	std::tm*	tm = std::localtime(&now);
 
 	_os << std::put_time(tm, "[%Y/%m/%d:%H:%M:%S+0100]") << " "; // time zone; daylight savings!
 }
