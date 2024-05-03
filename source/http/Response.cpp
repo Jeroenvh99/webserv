@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <fstream>
 
+using http::Response;
+
 Response::Response(const HttpRequest &request) : 
     _code(StatusCode::OK),
     _body("")
