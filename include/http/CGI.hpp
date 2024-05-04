@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 
-#include "../HttpRequest.hpp"
+#include "Request.hpp"
 
 namespace http
 {
@@ -22,13 +22,13 @@ namespace http
             };
         };
 
-        CGI(const HttpRequest &request);
+        CGI(const Request &request);
 
     private:
         using EnvMap = std::map<std::string, std::string>;
 
-        void exec(const HttpRequest &request);
-        void initEnv(const HttpRequest &request);
+        void exec(const Request &request);
+        void initEnv(const Request &request);
 
         EnvMap _env;
     };

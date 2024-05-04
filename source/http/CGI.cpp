@@ -11,13 +11,13 @@
 
 using http::CGI;
 
-CGI::CGI(const HttpRequest &request)
+CGI::CGI(const Request &request)
 {
     initEnv(request);
     exec(request);
 }
 
-void CGI::exec(const HttpRequest &request)
+void CGI::exec(const Request &request)
 {
     pid_t pid;
 
@@ -59,7 +59,7 @@ void CGI::exec(const HttpRequest &request)
     }
 }
 
-void CGI::initEnv(const HttpRequest &request)
+void CGI::initEnv(const Request &request)
 {
     auto headers = request.getHeaders();
 

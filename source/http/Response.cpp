@@ -5,11 +5,11 @@
 
 using http::Response;
 
-Response::Response(const HttpRequest &request) : 
+Response::Response(const Request &request) : 
     _code(StatusCode::OK),
     _body("")
 {
-    (this->*_methodMap.at(request.getRequestType()))(request);
+    (this->*_methodMap.at(request.getMethod()))(request);
 }
 
 const std::string &Response::get()
@@ -23,7 +23,7 @@ const std::string &Response::get()
     return _response;
 }
 
-void http::Response::getMethod(const HttpRequest &request)
+void http::Response::getMethod(const Request &request)
 {
     readFromFile(request.getRequestUri());
 }
