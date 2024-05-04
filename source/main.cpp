@@ -1,6 +1,6 @@
 #include "webserv.hpp"
 #include "network/Buffer.hpp"
-#include "HttpRequest.hpp"
+#include "http/Request.hpp"
 
 #include <iostream>
 #include <string>
@@ -32,7 +32,7 @@ main() {
 				} else {
 					IPv4StreamSocket const&	client = static_cast<IPv4StreamSocket const&>(*handle);
 					network::Buffer<512>	buf;
-					HttpRequest req;
+					http::Request req;
 	
 					if (event.happened(network::Poller::EventType::read)) {
 						client.read(buf);
