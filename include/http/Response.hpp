@@ -5,21 +5,21 @@
 #include <unordered_map>
 
 #include "StatusCode.hpp"
-#include "HttpRequest.hpp"
+#include "Request.hpp"
 
 namespace http
 {
     class Response
     {
     public:
-        Response(const HttpRequest &request);
+        Response(const Request &request);
 
         const std::string &get();
 
     private:
         using HeaderMap = std::map<std::string, std::string>;
         using StatusMap = std::unordered_map<int, std::string>;
-        using MethodMap = std::map<requestType, void (Response::*)(const HttpRequest&)>;
+        using MethodMap = std::map<RequestMethod, void (Response::*)(const Request&)>;
 
         StatusCode _code;
         HeaderMap _headers;
@@ -35,12 +35,12 @@ namespace http
             {500, "Internal Server Error"}
         };
 
-        void getMethod(const HttpRequest &request);
+        void getMethod(const Request &request);
         
         static const inline MethodMap _methodMap = {
-            {requestType::GET, &Response::getMethod},
-            // TODO: {requestType::POST, &Response::postMethod},
-            // TODO: {requestType::DELETE, &Response::deleteMethod},
+            {RequestMethod::GET, &Response::getMethod},
+            // TODO: {RequestMethod::POST, &Response::postMethod},
+            // TODO: {RequestMethod::DELETE, &Response::deleteMethod},
         };
 
         void readFromFile(const std::string &path);
