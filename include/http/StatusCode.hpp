@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HTTP_STATUS_CODE_HPP
+# define HTTP_STATUS_CODE_HPP
 
 namespace http
 {
@@ -11,3 +12,5 @@ namespace http
         NotFound = 404,
     };
 }
+
+#endif // HTTP_STATUS_CODE_HPP

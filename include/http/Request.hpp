@@ -1,18 +1,21 @@
-#pragma once
+#ifndef HTTP_REQUEST_HPP
+# define HTTP_REQUEST_HPP
 
-#include "Server.hpp"
+# include "Buffer.hpp"
 
-#include <string>
-#include <sstream>
-#include <exception>
-#include <algorithm>
-#include <unordered_map>
+# include <algorithm>
+# include <array>
+# include <stdexcept>
+# include <string>
+# include <sstream>
+# include <unordered_map>
+# include <utility>
 
 namespace http
 {
 	enum RequestMethod
 	{
-		NONE = 0x0,
+		NONE = 0x0, // is this for error handling? if so, this is now obsolete
 		GET = 0x1 < 0,
 		HEAD = 0x1 < 1,
 		POST = 0x1 < 2,
@@ -22,6 +25,21 @@ namespace http
 		OPTIONS = 0x1 < 6,
 		TRACE = 0x1 < 7,
 	};
+
+	using RequestMethodMap = std::array<std::pair<RequestMethod, char const*>, 8>;
+	constexpr RequestMethodMap	request_methods = {{
+		{GET, "GET"},
+		{HEAD, "HEAD"},
+		{POST, "POST"},
+		{PUT, "PUT"},
+		{DELETE, "DELETE"},
+		{CONNECT, "CONNECT"},
+		{OPTIONS, "OPTIONS"},
+		{TRACE, "TRACE"}
+	}};
+
+	RequestMethod	request_method_from_str(std::string const&);
+	char const*		request_method_to_str(RequestMethod);
 
 	enum HttpVersion
 	{
@@ -49,7 +67,7 @@ namespace http
 		Request &operator=(const Request &src);
 		~Request();
 
-		void addBuffer(Server::Buffer const& src);
+		void addBuffer(Buffer const& src);
 		void parse(std::string &request);
 		void parseRequestLine(std::stringstream &s);
 		void parseHeaders(std::stringstream &s);
@@ -72,3 +90,5 @@ namespace http
 		};
 	};
 }
+
+#endif // HTTP_REQUEST_HPP

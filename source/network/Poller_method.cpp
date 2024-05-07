@@ -13,6 +13,24 @@ extern int	errno;
 // maybe more detailed exception handling, encapsulating errno
 
 void
+Poller::add_shared(SharedHandle const& handle, EventTypes events, Modes modes) {
+	Event::Raw	rev;
+
+	rev.events = _get_bitmask(events) | _get_bitmask(modes);
+	rev.data.fd = handle->raw();
+
+	if (epoll_ctl(raw(), EPOLL_CTL_ADD, rev.data.fd, &rev) == -1) {
+		switch (errno) {
+			case EEXIST:	// attempt to add a handle twice
+				break;
+			default:
+				throw (Exception("epoll_ctl"));
+		}
+	}
+	_handles.emplace(handle);
+}
+
+void
 Poller::modify(SharedHandle const& handle, EventTypes events, Modes modes) {
 	Event::Raw			rev;
 	Handle::Raw const	fd = handle->raw();

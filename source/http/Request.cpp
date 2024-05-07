@@ -47,14 +47,14 @@ Request &Request::operator=(const Request& src) {
 }
 
 // when receiving 0 bytes from recv() parsing can begin
-void Request::addBuffer(Server::Buffer const& src) {
-	if (from.len() == 0) {
+void Request::addBuffer(Buffer const& src) {
+	if (src.len() == 0) {
 		_contentlength = 0;
 		parse(_buffer);
 	}
 	else {
-		_buffer.reserve(_buffer.size() + from.len());
-		for (auto const& c: from)
+		_buffer.reserve(_buffer.size() + src.len());
+		for (auto const& c: src)
 			_buffer += c;
 	}
 }
@@ -87,17 +87,7 @@ void Request::parseRequestLine(std::stringstream &s) {
 	std::string temp;
 	std::stringstream s2(requestline);
 	std::getline(s2, temp, ' ');
-	std::string methods[RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
-	RequestMethod methodtype[RequestMethod::NONE] = {RequestMethod::GET, RequestMethod::HEAD, RequestMethod::POST, RequestMethod::PUT, RequestMethod::DELETE, RequestMethod::CONNECT, RequestMethod::OPTIONS, RequestMethod::TRACE};
-	for (int i = 0; i < RequestMethod::NONE; i++) {
-		if (temp == methods[i]) {
-			_method = methodtype[i];
-			break;
-		}
-	}
-	if (_method == RequestMethod::NONE) {
-		throw Request::IncorrectRequestFormatException();
-	}
+	_method = request_method_from_str(temp);
 	std::getline(s2, _requesturi, ' ');
 	std::getline(s2, temp, ' ');
 	if (temp.back() != '\r') {

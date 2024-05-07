@@ -1,11 +1,12 @@
-#pragma once
+#ifndef HTTP_RESPONSE_HPP
+# define HTTP_RESPONSE_HPP
 
-#include <string>
-#include <map>
-#include <unordered_map>
+# include <string>
+# include <map>
+# include <unordered_map>
 
-#include "StatusCode.hpp"
-#include "Request.hpp"
+# include "StatusCode.hpp"
+# include "Request.hpp"
 
 namespace http
 {
@@ -46,3 +47,5 @@ namespace http
         void readFromFile(const std::string &path);
     };
 }
+
+#endif // HTTP_RESPONSE_HPP
