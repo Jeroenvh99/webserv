@@ -47,6 +47,7 @@ Request &Request::operator=(const Request& src) {
 }
 
 // when receiving 0 bytes from recv() parsing can begin
+// DB: No, it should begin sooner.
 void Request::addBuffer(Buffer const& src) {
 	if (src.len() == 0) {
 		_contentlength = 0;
@@ -76,6 +77,7 @@ void Request::parse(std::string& request) {
 	if (!s.eof()) {
 		throw Request::IncorrectRequestFormatException();
 	}
+	std::cout << "Request at " << std::to_string(reinterpret_cast<uintptr_t>(this)) << " successfully parsed.\n";
 }
 
 void Request::parseRequestLine(std::stringstream &s) {

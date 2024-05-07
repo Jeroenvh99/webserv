@@ -5,10 +5,11 @@
 
 void
 Server::loop(int backlog_size) {
-	((Acceptor&)(*_acceptor)).listen(backlog_size);
+	acceptor().listen(backlog_size);
 	while (true)
 		_process_events(_poller.wait<128>(1000));
 }
+// DB: make poller timeout and backlog size configurable?
 
 void
 Server::_process_events(Poller::Events const& events) {
@@ -33,8 +34,10 @@ Server::_handle_client(Poller::Event const& event, Clients::iterator it) {
 	_buffer.empty();
 	if (event.happened(Poller::EventType::read)) {
 		it->socket().read(_buffer);
-		if (_buffer.len() == 0)
+		if (_buffer.len() == 0) {
+			it->request().addBuffer(_buffer); // DB: get rid of this
 			_drop_client(it);
+		}
 		else
 			_process_buffer(*it);
 	} else if (event.happened(Poller::EventType::write))
