@@ -6,7 +6,6 @@
 #include <sstream>
 #include <exception>
 #include <algorithm>
-#include <array>
 #include <unordered_map>
 
 namespace http
