@@ -47,15 +47,15 @@ Request &Request::operator=(const Request& src) {
 }
 
 // when receiving 0 bytes from recv() parsing can begin
-void Request::addBuffer(std::array<char, 512> request) {
-	if (request[0] != '\0') {
-		for (int i = 0; i < 512; i++) {
-			_buffer += request[i];
-		}
-	}
-	if (!_buffer.empty() && request[0] == '\0') {
+void Request::addBuffer(Server::Buffer const& src) {
+	if (from.len() == 0) {
 		_contentlength = 0;
 		parse(_buffer);
+	}
+	else {
+		_buffer.reserve(_buffer.size() + from.len());
+		for (auto const& c: from)
+			_buffer += c;
 	}
 }
 

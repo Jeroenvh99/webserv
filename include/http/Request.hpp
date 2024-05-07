@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Server.hpp"
+
 #include <string>
 #include <sstream>
 #include <exception>
@@ -11,15 +13,15 @@ namespace http
 {
 	enum RequestMethod
 	{
-		GET,
-		HEAD,
-		POST,
-		PUT,
-		DELETE,
-		CONNECT,
-		OPTIONS,
-		TRACE,
-		NONE
+		NONE = 0x0,
+		GET = 0x1 < 0,
+		HEAD = 0x1 < 1,
+		POST = 0x1 < 2,
+		PUT = 0x1 < 3,
+		DELETE = 0x1 < 4,
+		CONNECT = 0x1 < 5,
+		OPTIONS = 0x1 < 6,
+		TRACE = 0x1 < 7,
 	};
 
 	enum HttpVersion
@@ -48,7 +50,7 @@ namespace http
 		Request &operator=(const Request &src);
 		~Request();
 
-		void addBuffer(std::array<char, 512> request);
+		void addBuffer(Server::Buffer const& src);
 		void parse(std::string &request);
 		void parseRequestLine(std::stringstream &s);
 		void parseHeaders(std::stringstream &s);
