@@ -1,12 +1,7 @@
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
-#include "regexengine.hpp"
-<<<<<<< HEAD:test/requesttest.cpp
-#include "HttpRequest.hpp"
 #include "Config.hpp"
-=======
 #include "Request.hpp"
->>>>>>> main:test/test.cpp
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -21,46 +16,7 @@ void redirect_stdout(void)
     cr_redirect_stdout();
 }
 
-TestSuite(misc, .init=redirect_stdout);
-
 TestSuite(parserequest, .init=redirect_stdout);
-
-TestSuite(parseconfig, .init=redirect_stdout);
-
-Test(misc, letters1) {
-	std::vector<std::string> v = { "dkhgadkjdu", "d[h-m]" };
-	regexsearch(v);
-	fflush(stdout);
-    cr_assert_stdout_eq_str("dk\ndk\n");
-}
-
-Test(misc, numbers1) {
-	std::vector<std::string> v = { "d1hgad6jdu", "d\\d" };
-	regexsearch(v);
-	fflush(stdout);
-    cr_assert_stdout_eq_str("d1\nd6\n");
-}
-
-Test(misc, numbers2) {
-	std::vector<std::string> v = { "d1hgad6jdu", "d\\D" };
-	regexsearch(v);
-	fflush(stdout);
-    cr_assert_stdout_eq_str("du\n");
-}
-
-Test(misc, numbers3) {
-	std::vector<std::string> v = { "d1hgad6jdu", "d[3-7]" };
-	regexsearch(v);
-	fflush(stdout);
-    cr_assert_stdout_eq_str("d6\n");
-}
-
-Test(misc, numbers4) {
-	std::vector<std::string> v = { "d1hgad6jdu", "d[6]" };
-	regexsearch(v);
-	fflush(stdout);
-    cr_assert_stdout_eq_str("d6\n");
-}
 
 Test(parserequest, requestline1) {
 	std::string in("");
@@ -291,24 +247,6 @@ Test(parserequest, complete2) {
 		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
-		cr_assert(0);
-	}
-}
-
-Test(parseconfig, config1) {
-	try {
-		std::string file = "test1.conf";
-		Config conf(file);
-		cr_assert_str_eq(conf.getConfig().c_str(), "error_log\tlogs/error.log;\n"
-"server {\n"
-"\tlisten\t\t80;\n"
-"\terror_page\t404\t/404.html;\n"
-"\tlocation /404.html /50x.html {\n"
-"\t\troot\t./tests/default/error;\n"
-"\t}\n"
-"}\n");
-	} catch (std::exception &e) {
-		std::cerr << e.what();
 		cr_assert(0);
 	}
 }
