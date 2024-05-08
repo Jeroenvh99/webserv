@@ -5,7 +5,7 @@
 #include <iostream>
 #include <exception>
 
-void redirect_stdout(void)
+static void redirect_stdout(void)
 {
     cr_redirect_stdout();
 }
@@ -28,4 +28,24 @@ Test(parseconfig, config1) {
 		std::cerr << e.what();
 		cr_assert(0);
 	}
-// }
+}
+
+Test(parseconfig, config2) {
+	try {
+		std::string file = "test2.conf";
+		Config conf(file);
+		cr_assert(0);
+	} catch (std::exception &e) {
+		std::cerr << e.what();
+	}
+}
+
+Test(parseconfig, config3) {
+	try {
+		std::string file = "test3.conf";
+		Config conf(file);
+		cr_assert(0);
+	} catch (std::exception &e) {
+		std::cerr << e.what();
+	}
+}
