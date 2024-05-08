@@ -2,6 +2,7 @@
 #include <criterion/redirect.h>
 #include "regexengine.hpp"
 #include "HttpRequest.hpp"
+#include "Config.hpp"
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -17,6 +18,8 @@ void redirect_stdout(void)
 TestSuite(misc, .init=redirect_stdout);
 
 TestSuite(parserequest, .init=redirect_stdout);
+
+TestSuite(parseconfig, .init=redirect_stdout);
 
 Test(misc, letters1) {
 	std::vector<std::string> v = { "dkhgadkjdu", "d[h-m]" };
@@ -59,7 +62,6 @@ Test(parserequest, requestline1) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseRequestLine(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for requestline\n";
@@ -72,7 +74,6 @@ Test(parserequest, requestline2) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseRequestLine(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for requestline\n";
@@ -85,7 +86,6 @@ Test(parserequest, requestline3) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseRequestLine(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for requestline\n";
@@ -98,7 +98,6 @@ Test(parserequest, requestline4) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseRequestLine(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for requestline\n";
@@ -111,7 +110,6 @@ Test(parserequest, requestline5) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseRequestLine(s);
-		fflush(stdout);
 		cr_assert_str_eq(req.getRequestUri().c_str(), "www.test.com");
 		cr_assert_eq(req.getRequestType(), requestType::GET);
 		cr_assert_eq(req.getHttpVersion(), httpVersion::ONE);
@@ -127,10 +125,9 @@ Test(parserequest, headers1) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
-		std::unordered_map<std::string, std::string> headers = req.getHeaders();
-		cr_assert_str_eq(headers["Host"].c_str(), "test.com");
-		cr_assert_str_eq(headers["Content-Type"].c_str(), "app");
+		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
+		cr_assert_str_eq(headers.find("Host")->second.c_str(), "test.com");
+		cr_assert_str_eq(headers.find("Content-Type")->second.c_str(), "app");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
 		cr_assert(0);
@@ -143,7 +140,6 @@ Test(parserequest, headers2) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
@@ -156,7 +152,6 @@ Test(parserequest, headers3) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
@@ -169,7 +164,6 @@ Test(parserequest, headers4) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
@@ -182,8 +176,7 @@ Test(parserequest, headers5) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
-		std::unordered_map<std::string, std::string> headers = req.getHeaders();
+		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
 		cr_assert_eq(headers.size(), 0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
@@ -197,10 +190,9 @@ Test(parserequest, headers6) {
 		std::stringstream s(in);
 		HttpRequest req;
 		req.parseHeaders(s);
-		fflush(stdout);
-		std::unordered_map<std::string, std::string> headers = req.getHeaders();
-		cr_assert_str_eq(headers["Host"].c_str(), "test.com");
-		cr_assert_str_eq(headers["Content-Length"].c_str(), "25");
+		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
+		cr_assert_str_eq(headers.find("Host")->second.c_str(), "test.com");
+		cr_assert_str_eq(headers.find("Content-Length")->second.c_str(), "25");
 		cr_assert_eq(req.getContentLength(), 25);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for header\n";
@@ -214,7 +206,6 @@ Test(parserequest, body1) {
 		std::stringstream s(in);
 		HttpRequest req(18);
 		req.parseBody(s);
-		fflush(stdout);
 		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for body\n";
@@ -228,7 +219,6 @@ Test(parserequest, body2) {
 		std::stringstream s(in);
 		HttpRequest req(14);
 		req.parseBody(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for body\n";
@@ -241,7 +231,6 @@ Test(parserequest, body3) {
 		std::stringstream s(in);
 		HttpRequest req(20);
 		req.parseBody(s);
-		fflush(stdout);
 		cr_assert_str_eq(req.getMessage().c_str(), "this is the\r\n body\r\n");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for body\n";
@@ -255,7 +244,6 @@ Test(parserequest, body4) {
 		std::stringstream s(in);
 		HttpRequest req(14);
 		req.parseBody(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for body\n";
@@ -271,7 +259,6 @@ Test(parserequest, complete1) {
 		req.addBuffer(s);
 		std::fill(s.begin(), s.end(), 0);
 		req.addBuffer(s);
-		fflush(stdout);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
@@ -287,18 +274,35 @@ Test(parserequest, complete2) {
 		req.addBuffer(s);
 		std::fill(s.begin(), s.end(), 0);
 		req.addBuffer(s);
-		fflush(stdout);
-		std::unordered_map<std::string, std::string> headers = req.getHeaders();
+		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
 		cr_assert_str_eq(req.getRequestUri().c_str(), "www.test.com");
 		cr_assert_eq(req.getRequestType(), requestType::GET);
 		cr_assert_eq(req.getHttpVersion(), httpVersion::ONE);
-		cr_assert_str_eq(headers["Host"].c_str(), "test.com");
-		cr_assert_str_eq(headers["Content-Type"].c_str(), "app");
-		cr_assert_str_eq(headers["Content-Length"].c_str(), "18");
+		cr_assert_str_eq(headers.find("Host")->second.c_str(), "test.com");
+		cr_assert_str_eq(headers.find("Content-Type")->second.c_str(), "app");
+		cr_assert_str_eq(headers.find("Content-Length")->second.c_str(), "18");
 		cr_assert_eq(req.getContentLength(), 18);
 		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
+		cr_assert(0);
+	}
+}
+
+Test(parseconfig, config1) {
+	try {
+		std::string file = "test1.conf";
+		Config conf(file);
+		cr_assert_str_eq(conf.getConfig().c_str(), "error_log\tlogs/error.log;\n"
+"server {\n"
+"\tlisten\t\t80;\n"
+"\terror_page\t404\t/404.html;\n"
+"\tlocation /404.html /50x.html {\n"
+"\t\troot\t./tests/default/error;\n"
+"\t}\n"
+"}\n");
+	} catch (std::exception &e) {
+		std::cerr << e.what();
 		cr_assert(0);
 	}
 }

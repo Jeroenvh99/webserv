@@ -26,7 +26,7 @@ enum httpVersion {
 };
 
 class HttpRequest {
-	using HeaderMap = std::unordered_map<std::string, std::string>;
+	using HeaderMap = std::unordered_multimap<std::string, std::string>;
 	private:
 		std::string _buffer;
 		requestType _method;

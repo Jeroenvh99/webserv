@@ -2,7 +2,7 @@ FROM debian:bullseye
 
 RUN apt-get update && apt-get install g++ libcriterion-dev -y
 
-COPY regexengine.cpp regexengine.hpp test/test.cpp include/HttpRequest.hpp source/request/HttpRequest.cpp .
-RUN g++ HttpRequest.cpp regexengine.cpp test.cpp -lcriterion
+COPY regexengine.cpp regexengine.hpp test/configtest.cpp include/HttpRequest.hpp source/request/HttpRequest.cpp include/Config.hpp source/config/Config.cpp .
+RUN g++ HttpRequest.cpp Config.cpp regexengine.cpp configtest.cpp -lcriterion
 
 CMD ["./a.out"]
