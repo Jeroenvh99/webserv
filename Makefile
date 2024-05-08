@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ network/ request/
+SRC_SUBDIRS	:= network/ network/ http/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -11,11 +11,12 @@ SRC_FILES	:= main.cpp\
 			network/Poller_ctor.cpp\
 			network/Poller_method.cpp\
 			network/Poller_Event.cpp \
-			request/HttpRequest.cpp
+			http/Request.cpp \
+			http/Response.cpp \
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
-CXX			:= c++
+CXX			:= clang++
 CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) -g
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))

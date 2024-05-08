@@ -9,16 +9,17 @@
 #define WRITE_END 1
 #define READ_END 0
 
-CGI::CGI(const HttpRequest &request)
+using http::CGI;
+
+CGI::CGI(const Request &request)
 {
     initEnv(request);
     exec(request);
 }
 
-void CGI::exec(const HttpRequest &request)
+void CGI::exec(const Request &request)
 {
     pid_t pid;
-
 
     int pipefds[2];
     if (pipe(pipefds) == -1)
@@ -58,7 +59,7 @@ void CGI::exec(const HttpRequest &request)
     }
 }
 
-void CGI::initEnv(const HttpRequest &request)
+void CGI::initEnv(const Request &request)
 {
     auto headers = request.getHeaders();
 
@@ -67,4 +68,5 @@ void CGI::initEnv(const HttpRequest &request)
     _env["CONTENT_TYPE"] = headers["Content-Type"];
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "Webserv";
+    // TODO: Other env variables
 }
