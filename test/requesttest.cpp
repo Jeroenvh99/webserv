@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
 #include "Config.hpp"
-#include "Request.hpp"
+#include "http/Request.hpp"
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -11,7 +11,7 @@
 
 using namespace http;
 
-void redirect_stdout(void)
+static void redirect_stdout(void)
 {
     cr_redirect_stdout();
 }
@@ -238,8 +238,8 @@ Test(parserequest, complete2) {
 		req.addBuffer(s);
 		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
 		cr_assert_str_eq(req.getRequestUri().c_str(), "www.test.com");
-		cr_assert_eq(req.getRequestType(), requestType::GET);
-		cr_assert_eq(req.getHttpVersion(), httpVersion::ONE);
+		cr_assert_eq(req.getMethod(), RequestMethod::GET);
+		cr_assert_eq(req.getHttpVersion(), HttpVersion::ONE);
 		cr_assert_str_eq(headers.find("Host")->second.c_str(), "test.com");
 		cr_assert_str_eq(headers.find("Content-Type")->second.c_str(), "app");
 		cr_assert_str_eq(headers.find("Content-Length")->second.c_str(), "18");

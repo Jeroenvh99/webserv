@@ -238,17 +238,17 @@ const std::string &Config::getConfig() const {
 
 Config::~Config() {}
 
-int main() {
-	std::string file = "/home/jvan-hal/Desktop/webserv/test/test1.conf";
-	Config test(file);
-	const char *res = test.getConfig().c_str();
-	size_t where = strcmp(res, "error_log\tlogs/error.log;\n"
-"server {\n"
-"\tlisten\t\t80;\n"
-"\terror_page\t404\t/404.html;\n"
-"\tlocation /404.html /50x.html {\n"
-"\t\troot\t./tests/default/error;\n"
-"\t}\n"
-"}\n");
-	std::cout << res[where] << where;
-}
+// int main() {
+// 	std::string file = "/home/jvan-hal/Desktop/webserv/test/test1.conf";
+// 	Config test(file);
+// 	const char *res = test.getConfig().c_str();
+// 	size_t where = strcmp(res, "error_log\tlogs/error.log;\n"
+// "server {\n"
+// "\tlisten\t\t80;\n"
+// "\terror_page\t404\t/404.html;\n"
+// "\tlocation /404.html /50x.html {\n"
+// "\t\troot\t./tests/default/error;\n"
+// "\t}\n"
+// "}\n");
+// 	std::cout << res[where] << where;
+// }

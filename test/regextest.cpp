@@ -5,9 +5,7 @@
 #include <string>
 #include <iostream>
 
-using namespace http;
-
-void redirect_stdout(void)
+static void redirect_stdout(void)
 {
     cr_redirect_stdout();
 }

@@ -20,7 +20,7 @@ namespace configUtils {
 		EMERG
 	};
 
-	std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
+	// std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
 
 	struct t_serverlog
 	{
