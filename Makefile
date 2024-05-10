@@ -1,14 +1,16 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ /Logger /request
+SRC_SUBDIRS	:= network/ http/ /logging /request
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp\
-			Logger/Logger.cpp\
-			Logger/AccessLogger.cpp\
-			Logger/ErrorLogger.cpp\
+			logging/Logger.cpp\
+			logging/AccessLogger.cpp\
+			logging/ErrorLogger.cpp\
+			logging/Variable.cpp\
+			network/Address_IPv4.cpp \
 			network/except.cpp\
 			network/Handle.cpp\
 			network/Poller_ctor.cpp\

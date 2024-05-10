@@ -1,7 +1,9 @@
-#include "Logger.hpp"
+#include "logging.hpp"
 
 #include <cstring>
 #include <sstream>
+
+using logging::ErrorLogger;
 
 // Basic operations
 
@@ -16,13 +18,13 @@ ErrorLogger::ErrorLogger(std::ostream& os, Level level):
 // Public methods
 
 void
-ErrorLogger::log(std::string const& msg, Level level) const {
-	if (level > _level) {
-		std::ostringstream	oss;
-
-		oss << "[" << level_to_string(level) << "]" << msg;
-		static_cast<Logger const*>(this)->log(oss.str());
-	}
+ErrorLogger::log(std::string const& msg, Level level) {
+	if (level < _level)
+		return;
+	timestamp_update();
+	os() << "[" << level_to_string(level) << "] "
+		<< "[" << timestamp() << "] "
+		<< msg << std::endl;
 }
 
 char const*
