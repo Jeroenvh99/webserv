@@ -52,13 +52,13 @@ main() {
 					client.read(buf);
 					if (buf.len() == 0) { // close host socket automatically?
 						poller.remove(handle);
-						handle->close();
 						req.addBuffer(buf);
 						elog.log("Connection lost", ErrorLogger::Level::notice);
 					} else {
 						Client	c;
 						alog.log(c);
 						std::ostringstream	oss;
+						std::cout << buf;
 						oss << buf;
 						req.addBuffer(buf);
 					}
