@@ -3,6 +3,7 @@
 #include "Logger.hpp"
 #include "http/Request.hpp"
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -11,6 +12,7 @@ int
 main() {
 	try {
 		Poller			poller;
+		//std::ofstream	logf("log.txt");
 		AccessLogger	alog(std::cout);
 
 		auto	abox = poller.add(
@@ -19,6 +21,7 @@ main() {
 			{Poller::Mode::edge_triggered});
 
 		((IPv4Acceptor&)*abox).listen(1000);
+
 		while (true) {
 			Poller::Events	events = poller.wait<128>(1000);
 
