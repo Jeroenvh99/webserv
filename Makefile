@@ -6,6 +6,11 @@ OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
+			Client.cpp \
+			Route.cpp \
+			Server_ctor.cpp \
+			Server_loop.cpp \
+			Server_method.cpp \
 			logging/Logger.cpp \
 			logging/AccessLogger.cpp \
 			logging/ErrorLogger.cpp \

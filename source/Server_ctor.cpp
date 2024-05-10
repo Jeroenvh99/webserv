@@ -12,13 +12,19 @@ Server::Server(Config&& config):
 	_buffer() {}
 */
 
-Server::Server(in_port_t port): // remove this once config parser is done
+using namespace logging;
+
+Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_poller(),
 	_acceptor(),
 	_clients(),
 	_routes(),
 	_error_pages(),
-	_buffer() {
+	_buffer(),
+	_alog(alog, Format{
+		Variable("["), Variable(Variable::Type::time_local), Variable("]")
+	}),
+	_elog(elog, ErrorLogger::Level::debug) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});

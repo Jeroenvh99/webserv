@@ -7,7 +7,7 @@
 # include "network/Handle.hpp"
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
-// # include "../source/config/ConfigParser.hpp" // why is this here?
+# include "logging.hpp"
 # include "http/StatusCode.hpp"
 # include "Buffer.hpp"
 # include "Client.hpp"
@@ -30,7 +30,7 @@ public:
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&);
-	Server(in_port_t); // remove this once the config parser is done
+	Server(in_port_t, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
@@ -51,12 +51,14 @@ private:
 	void	_drop_client(Clients::iterator);
 	void	_process_buffer(Client&);
 
-	Poller			_poller;
-	SharedHandle	_acceptor;
-	Clients			_clients;
-	RouteMap		_routes;
-	ErrorPageMap	_error_pages;
-	Buffer			_buffer;
+	Poller					_poller;
+	SharedHandle			_acceptor;
+	Clients					_clients;
+	RouteMap				_routes;
+	ErrorPageMap			_error_pages;
+	Buffer					_buffer;
+	logging::AccessLogger	_alog;
+	logging::ErrorLogger	_elog;
 }; // class Server
 
 #endif // SERVER_HPP
