@@ -1,5 +1,4 @@
 #include "Server.hpp"
-
 #include <iostream>
 
 int
@@ -12,7 +11,6 @@ main(int argc, char** argv) {
 
 	try {
 		Server	server(port);
-
 		server.loop(5192);
 	} catch (std::exception& e) {
 		std::cerr << e.what() << '\n';

@@ -77,7 +77,7 @@ void Request::parse(std::string& request) {
 	if (!s.eof()) {
 		throw Request::IncorrectRequestFormatException();
 	}
-	std::cout << "Request at " << std::to_string(reinterpret_cast<uintptr_t>(this)) << " successfully parsed.\n";
+	std::cout << "Request at " << std::to_string(reinterpret_cast<uintptr_t>(this)) << " successfully parsed.\n"; // DB: replace with debug
 }
 
 void Request::parseRequestLine(std::stringstream &s) {

@@ -3,7 +3,7 @@
 
 namespace http
 {
-    enum class StatusCode : int
+    enum StatusCode: int
     {
         OK = 200,
         BadRequest = 400,
