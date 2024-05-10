@@ -45,6 +45,8 @@ public:
 	static constexpr Poller::Modes		poller_mode = {};
 
 private:
+	using LogLevel = logging::ErrorLogger::Level;
+
 	void	_process_events(Poller::Events const&);
 	void	_add_client();
 	void	_handle_client(Poller::Event const&, Clients::iterator);
