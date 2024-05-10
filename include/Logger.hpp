@@ -1,8 +1,10 @@
 #ifndef LOGGER_HPP
 # define LOGGER_HPP
 
+# include <array>
 # include <iostream>
 # include <string>
+# include <utility>
 
 class Logger {
 public:
@@ -44,7 +46,14 @@ public:
 
 	void	log(std::string const&, Level) const;
 
+	static char const*			level_to_string(ErrorLogger::Level);
+	static ErrorLogger::Level	level_from_string(std::string const&);
+
 private:
+	using LevelStringMap = std::array<std::pair<Level, char const*>, 8>;
+
+	static const LevelStringMap	_levels;
+
 	Level const		_level;
 }; // class ErrorLogger
 
@@ -59,7 +68,15 @@ enum ErrorLogger::Level: int {
 	emergency,
 }; // enum ErrorLogger::Level
 
-char const*			level_to_str(ErrorLogger::Level);
-ErrorLogger::Level	level_from_str(char const*);
+inline constexpr ErrorLogger::LevelStringMap	ErrorLogger::_levels = {{
+	{debug, "debug"},
+	{info, "info"},
+	{notice, "notice"},
+	{warning, "warning"},
+	{error, "error"},
+	{critical, "critical"},
+	{alert, "alert"},
+	{emergency, "emergency"},
+}};
 
 #endif // LOGGER_HPP

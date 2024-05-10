@@ -12,6 +12,7 @@ SRC_FILES	:= main.cpp\
 			network/except.cpp\
 			network/Handle.cpp\
 			network/Poller_ctor.cpp\
+			network/Poller_Event.cpp\
 			network/Poller_method.cpp\
 			request/HttpRequest.cpp
 
