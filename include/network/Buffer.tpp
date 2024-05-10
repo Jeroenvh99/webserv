@@ -5,7 +5,14 @@
 #  error "include __FILE__ in network/Buffer.hpp"
 # endif // NETWORK_BUFFER_HPP
 
+# include <sstream>
+
 namespace network {
+	template<size_t SIZE>
+	Buffer<SIZE>::operator std::string() const {
+		return (std::string(this->begin(), this->end()));
+	}
+
 	template<size_t SIZE>
 	void
 	Buffer<SIZE>::empty() noexcept {

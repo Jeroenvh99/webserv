@@ -41,12 +41,12 @@ namespace network {
 	template<Domain DOMAIN>
 	StreamSocket<DOMAIN>
 	Acceptor<DOMAIN>::accept(typename StreamSocket<DOMAIN>::Address& addr) const {
-		socklen_t			size;
+		socklen_t			size = addr.size();
 		Handle::Raw const	raw_handle = ::accept(this->raw(), addr.raw(), &size);
-		
+
 		if (raw_handle == StreamSocket<DOMAIN>::_invalid_handle)
 			throw (SocketException("accept"));
-		if (size > addr.size())
+		if (size != addr.size())
 			throw (network::Exception("address", "accept"));
 		return (StreamSocket<DOMAIN>(raw_handle));
 	}

@@ -35,6 +35,4 @@ namespace network {
 	}; // specialized class template SocketAddress<Domain::ipv4>
 }; // namespace network
 
-# include "network/Address_IPv4.tpp"
-
 #endif // NETWORK_ADDRESS_IPV4_HPP

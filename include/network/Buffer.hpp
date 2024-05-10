@@ -6,6 +6,7 @@
 # include <array>
 # include <istream>
 # include <ostream>
+# include <string>
 
 namespace network {
 	template<size_t SIZE>
@@ -14,6 +15,8 @@ namespace network {
 		using super = std::array<char, SIZE>;
 		using iterator = typename super::iterator;
 		using const_iterator = typename super::const_iterator;
+
+		operator std::string() const;
 
 		void	empty() noexcept;
 		size_t	len() const noexcept;
