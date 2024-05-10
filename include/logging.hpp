@@ -77,8 +77,9 @@ namespace logging {
 		ErrorLogger(ErrorLogger&&) = delete;
 		ErrorLogger&	operator=(ErrorLogger const&) = delete;
 		ErrorLogger&	operator=(ErrorLogger&&) = delete;
-	
-		void	log(std::string const&, Level);
+
+		template<typename... Ts>
+		void	log(Level, Ts...);
 	
 		static char const*			level_to_string(ErrorLogger::Level);
 		static ErrorLogger::Level	level_from_string(std::string const&);
@@ -113,5 +114,7 @@ namespace logging {
 		{emergency, "emergency"},
 	}};
 }; // namespace logging
+
+# include "logging/ErrorLogger.tpp"
 
 #endif // LOGGING_HPP
