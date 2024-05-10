@@ -20,7 +20,7 @@ main() {
 	ErrorLogger	elog(std::cerr, ErrorLogger::Level::debug);
 
 	auto	abox = poller.add(
-		IPv4Acceptor(IPv4Acceptor::Address(1100, INADDR_ANY)),
+		IPv4Acceptor(IPv4Acceptor::Address(1101, INADDR_ANY)),
 		{Poller::EventType::read},
 		{Poller::Mode::edge_triggered});
 
@@ -39,9 +39,9 @@ main() {
 					IPv4StreamSocket		client = acceptor.accept(address);
 	
 					poller.add(std::move(client), dfl_events, dfl_mode);
-					elog.log("Connection established", ErrorLogger::Level::notice);
+					elog.log(ErrorLogger::Level::notice, "Connection established");
 				} catch (std::exception& e) {
-					elog.log(e.what(), ErrorLogger::Level::critical);
+					elog.log(ErrorLogger::Level::critical, "Error:", e.what());
 				}
 			} else {
 				IPv4StreamSocket const&	client = static_cast<IPv4StreamSocket const&>(*handle);
@@ -53,7 +53,7 @@ main() {
 					if (buf.len() == 0) { // close host socket automatically?
 						poller.remove(handle);
 						req.addBuffer(buf);
-						elog.log("Connection lost", ErrorLogger::Level::notice);
+						elog.log(ErrorLogger::Level::notice, "Connection lost");
 					} else {
 						Client	c;
 						alog.log(c);

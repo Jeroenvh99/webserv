@@ -17,16 +17,6 @@ ErrorLogger::ErrorLogger(std::ostream& os, Level level):
 
 // Public methods
 
-void
-ErrorLogger::log(std::string const& msg, Level level) {
-	if (level < _level)
-		return;
-	timestamp_update();
-	os() << "[" << level_to_string(level) << "] "
-		<< "[" << timestamp() << "] "
-		<< msg << std::endl;
-}
-
 char const*
 ErrorLogger::level_to_string(ErrorLogger::Level level) {
 	switch (level) {
