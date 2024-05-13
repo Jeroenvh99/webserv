@@ -6,6 +6,15 @@ using http::Request;
 using http::RequestMethod;
 using http::HttpVersion;
 
+bool caseInsensitiveCharCompare(char a, char b) {
+	return std::tolower(a) == std::tolower(b);
+}
+
+bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
+	auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), caseInsensitiveCharCompare);
+	return it != str.end();
+}
+
 const char* Request::IncorrectRequestFormatException::what() const throw()
 {
 	return "httpException: Http request incorrectly formatted";
@@ -30,6 +39,7 @@ Request::Request(int contentlength) {
 	_contentlength = contentlength;
 	_method = RequestMethod::NONE;
 	_version = HttpVersion::NO;
+	_hasbody = false;
 }
 
 Request::Request(const Request& src) {
@@ -46,10 +56,31 @@ Request &Request::operator=(const Request& src) {
 	return *this;
 }
 
+<<<<<<< HEAD
 // when receiving 0 bytes from recv() parsing can begin
 // DB: No, it should begin sooner.
 void Request::addBuffer(Buffer const& src) {
 	if (src.len() == 0) {
+=======
+void Request::addBuffer(std::array<char, 512> request) {
+	if (request[0] != '\0') {
+		for (int i = 0; i < 512; i++) {
+			_buffer += request[i];
+		}
+	}
+	if (!_hasbody && caseInsensitiveSearch(_buffer, std::string("Content-Length"))) {
+		_hasbody = true;
+	} else if (!_hasbody && caseInsensitiveSearch(_buffer, std::string("Transfer-Encoding"))) {
+		_hasbody = true;
+	}
+	int newlines = 0;
+	for (int i = 0; i < _buffer.size() - 1; i++) {
+		if (_buffer[i] == '\n' && _buffer[i + 1] == '\r') {
+			++newlines;
+		}
+	}
+	if (!_buffer.empty() && ((newlines == 1 && !_hasbody) || (newlines == 2 && _hasbody))) {
+>>>>>>> main
 		_contentlength = 0;
 		parse(_buffer);
 	}
@@ -58,15 +89,6 @@ void Request::addBuffer(Buffer const& src) {
 		for (auto const& c: src)
 			_buffer += c;
 	}
-}
-
-bool caseInsensitiveCharCompare(char a, char b) {
-	return std::tolower(a) == std::tolower(b);
-}
-
-bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
-	auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), caseInsensitiveCharCompare);
-	return it != str.end();
 }
 
 void Request::parse(std::string& request) {
@@ -145,7 +167,7 @@ void Request::parseBody(std::stringstream &s) {
 	while (!s.eof()) {
 		std::getline(s, temp);
 		temp += '\n';
-		if ((_contentlength > 0 && temp == "0\r\n") || bodysize == _contentlength) {
+		if ((_contentlength == 0 && temp == "0\r\n") || bodysize == _contentlength) {
 			return;
 		}
 		bodysize += temp.length();
