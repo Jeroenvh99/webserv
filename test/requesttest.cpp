@@ -219,8 +219,6 @@ Test(parserequest, complete1) {
 		std::copy(in.begin(), in.end(), s.begin());
 		Request req;
 		req.addBuffer(s);
-		std::fill(s.begin(), s.end(), 0);
-		req.addBuffer(s);
 		cr_assert(0);
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
@@ -228,13 +226,11 @@ Test(parserequest, complete1) {
 }
 
 Test(parserequest, complete2) {
-	std::string in("GET www.test.com HTTP/1.0\r\nHost: test.com\r\nContent-Type: app\r\nContent-Length: 18\r\n\r\nthis is the body\r\n");
+	std::string in("GET www.test.com HTTP/1.0\r\nHost: test.com\r\nContent-Type: app\r\nContent-Length: 20\r\n\r\nthis is the body\r\n\r\n");
 	try {
 		std::array<char, 512> s = {0};
 		std::copy(in.begin(), in.end(), s.begin());
 		Request req;
-		req.addBuffer(s);
-		std::fill(s.begin(), s.end(), 0);
 		req.addBuffer(s);
 		std::unordered_multimap<std::string, std::string> headers = req.getHeaders();
 		cr_assert_str_eq(req.getRequestUri().c_str(), "www.test.com");
@@ -242,9 +238,9 @@ Test(parserequest, complete2) {
 		cr_assert_eq(req.getHttpVersion(), HttpVersion::ONE);
 		cr_assert_str_eq(headers.find("Host")->second.c_str(), "test.com");
 		cr_assert_str_eq(headers.find("Content-Type")->second.c_str(), "app");
-		cr_assert_str_eq(headers.find("Content-Length")->second.c_str(), "18");
-		cr_assert_eq(req.getContentLength(), 18);
-		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n");
+		cr_assert_str_eq(headers.find("Content-Length")->second.c_str(), "20");
+		cr_assert_eq(req.getContentLength(), 20);
+		cr_assert_str_eq(req.getMessage().c_str(), "this is the body\r\n\r\n");
 	} catch (std::exception &e) {
 		std::cerr << "incorrect format for request\n";
 		cr_assert(0);

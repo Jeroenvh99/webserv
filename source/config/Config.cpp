@@ -189,7 +189,7 @@ Config &Config::operator=(const Config& src) {
 void Config::removeComments(std::ifstream &in) {
 	std::string line;
 	std::string res = "";
-	int openbrackets = 0;
+	unsigned int openbrackets = 0;
 	while (!in.eof()) {
 		std::getline(in, line);
 		if (line[0] == '#') {
