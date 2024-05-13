@@ -41,6 +41,7 @@ namespace http
 		HeaderMap _headers;
 		std::string _message;
 		int _contentlength;
+		bool _hasbody;
 
 	public:
 		Request(int contentlength = -1);
