@@ -13,7 +13,7 @@ namespace network {
 	template<typename T> // Requires a Handle-derived type.
 	SharedHandle
 	Poller::add(T&& handle, EventTypes events, Modes modes) {
-	SharedHandle	box = std::make_shared<T>(std::move(handle));
+	SharedHandle	box = std::make_shared<T>(handle);
 	
 	add_shared(box, events, modes);
 	return (box);

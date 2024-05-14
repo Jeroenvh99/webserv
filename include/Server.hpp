@@ -20,7 +20,6 @@
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using Clients = std::vector<Client>;
 	using ErrorPageMap = std::map<http::StatusCode, std::string>;
 	using Poller = network::Poller;
 	using RouteMap = std::map<std::string, Route>;
@@ -48,14 +47,17 @@ private:
 	using LogLevel = logging::ErrorLogger::Level;
 
 	void	_process_events(Poller::Events const&);
-	void	_add_client();
-	void	_handle_client(Poller::Event const&, Clients::iterator);
-	void	_drop_client(Clients::iterator);
+	void	_client_add();
+	void	_client_handle(ClientMap::iterator, Poller::Event const&);
+	void	_client_handle_graveyard(ClientMap::iterator, Poller::Event const&);
+	void	_client_to_graveyard(ClientMap::iterator);
+	void	_client_drop(ClientMap::iterator);
 	void	_process_buffer(Client&);
 
 	Poller					_poller;
 	SharedHandle			_acceptor;
-	Clients					_clients;
+	ClientMap				_clients;
+	ClientMap				_graveyard;
 	RouteMap				_routes;
 	ErrorPageMap			_error_pages;
 	Buffer					_buffer;

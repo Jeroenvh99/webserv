@@ -7,6 +7,7 @@ HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
 			Client.cpp \
+			ClientData.cpp \
 			Route.cpp \
 			Server_ctor.cpp \
 			Server_loop.cpp \
