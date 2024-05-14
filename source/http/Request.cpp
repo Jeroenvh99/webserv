@@ -1,223 +1,112 @@
 #include "http/Request.hpp"
 
-#include <iostream>
+#include <sstream>
 
 using http::Request;
-using http::RequestMethod;
-using http::HttpVersion;
+using http::Method;
+using http::Version;
 
-bool caseInsensitiveCharCompare(char a, char b) {
-	return std::tolower(a) == std::tolower(b);
+// Basic operations
+
+Request::Request(Method method, Version version, std::string const& uri):
+	_method(method), _version(version), _uri(uri),
+	_headers(), _body() {}
+
+Request::Request(Method method, Version version, std::string&& uri):
+	_method(method), _version(version), _uri(uri),
+	_headers(), _body() {}
+
+// Conversions
+
+Request::operator std::string() const noexcept {
+	std::ostringstream	oss;
+
+	oss << method_to_string(_method) << ' '
+		<< _uri << ' '
+		<< version_to_string(_version) << "\r\n";
+	for (auto const& [key, value]: _headers)
+		oss << key << ": " << value << "\r\n";
+	oss << "\r\n";
+	if (_body.size() > 0)
+		oss << "< body of size " << std::to_string(_body.size()) << " >";
+	return (oss.str());
 }
 
-bool caseInsensitiveSearch(const std::string& str, const std::string& substr) {
-	auto it = std::search(str.begin(), str.end(), substr.begin(), substr.end(), caseInsensitiveCharCompare);
-	return it != str.end();
+// Accessors
+
+Method
+Request::method() const noexcept {
+	return (_method);
 }
 
-const char* Request::IncorrectRequestFormatException::what() const throw()
-{
-	return "httpException: Http request incorrectly formatted";
+Version
+Request::version() const noexcept {
+	return (_version);
 }
 
-const char* Request::IncorrectHeaderFormatException::what() const throw()
-{
-	return "httpException: Http request header incorrectly formatted";
+std::string const&
+Request::uri() const noexcept {
+	return (_uri);
 }
 
-int countWords(std::string& str) {
-	int words = 0;
-	for (size_t i = 0; i < str.size(); i++) {
-		if (i > 0 && (std::isspace(str[i]) || str[i] == '\0') && !std::isspace(str[i - 1])) {
-			++words;
-		}
-	}
-	return words;
+std::string const&
+Request::header(std::string const& name) const {
+	auto const	it = _headers.find(name);
+
+	if (it == _headers.end())
+		throw (std::out_of_range("undefined header"));
+	return (it->first);
 }
 
-Request::Request(int contentlength) {
-	_contentlength = contentlength;
-	_method = RequestMethod::NONE;
-	_version = HttpVersion::NO;
-	_hasbody = false;
+bool
+Request::has_header(std::string const& name) const noexcept {
+	return (_headers.find(name) != _headers.end()); // C++20 has .contains()
 }
 
-Request::Request(const Request& src) {
-	*this = src;
+std::string const&
+Request::body() const noexcept {
+	return (_body);
 }
 
-Request &Request::operator=(const Request& src) {
-	_method = src.getMethod();
-	_version = src.getHttpVersion();
-	_requesturi = src.getRequestUri();
-	_headers = src.getHeaders();
-	_message = src.getMessage();
-	_contentlength = src.getContentLength();
-	return *this;
+std::string&
+Request::body() noexcept {
+	return (_body);
 }
 
-<<<<<<< HEAD
-// when receiving 0 bytes from recv() parsing can begin
-// DB: No, it should begin sooner.
-void Request::addBuffer(Buffer const& src) {
-	if (src.len() == 0) {
-=======
-void Request::addBuffer(std::array<char, 512> request) {
-	if (request[0] != '\0') {
-		for (int i = 0; i < 512; i++) {
-			_buffer += request[i];
-		}
-	}
-	if (!_hasbody && caseInsensitiveSearch(_buffer, std::string("Content-Length"))) {
-		_hasbody = true;
-	} else if (!_hasbody && caseInsensitiveSearch(_buffer, std::string("Transfer-Encoding"))) {
-		_hasbody = true;
-	}
-	int newlines = 0;
-	for (int i = 0; i < _buffer.size() - 1; i++) {
-		if (_buffer[i] == '\n' && _buffer[i + 1] == '\r') {
-			++newlines;
-		}
-	}
-	if (!_buffer.empty() && ((newlines == 1 && !_hasbody) || (newlines == 2 && _hasbody))) {
->>>>>>> main
-		_contentlength = 0;
-		parse(_buffer);
-	}
-	else {
-		_buffer.reserve(_buffer.size() + src.len());
-		for (auto const& c: src)
-			_buffer += c;
-	}
+// Modifiers
+
+void
+Request::header_add(Header const& header) {
+	_headers.insert(header);
 }
 
-void Request::parse(std::string& request) {
-	std::stringstream s(request);
-	parseRequestLine(s);
-	parseHeaders(s);
-	parseBody(s);
-	if (!s.eof()) {
-		throw Request::IncorrectRequestFormatException();
-	}
-	std::cout << "Request at " << std::to_string(reinterpret_cast<uintptr_t>(this)) << " successfully parsed.\n"; // DB: replace with debug
+void
+Request::header_add(Header&& header) {
+	_headers.insert(header);
 }
 
-void Request::parseRequestLine(std::stringstream &s) {
-	std::string requestline;
-	std::getline(s, requestline);
-	if (countWords(requestline) != 3) {
-		throw Request::IncorrectRequestFormatException();
-	}
-	std::string temp;
-	std::stringstream s2(requestline);
-	std::getline(s2, temp, ' ');
-	_method = request_method_from_str(temp);
-	std::getline(s2, _requesturi, ' ');
-	std::getline(s2, temp, ' ');
-	if (temp.back() != '\r') {
-		throw Request::IncorrectRequestFormatException();
-	}
-	temp.erase(temp.find_last_not_of(" \n\r\t") + 1);
-	std::string versions[HttpVersion::NO] = {"HTTP/1.0", "HTTP/1.1"};
-	HttpVersion versiontype[HttpVersion::NO] = {HttpVersion::ONE, HttpVersion::ONEDOTONE};
-	for (int i = 0; i < HttpVersion::NO; i++) {
-		if (temp == versions[i]) {
-			_version = versiontype[i];
-			break;
-		}
-	}
-	if (_version == HttpVersion::NO) {
-		throw Request::IncorrectRequestFormatException();
-	}
+void
+Request::header_add(std::string const& key, std::string const& value) {
+	_headers.insert(std::make_pair(key, value));
 }
 
-void Request::parseHeaders(std::stringstream &s) {
-	std::string temp;
-	while (!s.eof()) {
-		std::getline(s, temp);
-		if (temp == "\r") {
-			return;
-		}
-		if (!isHttpHeader(temp)) {
-			throw Request::IncorrectHeaderFormatException();
-		}
-		std::stringstream h(temp);
-		std::string name;
-		std::getline(h, name, ':');
-		name.erase(0, name.find_first_not_of(" \n\r\t"));
-		name.erase(name.find_last_not_of(" \n\r\t") + 1);
-		std::string value;
-		std::getline(h, value, ':');
-		value.erase(0, value.find_first_not_of(" \n\r\t"));
-		if (value.back() != '\r') {
-			throw Request::IncorrectHeaderFormatException();
-		}
-		value.erase(value.find_last_not_of(" \n\r\t") + 1);
-		_headers.insert(std::make_pair(name, value));
-		if (caseInsensitiveSearch(name, std::string("Content-Length"))) {
-			_contentlength = std::stoi(value);
-		}
-	}
-	throw Request::IncorrectRequestFormatException();
+void
+Request::header_add(std::string&& key, std::string&& value) {
+	_headers.insert(std::make_pair(key, value));
 }
 
-void Request::parseBody(std::stringstream &s) {
-	std::string temp;
-	int bodysize = 0;
-	while (!s.eof()) {
-		std::getline(s, temp);
-		temp += '\n';
-		if ((_contentlength == 0 && temp == "0\r\n") || bodysize == _contentlength) {
-			return;
-		}
-		bodysize += temp.length();
-		_message += temp;
-	}
-	throw Request::IncorrectRequestFormatException();
+void
+Request::clear() noexcept {
+	_method = Method::GET;
+	_version = Version(0, 0);
+	_uri.clear();
+	_headers.clear();
+	_body.clear();
 }
 
-const RequestMethod &Request::getMethod() const {
-	return _method;
-}
+// cmp
 
-const HttpVersion &Request::getHttpVersion() const {
-	return _version;
+bool
+Request::cmp::operator()(std::string const& s1, std::string const& s2) const {
+	return (strcmp_nocase(s1, s2));
 }
-
-const std::string &Request::getRequestUri() const {
-	return _requesturi;
-}
-
-const Request::HeaderMap &Request::getHeaders() const {
-	return _headers;
-}
-
-const std::string &Request::getMessage() const {
-	return _message;
-}
-
-const int &Request::getContentLength() const {
-	return _contentlength;
-}
-
-bool Request::isHttpHeader(std::string& header) {
-	size_t colon = header.find(':');
-	if (colon == std::string::npos) {
-		return false;
-	}
-	for (size_t i = 0; i < colon; i++) {
-		if (header[i] == ' ') {
-			return false;
-		}
-	}
-	bool hasvalue = false;
-	for (size_t i = colon; i < header.length(); i++) {
-		if (!std::isspace(header[i])) {
-			hasvalue = true;
-			break;
-		}
-	}
-	return hasvalue;
-}
-
-Request::~Request() {}

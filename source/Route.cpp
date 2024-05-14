@@ -1,10 +1,12 @@
 #include "Route.hpp"
 
+#include "network/utils.tpp"
+
 Route::Route(std::string const& to, std::string const& dfl,
-		http::RequestMethod methods):
+		std::initializer_list<http::Method> methods):
 	_to(to),
 	_dfl(dfl),
-	_methods(methods) {}
+	_methods(network::_get_bitmask(methods)) {}
 
 std::string const&
 Route::to() const noexcept {
@@ -17,6 +19,6 @@ Route::default_file() const noexcept {
 }
 
 bool
-Route::allows_method(http::RequestMethod method) const noexcept {
-	return (_methods & method);
+Route::allows_method(http::Method method) const noexcept {
+	return (_methods & static_cast<Bitmask>(method));
 }

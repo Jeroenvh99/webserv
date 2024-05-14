@@ -9,7 +9,7 @@ Response::Response(const Request &request) :
     _code(StatusCode::OK),
     _body("")
 {
-    (this->*_methodMap.at(request.getMethod()))(request);
+    (this->*_methodMap.at(request.method()))(request);
 }
 
 const std::string &Response::get()
@@ -25,7 +25,7 @@ const std::string &Response::get()
 
 void http::Response::getMethod(const Request &request)
 {
-    readFromFile(request.getRequestUri());
+    readFromFile(request.uri());
 }
 
 void Response::readFromFile(const std::string &path)

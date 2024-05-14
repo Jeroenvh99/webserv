@@ -1,12 +1,13 @@
 #ifndef HTTP_RESPONSE_HPP
 # define HTTP_RESPONSE_HPP
 
+# include "http.hpp"
+# include "StatusCode.hpp"
+# include "Request.hpp"
+
 # include <string>
 # include <map>
 # include <unordered_map>
-
-# include "StatusCode.hpp"
-# include "Request.hpp"
 
 namespace http
 {
@@ -20,7 +21,7 @@ namespace http
     private:
         using HeaderMap = std::map<std::string, std::string>;
         using StatusMap = std::unordered_map<int, std::string>;
-        using MethodMap = std::map<RequestMethod, void (Response::*)(const Request&)>;
+        using MethodMap = std::map<Method, void (Response::*)(const Request&)>;
 
         StatusCode _code;
         HeaderMap _headers;
@@ -39,7 +40,7 @@ namespace http
         void getMethod(const Request &request);
         
         static const inline MethodMap _methodMap = {
-            {RequestMethod::GET, &Response::getMethod},
+            {Method::GET, &Response::getMethod},
             // TODO: {RequestMethod::POST, &Response::postMethod},
             // TODO: {RequestMethod::DELETE, &Response::deleteMethod},
         };

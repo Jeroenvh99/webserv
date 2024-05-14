@@ -58,7 +58,7 @@ Server::_drop_client(Clients::iterator client) {
 }
 
 void
-Server::_process_buffer(Client& client) {
+Server::_process_buffer(Client&) {
 	_elog.log(LogLevel::notice, "Received: ", _buffer);
-	client.request().addBuffer(_buffer);
+	// attempt parse
 }

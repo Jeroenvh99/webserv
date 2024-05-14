@@ -1,10 +1,10 @@
 #ifndef HTTP_REQUEST_HPP
 # define HTTP_REQUEST_HPP
 
+# include "http.hpp"
 # include "Buffer.hpp"
 
-# include <algorithm>
-# include <array>
+# include <iostream>
 # include <stdexcept>
 # include <string>
 # include <sstream>
@@ -13,83 +13,133 @@
 
 namespace http
 {
-	enum RequestMethod
-	{
-		NONE = 0x0, // is this for error handling? if so, this is now obsolete
-		GET = 0x1 < 0,
-		HEAD = 0x1 < 1,
-		POST = 0x1 < 2,
-		PUT = 0x1 < 3,
-		DELETE = 0x1 < 4,
-		CONNECT = 0x1 < 5,
-		OPTIONS = 0x1 < 6,
-		TRACE = 0x1 < 7,
-	};
+	class Request {
+	public:
+		using Header = std::pair<std::string, std::string>;
+		class Parser;
 
-	using RequestMethodMap = std::array<std::pair<RequestMethod, char const*>, 8>;
-	constexpr RequestMethodMap	request_methods = {{
-		{GET, "GET"},
-		{HEAD, "HEAD"},
-		{POST, "POST"},
-		{PUT, "PUT"},
-		{DELETE, "DELETE"},
-		{CONNECT, "CONNECT"},
-		{OPTIONS, "OPTIONS"},
-		{TRACE, "TRACE"}
-	}};
+		Request(Method = Method::GET,
+			Version = Version(0, 0),
+			std::string const& = "");
+		Request(Method, Version, std::string&&);
 
-	RequestMethod	request_method_from_str(std::string const&);
-	char const*		request_method_to_str(RequestMethod);
+		operator std::string() const noexcept;
 
-	enum HttpVersion
-	{
-		ONE,
-		ONEDOTONE,
-		NO
-	};
+		Method				method() const noexcept;
+		Version				version() const noexcept;
+		std::string const&	uri() const noexcept;
+		std::string const&	header(std::string const&) const;
+		bool				has_header(std::string const&) const noexcept;
+		std::string const&	body() const noexcept;
+		std::string&		body() noexcept;
 
-	class Request
-	{
-		using HeaderMap = std::unordered_multimap<std::string, std::string>;
+		void	clear() noexcept;
+		void	header_add(Header const&);
+		void	header_add(Header&&);
+		void	header_add(std::string const&, std::string const&);
+		void	header_add(std::string&&, std::string&&);
 
 	private:
-		std::string _buffer;
-		RequestMethod _method;
-		HttpVersion _version;
-		std::string _requesturi;
-		HeaderMap _headers;
-		std::string _message;
-		int _contentlength;
-		bool _hasbody;
+		struct cmp {
+			bool	operator()(std::string const&, std::string const&) const;
+		}; // struct Request::cmp
+		using Headers = std::unordered_map<std::string, std::string, std::hash<std::string>, cmp>;
 
+		Method		_method;
+		Version		_version;
+		std::string _uri;
+		Headers 	_headers;
+		std::string _body;
+	}; // class Request
+
+	class Request::Parser {
 	public:
-		Request(int contentlength = -1);
-		Request(const Request &src);
-		Request &operator=(const Request &src);
-		~Request();
+		enum class State;
+		
+		class Exception;
+		class IncompleteLineException;
+		class HeaderException;
+		class StartLineException;
+		class MethodException;
+		class VersionException;
 
-		void addBuffer(Buffer const& src);
-		void parse(std::string &request);
-		void parseRequestLine(std::stringstream &s);
-		void parseHeaders(std::stringstream &s);
-		void parseBody(std::stringstream &s);
-		static bool isHttpHeader(std::string &header);
-		const RequestMethod &getMethod() const;
-		const HttpVersion &getHttpVersion() const;
-		const std::string &getRequestUri() const;
-		const HeaderMap &getHeaders() const;
-		const std::string &getMessage() const;
-		const int &getContentLength() const;
+		Parser();
+		~Parser();
+		Parser(Parser const&) = delete;
+		Parser(Parser&&) = delete;
+		Parser&	operator=(Parser const&) = delete;
+		Parser&	operator=(Parser&&) = delete;
 
-		class IncorrectRequestFormatException : public std::exception
-		{
-			virtual const char *what() const throw();
-		};
-		class IncorrectHeaderFormatException : public std::exception
-		{
-			virtual const char *what() const throw();
-		};
-	};
-}
+		void	append(Buffer const&);
+		void	clear() noexcept;
+		// make some of these private
+		void	parse(Buffer const&, Request&);
+		Request	parse_start();
+		void	parse_headers(Request&);
+		void	parse_body(Request&);
+
+		bool	needs_body(Request const&);
+
+		State	state() const noexcept;
+
+	private:
+		void	_parse_header(Request&, std::string const&);
+
+		State				_state;
+		std::pair<std::string, std::string>	_tmp_hdr; 		// union
+		size_t				_body_length;	// "
+		size_t				_chunk_length;	// "
+		std::stringstream	_buffer;
+	}; // class Request::Parser
+
+	enum class Request::Parser::State {
+		start,			// parsing the first line
+		header,			// parsing headers
+		body_by_length,	// parsing body, checking number of bytes
+		body_chunked,	// parsing body, processing chunks
+		body_until_eof, // parsing body until connection is closed
+		done,			// parsing has finished
+	}; // enum class Request::Parser::BodyParserMode
+
+	class Request::Parser::Exception: public std::logic_error {
+	public:
+		Exception(char const* = "");
+	}; // class Request::Parser::Exception
+
+	class Request::Parser::IncompleteLineException:
+			public Request::Parser::Exception {
+	}; // class Request::Parser::IncompleteLineException
+
+	class Request::Parser::StartLineException:
+			public Request::Parser::Exception {
+	public:
+		StartLineException(char const*);
+	}; // class Request::Parser::StartLineException
+
+	class Request::Parser::MethodException:
+			public Request::Parser::StartLineException {
+	public:
+		MethodException(char const*);
+	}; // class Request::Parser::MethodException
+
+	class Request::Parser::VersionException:
+			public Request::Parser::StartLineException {
+	public:
+		VersionException(char const*);
+	}; // class Request::Parser::VersionException
+
+	class Request::Parser::HeaderException:
+			public Request::Parser::Exception {
+	public:
+		HeaderException(char const*);
+	}; // class Request::Parser::HeaderException
+
+	std::istream&	getline(std::istream&, std::string&);
+	bool			strcmp_nocase(std::string const&, std::string const&);
+	std::string		trim_ws(std::string const&);
+	std::string&	trim_ws(std::string&);
+	std::string&	ltrim_ws(std::string&);
+	std::string&	rtrim_ws(std::string&);
+}; // namespace http
 
 #endif // HTTP_REQUEST_HPP
