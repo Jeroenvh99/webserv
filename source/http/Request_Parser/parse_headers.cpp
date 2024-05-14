@@ -3,66 +3,84 @@
 #include <sstream>
 
 using http::Request;
+using http::Header;
 using Parser = Request::Parser;
 
-static bool	_get_header_line(std::string&, std::stringstream&);
+enum class HeaderLineType {
+	first,
+	continuation,
+	end,
+	incomplete,
+}; // enum class HeaderLineType
+
+static HeaderLineType	_get_header_line(std::iostream&, std::string&);
+static void				_header_flush(Request&, Header&&);
+static void				_header_init(Header&, std::string&&);
+static void				_header_continue(Header&, std::string&&);
+static Parser::State	_parse_body_how(Request const& req, size_t&);
+static bool				_get_body_length(size_t&, Request const&);
 
 void
 Parser::parse_headers(Request& req) {
-	std::string	s;
+	std::string	line;
 
-	while (_get_header_line(s, _buffer))
-		_parse_header(req, s);
-	if (_tmp_hdr.first.size() != 0) {	// make temporary header definitive
-		req.header_add(std::move(_tmp_hdr));
-		_tmp_hdr.first.clear();
-		_tmp_hdr.second.clear();
+	while (true) {
+		switch (_get_header_line(_buffer, line)) {
+		case HeaderLineType::first:
+			_header_flush(req, std::move(_tmp_hdr));
+			_header_init(_tmp_hdr, std::move(line));
+			break;
+		case HeaderLineType::continuation:
+			_header_continue(_tmp_hdr, std::move(line));
+			break;
+		case HeaderLineType::end:
+			_header_flush(req, std::move(_tmp_hdr));
+			_state = _parse_body_how(req, _body_length);
+			return;
+		case HeaderLineType::incomplete:
+			throw (IncompleteLineException());
+		}
 	}
-	needs_body(req);
 }
 
-static bool
-_get_header_line(std::string& line, std::stringstream& buffer) {
+static HeaderLineType
+_get_header_line(std::iostream& buffer, std::string& line) {
 	http::getline(buffer, line);
-	if (line.size() == 0) {	// bare CRLF returns false
-		if (buffer.eof())	// incomplete line throws
-			throw (Parser::IncompleteLineException());
-		return (false);
-	}
-	if (buffer.eof()) {	// incomplete line throws
+	if (line.size() == 0)	// bare CRLF
+		return (HeaderLineType::end);
+	if (buffer.eof()) {		// no CRLF
 		buffer << line;
 		buffer.clear();
-		throw (Parser::IncompleteLineException());
-	}
-	return (true);
+		return (HeaderLineType::incomplete);
+	} if (line[0] == ' ' || line[0] == '\t')	// leading whitespace
+		return (HeaderLineType::continuation);
+	return (HeaderLineType::first);
 }
 
-static bool			_is_continuation(std::string const&);
 static std::string	_parse_key(std::istream&);
 
-void
-Parser::_parse_header(Request& req, std::string const& str) {
-	if (_is_continuation(str)) {	// append continuation lines
-		_tmp_hdr.second += ' ';
-		_tmp_hdr.second += trim_ws(std::string(str)); // can be optimized
-	} else if (_tmp_hdr.first.size() != 0) { // make temporary header definitive
-		req.header_add(std::move(_tmp_hdr));
-		_tmp_hdr.first.clear();
-		_tmp_hdr.second.clear();
-	} else {						// reinitialize temporary header
-		std::istringstream	iss(str);
-
-		_tmp_hdr.first = _parse_key(iss);
-		iss >> _tmp_hdr.second;
-		trim_ws(_tmp_hdr.second);
-	}	
+static void
+_header_flush(Request& req, Header&& tmp) {
+	if (tmp.first.size() == 0)	// undefined header
+		return;
+	req.header_add(tmp);
+	tmp.first.clear();
+	tmp.second.clear();
 }
 
-static bool
-_is_continuation(std::string const& str) {
-	char const	c = str[0];
+static void
+_header_init(Header& tmp, std::string&& line) {
+	std::istringstream	iss(line);
 
-	return (c == ' ' || c == '\t');
+	tmp.first = _parse_key(iss);
+	iss >> tmp.second;
+	http::trim_ws(tmp.second);
+}
+
+static void
+_header_continue(Header& tmp, std::string&& line) {
+	tmp.second += ' ';
+	tmp.second += http::trim_ws(line);
 }
 
 static std::string
@@ -73,4 +91,39 @@ _parse_key(std::istream& is) {
 	if (is.eof())
 		throw (Parser::HeaderException("bad header format"));
 	return (s);
+}
+
+static Parser::State
+_parse_body_how(Request const& req, size_t& body_length) {
+	if (_get_body_length(body_length, req)) {
+		if (req.has_header("Transfer-Encoding"))
+			throw (std::invalid_argument("duplicate body length specification"));
+		return (Parser::State::body_by_length);
+	}
+	try {
+		std::string const&	strval = req.header("Transfer-Encoding");
+
+		if (http::strcmp_nocase(strval, "chunked"))
+			return (Parser::State::body_chunked);
+		return (Parser::State::body_until_eof);
+	} catch (std::out_of_range& e) {	// Transfer-Encoding is not defined
+		return (Parser::State::done);
+	}
+}
+static bool
+_get_body_length(size_t& len, Request const& req) {
+	try {
+		std::string const&	strval = req.header("Content-Length");
+
+		try {
+			len = std::stoul(strval);
+			return (true);
+		} catch (std::out_of_range& e) {		// overflow
+			throw (std::invalid_argument("bad header Content-Length"));
+		} catch (std::invalid_argument& e) {	// non-numeric value
+			throw (std::invalid_argument("bad header Content-Length"));
+		}
+	} catch (std::out_of_range& e) {	// Content-Length is not defined
+		return (false);
+	}
 }

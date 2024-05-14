@@ -20,12 +20,13 @@ Parser::parse_start() {
 	std::getline(iss, s, ' ');
 	Method const	method = _parse_method(s);
 	std::getline(iss, s, ' ');
-	Version const	version = _parse_version(s);
+	std::string		uri(std::move(s));
 	std::getline(iss, s, ' ');
 	if (!iss.eof())
 		throw (StartLineException("excess elements in first line"));
+	Version const	version = _parse_version(s);
 	_state = State::header;
-	return (Request(method, version, std::move(s)));
+	return (Request(method, version, std::move(uri)));
 }
 
 static std::string
@@ -57,7 +58,7 @@ _parse_version(std::string const& str) {
 	try {
 		Version const	version = http::version_from_string(str);
 
-		if (version != http::one_zero || version != http::one_one)
+		if (version != http::one_zero && version != http::one_one)
 			throw (Parser::VersionException("unsupported HTTP version"));
 		return (version);
 	} catch (std::exception& e) {

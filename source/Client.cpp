@@ -23,3 +23,13 @@ http::Request&
 Client::request() noexcept {
 	return (_request);
 }
+
+http::Request::Parser const&
+Client::parser() const noexcept {
+	return (_parser);
+}
+
+http::Request::Parser&
+Client::parser() noexcept {
+	return (_parser);
+}

@@ -48,9 +48,7 @@ Parser::parse(Buffer const& src, Request& req) {
 		while (!_buffer.eof()) {
 			switch (_state) {
 			case State::done:
-				req.clear();
-				clear();
-				break;
+				return;
 			case State::start:
 				req = parse_start();
 				break;

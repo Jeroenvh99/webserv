@@ -22,9 +22,10 @@ http::version_from_string(std::string const& that) {
 
 std::string
 http::version_to_string(Version const& that) {
-	std::ostringstream	oss("HTTP/");
+	std::ostringstream	oss;
 
-	oss << std::to_string(that.first)
+	oss << "HTTP/"
+		<< std::to_string(that.first)
 		<< "."
 		<< std::to_string(that.second);
 	return (oss.str());

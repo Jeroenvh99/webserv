@@ -1,4 +1,0 @@
-# Functionality
-- 
-# Design
-- Find a way to keep the addressless overload for the IPv4Address constructor (default INADDR_ANY) whilst also being able to find the address of a socket descriptor with getsockname().

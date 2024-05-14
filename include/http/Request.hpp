@@ -13,9 +13,10 @@
 
 namespace http
 {
+	using Header = std::pair<std::string, std::string>;
+
 	class Request {
 	public:
-		using Header = std::pair<std::string, std::string>;
 		class Parser;
 
 		Request(Method = Method::GET,
@@ -43,7 +44,11 @@ namespace http
 		struct cmp {
 			bool	operator()(std::string const&, std::string const&) const;
 		}; // struct Request::cmp
-		using Headers = std::unordered_map<std::string, std::string, std::hash<std::string>, cmp>;
+		using Headers = std::unordered_map<
+			std::string,
+			std::string,
+			std::hash<std::string>,
+			cmp>;
 
 		Method		_method;
 		Version		_version;
@@ -64,11 +69,6 @@ namespace http
 		class VersionException;
 
 		Parser();
-		~Parser();
-		Parser(Parser const&) = delete;
-		Parser(Parser&&) = delete;
-		Parser&	operator=(Parser const&) = delete;
-		Parser&	operator=(Parser&&) = delete;
 
 		void	append(Buffer const&);
 		void	clear() noexcept;
@@ -78,15 +78,11 @@ namespace http
 		void	parse_headers(Request&);
 		void	parse_body(Request&);
 
-		bool	needs_body(Request const&);
-
 		State	state() const noexcept;
 
 	private:
-		void	_parse_header(Request&, std::string const&);
-
 		State				_state;
-		std::pair<std::string, std::string>	_tmp_hdr; 		// union
+		Header				_tmp_hdr; 		// union
 		size_t				_body_length;	// "
 		size_t				_chunk_length;	// "
 		std::stringstream	_buffer;

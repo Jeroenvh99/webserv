@@ -58,7 +58,23 @@ Server::_drop_client(Clients::iterator client) {
 }
 
 void
-Server::_process_buffer(Client&) {
+Server::_process_buffer(Client& client) {
+	auto&	parser = client.parser();
 	_elog.log(LogLevel::notice, "Received: ", _buffer);
-	// attempt parse
+	try {
+		parser.parse(_buffer, client.request());
+		if (parser.state() == http::Request::Parser::State::done)
+			_elog.log(LogLevel::notice,
+				"Parsed request:\n", std::string(client.request()));
+	} catch (http::Request::Parser::Exception& e) {
+		parser.clear(); // note 1
+		_elog.log(LogLevel::error, "Error encountered whilst parsing buffer:", e.what());
+		// send error response to client
+	}
 }
+/* Notes:
+ * 1	DB: Either make sure that all data that was part of the faulty request
+ * 		is properly discarded (as to not interfere with a possible follow-up
+ * 		request), or close this connection altogether. The latter option seems
+ * 		the easiest.
+ */

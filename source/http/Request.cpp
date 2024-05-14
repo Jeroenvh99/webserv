@@ -1,6 +1,7 @@
 #include "http/Request.hpp"
 
 #include <sstream>
+#include <iostream>
 
 using http::Request;
 using http::Method;
@@ -23,12 +24,10 @@ Request::operator std::string() const noexcept {
 
 	oss << method_to_string(_method) << ' '
 		<< _uri << ' '
-		<< version_to_string(_version) << "\r\n";
+		<< version_to_string(_version) << '\n';
 	for (auto const& [key, value]: _headers)
-		oss << key << ": " << value << "\r\n";
-	oss << "\r\n";
-	if (_body.size() > 0)
-		oss << "< body of size " << std::to_string(_body.size()) << " >";
+		oss << key << ": " << value << '\n';
+	oss << "\n< body of size " << std::to_string(_body.size()) << " >";
 	return (oss.str());
 }
 
@@ -82,6 +81,7 @@ Request::header_add(Header const& header) {
 
 void
 Request::header_add(Header&& header) {
+	std::cout << "added header " << header.first << ":" << header.second << std::endl;
 	_headers.insert(header);
 }
 
