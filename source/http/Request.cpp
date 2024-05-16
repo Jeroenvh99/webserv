@@ -99,10 +99,9 @@ void Request::parseRequestLine(std::stringstream &s) {
 	std::stringstream s2(requestline);
 	std::getline(s2, temp, ' ');
 	std::string methods[RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
-	RequestMethod methodtype[RequestMethod::NONE] = {RequestMethod::GET, RequestMethod::HEAD, RequestMethod::POST, RequestMethod::PUT, RequestMethod::DELETE, RequestMethod::CONNECT, RequestMethod::OPTIONS, RequestMethod::TRACE};
 	for (int i = 0; i < RequestMethod::NONE; i++) {
 		if (temp == methods[i]) {
-			_method = methodtype[i];
+			_method = static_cast<http::RequestMethod>(i);
 			break;
 		}
 	}

@@ -29,10 +29,10 @@ struct t_serverlog
 struct t_location {
 	std::string path;
 	std::unordered_map<std::string, std::string> parameters;
-	std::vector<std::string> allowedmethods;
+	std::vector<http::RequestMethod> allowedmethods;
 };
 
-struct t_config {
+struct t_server {
 	struct t_serverlog errorlog;
 	struct t_serverlog accesslog;
 	int port;
@@ -47,24 +47,23 @@ class Config {
 		std::string _config;
 		struct t_serverlog _errorlog;
 		struct t_serverlog _accesslog;
-		std::vector<struct t_config> _servers;
+		std::vector<struct t_server> _servers;
 	public:
 		Config(std::string &filename);
 		Config(const Config& src);
 		Config &operator=(const Config& src);
 		t_serverlog ParseLog(std::string &word, std::stringstream &s);
+		void ParseMethods(int allow, std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed);
+		void ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, t_server &server);
 		void Parse();
 		void ParseServer(std::stringstream &s);
 		void RemoveComments(std::ifstream &in);
 		const t_serverlog &getErrorLog() const;
 		const t_serverlog &getAccessLog() const;
-		const std::vector<t_config> &getServers() const;
+		const std::vector<t_server> &getServers() const;
 		const std::string &getConfig() const;
 		~Config();
 		class InvalidSyntaxException: public std::exception {
-				virtual const char* what() const throw();
-		};
-		class InvalidServerblockException: public std::exception {
 				virtual const char* what() const throw();
 		};
 };

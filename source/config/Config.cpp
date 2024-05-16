@@ -5,11 +5,6 @@ const char* Config::InvalidSyntaxException::what() const throw()
 	return "configException: syntax error in config file";
 }
 
-const char* Config::InvalidServerblockException::what() const throw()
-{
-	return "configException: invalid server block in configuration file";
-}
-
 Config::Config(std::string &filename) {
 	std::ifstream in(filename);
 	if (!in.is_open()) { 
@@ -53,6 +48,25 @@ t_serverlog Config::ParseLog(std::string &word, std::stringstream &s) {
 	return log;
 }
 
+void Config::ParseMethods(int allow, std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed) {
+	std::string methods[http::RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+	while (1) {
+		std::getline(linestream, word, ' ');
+		for (int i = 0; i < http::RequestMethod::NONE; i++) {
+			if (word.find(methods[i]) != std::string::npos) {
+				if (!allow) {
+					allowed[i] = http::RequestMethod::NONE;
+				}
+			} else if (allow) {
+				allowed[i] = http::RequestMethod::NONE;
+			}
+		}
+		if (word.find(';') != std::string::npos) {
+			return;
+		}
+	}
+}
+
 void Config::Parse() {
 	std::stringstream s(_config);
 	std::string line;
@@ -71,39 +85,44 @@ void Config::Parse() {
 	}
 }
 
-// void Config::parseLocation(std::string &previous, std::string &word, std::stringstream &s, t_config &server) {
-// 	t_location loc {"", {}, server.allowedmethods};
-// 	loc.path = previous + word;
-// 	while (!s.eof()) {
-// 		std::string line;
-// 		std::getline(s, line);
-// 		if (line == "}") {
-// 			server.locations.push_back(loc);
-// 			return;
-// 		}
-// 		std::stringstream linestream(line);
-// 		std::string temp;
-// 		std::getline(linestream, temp, ' ');
-// 		if (temp == "location") {
-// 			std::getline(linestream, temp, ' ');
-// 			parseLocation(loc.path, temp, s, server);
-// 		} else {
-// 			std::string name = temp;
-// 			while (1) {
-// 				std::getline(linestream, temp, ' ');
-// 				std::string value = temp;
-// 				value.erase(value.find_last_not_of(";") + 1);
-// 				loc.parameters.insert({name, value});
-// 				if (temp.back() == ';') {
-// 					break;
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+void Config::ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, t_server &server) {
+	t_location loc {previousloc, {}, server.allowedmethods};
+	loc.path += word;
+	while (1) {
+		std::string line;
+		std::getline(s, line);
+		line.erase(0, line.find_first_not_of(' '));
+		if (line.find('}') != std::string::npos) {
+			server.locations.push_back(loc);
+			return;
+		}
+		std::stringstream linestream(line);
+		std::string temp;
+		std::getline(linestream, temp, ' ');
+		if (temp == "location") {
+			std::getline(linestream, temp, ' ');
+			ParseLocation(loc.path, temp, s, server);
+		} else if (temp == "allow_methods"){
+			ParseMethods(1, temp, linestream, server.allowedmethods);
+		} else if (temp == "deny_methods"){
+			ParseMethods(0, temp, linestream, server.allowedmethods);
+		} else {
+			std::string name = temp;
+			while (1) {
+				std::getline(linestream, temp, ' ');
+				std::string value = temp;
+				value.erase(value.find_last_not_of(';') + 1);
+				loc.parameters.insert({name, value});
+				if (temp.back() == ';') {
+					break;
+				}
+			}
+		}
+	}
+}
 
 void Config::ParseServer(std::stringstream &s) {
-	t_config server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
+	t_server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -133,33 +152,16 @@ void Config::ParseServer(std::stringstream &s) {
 			for (auto code : codes) {
 				server.errorpages.insert(std::make_pair(code, temp));
 			}
-		}
-		// else if (temp == "location") {
-		// 	// std::vector<std::string> directives;
-		// 	// while (1) {
-		// 	// 	std::getline(linestream, temp, ' ');
-		// 	// 	directives.push_back(temp);
-		// 	// 	if (temp == "}") {
-		// 	// 		break;
-		// 	// 	}
-		// 	// }
-		// 	// while (1) {
-		// 	// 	std::map<std::string, std::string> routes;
-		// 	// 	std::string first;
-		// 	// 	std::getline(linestream, first, ' ');
-		// 	// 	if (first == '}') {
-		// 	// 		server.locations.push_back(std::make_pair(directives, routes));
-		// 	// 		break;
-		// 	// 	}
-		// 	// 	std::getline(linestream, temp, ' ');
-		// 	// 	routes.push_back(std::make_pair(first, temp.pop_back()));
-		// 	}
-		// }
-		else if (temp == "listen") {
+		} else if (temp == "location") {
 			std::getline(linestream, temp, ' ');
-			while (temp == "") {
-				std::getline(linestream, temp, ' ');
-			}
+			std::string loc = "";
+			ParseLocation(loc, temp, s, server);
+		} else if (temp == "allow_methods"){
+			ParseMethods(1, temp, linestream, server.allowedmethods);
+		} else if (temp == "deny_methods"){
+			ParseMethods(0, temp, linestream, server.allowedmethods);
+		} else if (temp == "listen") {
+			std::getline(linestream, temp, ' ');
 			temp.pop_back();
 			server.port = std::stoi(temp);
 		} else if (temp == "server_name") {
@@ -168,7 +170,6 @@ void Config::ParseServer(std::stringstream &s) {
 			server.servername = temp;
 		}
 	}
-	throw Config::InvalidServerblockException();
 }
 
 void Config::RemoveComments(std::ifstream &in) {
@@ -205,6 +206,12 @@ void Config::RemoveComments(std::ifstream &in) {
 				throw Config::InvalidSyntaxException();
 			}
 		}
+		for (int i = 0; i < line.length(); i++) {
+			if (i > 0 && line[i - 1] == ' ' && line[i] == ' ') {
+				line.erase(i, 1);
+				--i;
+			}
+		}
 		res += line + "\n";
 	}
 	if (openbrackets > 0) {
@@ -221,7 +228,7 @@ const t_serverlog &Config::getAccessLog() const {
 	return _accesslog;
 }
 
-const std::vector<t_config> &Config::getServers() const {
+const std::vector<t_server> &Config::getServers() const {
 	return _servers;
 }
 
@@ -235,7 +242,7 @@ Config::~Config() {}
 // 	try {
 // 		std::string file = "/home/jvan-hal/Desktop/webserv/test/test5.conf";
 // 		Config conf(file);
-// 		std::cout << conf.getConfig();
+// 		t_server server = conf.getServers()[0];
 // 	} catch (std::exception &e) {
 // 		std::cerr << e.what();
 // 	}
