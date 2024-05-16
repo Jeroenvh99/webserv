@@ -74,10 +74,7 @@ Test(parseconfig, config6) {
 	try {
 		std::string file = "test4.conf";
 		Config conf(file);
-		// t_server server = conf.getServers()[0];
-		// cr_assert_str_eq(server.accesslog.filename.c_str(), "logs/access.log");
-		// cr_assert_str_eq(server.servername.c_str(), "hello");
-		// cr_assert_eq(server.port, 80);
+		// just see if {{} on one line works
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		cr_assert(0);
@@ -106,18 +103,6 @@ Test(parseconfig, config8) {
 		t_server server = conf.getServers()[0];
 		std::vector<t_location> locations = server.locations;
 		cr_assert(locations.size() == 3);
-	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		cr_assert(0);
-	}
-}
-
-Test(parseconfig, config9) {
-	try {
-		std::string file = "test5.conf";
-		Config conf(file);
-		t_server server = conf.getServers()[0];
-		std::vector<t_location> locations = server.locations;
 		cr_assert_str_eq(locations[0].path.c_str(), "/asa");
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
@@ -125,7 +110,7 @@ Test(parseconfig, config9) {
 	}
 }
 
-Test(parseconfig, config10) {
+Test(parseconfig, config9) {
 	try {
 		std::string file = "test5.conf";
 		Config conf(file);
@@ -140,7 +125,7 @@ Test(parseconfig, config10) {
 	}
 }
 
-Test(parseconfig, config11) {
+Test(parseconfig, config10) {
 	try {
 		std::string file = "test6.conf";
 		Config conf(file);

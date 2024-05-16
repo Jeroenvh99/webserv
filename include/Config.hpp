@@ -38,7 +38,7 @@ struct t_server {
 	int port;
 	std::string servername;
 	std::unordered_map<int, std::string> errorpages;
-	std::vector<t_location> locations; // can be nested
+	std::vector<t_location> locations;
 	std::vector<http::RequestMethod> allowedmethods;
 };
 
