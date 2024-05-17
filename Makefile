@@ -31,12 +31,13 @@ SRC_FILES	:= main.cpp \
 			http/Request_Parser/except.cpp \
 			http/Request_Parser/Parser.cpp \
 			http/Request_Parser/parse_body.cpp \
+			http/Request_Parser/parse_chunks.cpp \
 			http/Request_Parser/parse_headers.cpp \
 			http/Request_Parser/parse_start.cpp \
+			http/Request_Parser/utils.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
-			http/Version.cpp \
-			http/utils.cpp
+			http/Version.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 

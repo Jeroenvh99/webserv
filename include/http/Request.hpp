@@ -48,7 +48,8 @@ namespace http
 			std::string,
 			std::string,
 			std::hash<std::string>,
-			cmp>;
+			cmp
+		>;
 
 		Method		_method;
 		Version		_version;
@@ -71,19 +72,19 @@ namespace http
 		Parser();
 
 		void	clear() noexcept;
-		// make some of these private
 		void	parse(std::iostream&, Request&);
-		Request	parse_start(std::iostream&);
-		void	parse_headers(std::iostream&, Request&);
-		void	parse_body(std::iostream&, Request&);
 
 		State	state() const noexcept;
 
 	private:
-		State				_state;
-		Header				_tmp_hdr; 		// union
-		size_t				_body_length;	// "
-		size_t				_chunk_length;	// "
+		Request	_parse_start(std::iostream&);
+		void	_parse_headers(std::iostream&, Request&);
+		void	_parse_body(std::iostream&, Request&);
+		void	_parse_chunks(std::iostream&, std::string&);
+
+		State	_state;
+		Header	_tmp_hdr; 		// union
+		size_t	_body_length;	// "
 	}; // class Request::Parser
 
 	enum class Request::Parser::State {
@@ -129,6 +130,7 @@ namespace http
 	}; // class Request::Parser::HeaderException
 
 	std::istream&	getline(std::istream&, std::string&);
+	void			ios_restore(std::ostream&, std::string const&);
 	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;
 	std::string		trim_ws(std::string const&) noexcept;
 	std::string&	trim_ws(std::string&) noexcept;

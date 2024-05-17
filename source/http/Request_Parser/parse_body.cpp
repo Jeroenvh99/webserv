@@ -7,20 +7,19 @@ using http::Request;
 using Parser = Request::Parser;
 
 static Parser::State	_parse_body_by_length(std::istream&, std::string&, size_t);
-static Parser::State	_parse_body_chunked(std::istream&, std::string&, size_t&);
 static Parser::State	_parse_body_until_eof(std::istream&, std::string&);
 
 void
-Parser::parse_body(std::iostream& ios, Request& req) {
+Parser::_parse_body(std::iostream& ios, Request& req) {
 	switch (_state) {
 	case State::body_by_length:
 		_state = _parse_body_by_length(ios, req.body(), _body_length);
 		break;
-	case State::body_chunked:
-		_state = _parse_body_chunked(ios, req.body(), _chunk_length);
-		break;
 	case State::body_until_eof:
 		_state = _parse_body_until_eof(ios, req.body());
+		break;
+	case State::body_chunked:
+		_parse_chunks(ios, req.body());
 		break;
 	default:
 		break;
@@ -44,9 +43,4 @@ _parse_body_until_eof(std::istream& is, std::string& body) {
 	while (!is.eof())
 		body.push_back(is.get());
 	return (Parser::State::body_until_eof);
-}
-
-static Parser::State
-_parse_body_chunked(std::istream&, std::string&, size_t&) {
-	return (Parser::State::done); // temp
 }

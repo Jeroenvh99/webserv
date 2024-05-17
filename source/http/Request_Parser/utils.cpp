@@ -20,6 +20,12 @@ http::getline(std::istream& is, std::string& str) {
 	return (is);
 }
 
+void
+http::ios_restore(std::ostream& os, std::string const& str) {
+	os << str;
+	os.clear();
+}
+
 std::string
 http::trim_ws(std::string const& str) noexcept {
 	std::string	res(str);

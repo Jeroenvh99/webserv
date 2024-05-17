@@ -20,7 +20,6 @@ Parser::clear() noexcept {
 	_tmp_hdr.first.clear();
 	_tmp_hdr.second.clear();
 	_body_length = 0;
-	_chunk_length = 0;
 }
 
 // Accessors
@@ -40,13 +39,13 @@ Parser::parse(std::iostream& ios, Request& req) {
 			case State::done:
 				return;
 			case State::start:
-				req = parse_start(ios);
+				req = _parse_start(ios);
 				break;
 			case State::header:
-				parse_headers(ios, req);
+				_parse_headers(ios, req);
 				break;
 			default:	// body
-				parse_body(ios, req);
+				_parse_body(ios, req);
 				break;
 			}
 		}

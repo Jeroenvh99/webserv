@@ -11,7 +11,7 @@ static Method		_parse_method(std::string const&);
 static Version		_parse_version(std::string const&);
 
 Request
-Parser::parse_start(std::iostream& ios) {
+Parser::_parse_start(std::iostream& ios) {
 	std::istringstream	iss(_get_start_line(ios));
 	std::string			s;
 
@@ -34,9 +34,8 @@ _get_start_line(std::iostream& ios) {
 	http::getline(ios, res);
 	while (res.size() == 0)
 		http::getline(ios, res);	// ignore leading bare CRLF
-	if (ios.eof()) {			// line must end with CRLF
-		ios << res;
-		ios.clear();
+	if (ios.eof()) {				// line must end with CRLF
+		http::ios_restore(ios, res);
 		throw (Parser::IncompleteLineException());
 	}
 	return (res);

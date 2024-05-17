@@ -21,7 +21,7 @@ static Parser::State	_parse_body_how(Request const& req, size_t&);
 static bool				_get_body_length(size_t&, Request const&);
 
 void
-Parser::parse_headers(std::iostream& ios, Request& req) {
+Parser::_parse_headers(std::iostream& ios, Request& req) {
 	std::string	line;
 
 	while (true) {
@@ -49,8 +49,7 @@ _get_header_line(std::iostream& ios, std::string& line) {
 	if (line.size() == 0)	// bare CRLF
 		return (HeaderLineType::end);
 	if (ios.eof()) {		// no CRLF
-		ios << line;
-		ios.clear();
+		http::ios_restore(ios, line);
 		return (HeaderLineType::incomplete);
 	} if (line[0] == ' ' || line[0] == '\t')	// leading whitespace
 		return (HeaderLineType::continuation);
@@ -97,14 +96,16 @@ static Parser::State
 _parse_body_how(Request const& req, size_t& body_length) {
 	if (_get_body_length(body_length, req)) {
 		if (req.has_header("Transfer-Encoding"))
-			throw (std::invalid_argument("duplicate body length specification"));
+			throw (std::invalid_argument("duplicate body length specification")); // DB: other exception?
 		return (Parser::State::body_by_length);
 	}
 	try {
 		std::string const&	strval = req.header("Transfer-Encoding");
 
-		if (http::strcmp_nocase(strval, "chunked"))
+		if (http::strcmp_nocase(strval, "chunked")) {
+			body_length = 0;
 			return (Parser::State::body_chunked);
+		}
 		return (Parser::State::body_until_eof);
 	} catch (std::out_of_range& e) {	// Transfer-Encoding is not defined
 		return (Parser::State::done);
