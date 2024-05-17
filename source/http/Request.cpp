@@ -75,27 +75,6 @@ Request::body() noexcept {
 // Modifiers
 
 void
-Request::header_add(Header const& header) {
-	_headers.insert(header);
-}
-
-void
-Request::header_add(Header&& header) {
-	std::cout << "added header " << header.first << ":" << header.second << std::endl;
-	_headers.insert(header);
-}
-
-void
-Request::header_add(std::string const& key, std::string const& value) {
-	_headers.insert(std::make_pair(key, value));
-}
-
-void
-Request::header_add(std::string&& key, std::string&& value) {
-	_headers.insert(std::make_pair(key, value));
-}
-
-void
 Request::clear() noexcept {
 	_method = Method::GET;
 	_version = Version(0, 0);
@@ -109,4 +88,19 @@ Request::clear() noexcept {
 bool
 Request::cmp::operator()(std::string const& s1, std::string const& s2) const noexcept {
 	return (strcmp_nocase(s1, s2));
+}
+
+// Private methods
+// Modifiers
+
+void
+Request::_header_add(Header&& hdr) {
+	auto it = _headers.find(hdr.first);
+
+	if (it != _headers.end()) {
+		it->second.reserve(it->second.length() + 1 + hdr.second.length());
+		it->second += ",";
+		it->second += hdr.second;
+	} else
+		_headers.insert(hdr);	// DB: should I check the return value? The key is logically guaranteed to be unique.
 }

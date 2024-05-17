@@ -13,9 +13,11 @@ enum class HeaderLineType {
 }; // enum class HeaderLineType
 
 static HeaderLineType	_get_header_line(std::iostream&, std::string&);
-static void				_header_flush(Request&, Header&&);
+static std::string		_get_key(std::istream&);
+
 static void				_header_init(Header&, std::string&&);
 static void				_header_continue(Header&, std::string&&);
+
 static Parser::State	_parse_body_how(Request const& req, size_t&);
 static bool				_get_body_length(size_t&, Request const&);
 
@@ -26,18 +28,27 @@ Parser::_parse_headers(std::iostream& ios, Request& req) {
 	while (true) {
 		switch (_get_header_line(ios, line)) {
 		case HeaderLineType::first:
-			_header_flush(req, std::move(_tmp_hdr));
+			_header_add(req);
 			_header_init(_tmp_hdr, std::move(line));
 			break;
 		case HeaderLineType::continuation:
 			_header_continue(_tmp_hdr, std::move(line));
 			break;
 		case HeaderLineType::end:
-			_header_flush(req, std::move(_tmp_hdr));
+			_header_add(req);
 			_state = _parse_body_how(req, _body_length);
 			return;
 		}
 	}
+}
+
+void
+Parser::_header_add(Request& req) {
+	if (_tmp_hdr.first.length() == 0)	// attempting to add an undefined header
+		return;
+	req._header_add(std::move(_tmp_hdr));
+	_tmp_hdr.first.clear();
+	_tmp_hdr.second.clear();
 }
 
 static HeaderLineType
@@ -50,22 +61,11 @@ _get_header_line(std::iostream& ios, std::string& line) {
 	return (HeaderLineType::first);
 }
 
-static std::string	_parse_key(std::istream&);
-
-static void
-_header_flush(Request& req, Header&& tmp) {
-	if (tmp.first.size() == 0)	// undefined header
-		return;
-	req.header_add(tmp);
-	tmp.first.clear();
-	tmp.second.clear();
-}
-
 static void
 _header_init(Header& tmp, std::string&& line) {
 	std::istringstream	iss(line);
 
-	tmp.first = _parse_key(iss);
+	tmp.first = _get_key(iss);
 	iss >> tmp.second;
 	http::trim_ws(tmp.second);
 }
@@ -77,7 +77,7 @@ _header_continue(Header& tmp, std::string&& line) {
 }
 
 static std::string
-_parse_key(std::istream& is) {
+_get_key(std::istream& is) {
 	std::string	s;
 
 	std::getline(is, s, ':');

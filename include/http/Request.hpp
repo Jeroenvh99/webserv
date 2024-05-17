@@ -10,8 +10,7 @@
 # include <unordered_map>
 # include <utility>
 
-namespace http
-{
+namespace http {
 	using Header = std::pair<std::string, std::string>;
 
 	class Request {
@@ -34,22 +33,19 @@ namespace http
 		std::string&		body() noexcept;
 
 		void	clear() noexcept;
-		void	header_add(Header const&);
-		void	header_add(Header&&);
-		void	header_add(std::string const&, std::string const&);
-		void	header_add(std::string&&, std::string&&);
 
 	private:
 		struct cmp {
 			bool	operator()(std::string const&, std::string const&) const noexcept;
 		}; // struct Request::cmp
-
 		using Headers = std::unordered_map<
 			std::string,
 			std::string,
 			std::hash<std::string>,
 			cmp
 		>;
+		
+		void	_header_add(Header&&);
 
 		Method		_method;
 		Version		_version;
@@ -81,6 +77,7 @@ namespace http
 	private:
 		Request	_parse_start(std::iostream&);
 		void	_parse_headers(std::iostream&, Request&);
+		void	_header_add(Request&);
 		void	_parse_body(std::iostream&, Request&);
 		void	_parse_chunks(std::iostream&, std::string&);
 
