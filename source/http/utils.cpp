@@ -21,31 +21,31 @@ http::getline(std::istream& is, std::string& str) {
 }
 
 std::string
-http::trim_ws(std::string const& str) {
+http::trim_ws(std::string const& str) noexcept {
 	std::string	res(str);
 
 	return (ltrim_ws(rtrim_ws(res)));
 }
 
 std::string&
-http::trim_ws(std::string& str) {
+http::trim_ws(std::string& str) noexcept {
 	return (ltrim_ws(rtrim_ws(str)));
 }
 
 std::string&
-http::ltrim_ws(std::string& str) {
+http::ltrim_ws(std::string& str) noexcept {
 	str.erase(str.begin(), str.begin() + str.find_first_not_of(" \t"));
 	return (str);
 }
 
 std::string&
-http::rtrim_ws(std::string& str) {
+http::rtrim_ws(std::string& str) noexcept {
 	str.erase(str.find_last_not_of(" \t") + 1);
 	return (str);
 }
 
 bool
-http::strcmp_nocase(std::string const& s1, std::string const& s2) {
+http::strcmp_nocase(std::string const& s1, std::string const& s2) noexcept {
 	return (std::equal(
 		s1.begin(), s1.end(),
 		s2.begin(), s2.end(),

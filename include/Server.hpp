@@ -3,13 +3,11 @@
 
 # include "network/Acceptor.hpp"
 # include "network/Address_IPv4.hpp"
-# include "network/Buffer.hpp"
 # include "network/Handle.hpp"
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
 # include "logging.hpp"
 # include "http/StatusCode.hpp"
-# include "Buffer.hpp"
 # include "Client.hpp"
 # include "Route.hpp"
 
@@ -45,14 +43,16 @@ public:
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
+	using ClientIt = ClientMap::iterator;
 
-	void	_process_events(Poller::Events const&);
-	void	_client_add();
-	void	_client_handle(ClientMap::iterator, Poller::Event const&);
-	void	_client_handle_graveyard(ClientMap::iterator, Poller::Event const&);
-	void	_client_to_graveyard(ClientMap::iterator);
-	void	_client_drop(ClientMap::iterator);
-	void	_process_buffer(Client&);
+	void	_accept();
+	void	_process(Poller::Event const&, ClientIt);
+	void	_process_graveyard(Poller::Event const&, ClientIt);
+	void	_to_graveyard(ClientIt);
+	void	_drop(ClientIt);
+
+	bool	_read(Client&);
+	bool	_write(Client&);
 
 	Poller					_poller;
 	SharedHandle			_acceptor;
@@ -60,7 +60,6 @@ private:
 	ClientMap				_graveyard;
 	RouteMap				_routes;
 	ErrorPageMap			_error_pages;
-	Buffer					_buffer;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server

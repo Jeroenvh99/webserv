@@ -21,11 +21,11 @@ static Parser::State	_parse_body_how(Request const& req, size_t&);
 static bool				_get_body_length(size_t&, Request const&);
 
 void
-Parser::parse_headers(Request& req) {
+Parser::parse_headers(std::iostream& ios, Request& req) {
 	std::string	line;
 
 	while (true) {
-		switch (_get_header_line(_buffer, line)) {
+		switch (_get_header_line(ios, line)) {
 		case HeaderLineType::first:
 			_header_flush(req, std::move(_tmp_hdr));
 			_header_init(_tmp_hdr, std::move(line));
@@ -44,13 +44,13 @@ Parser::parse_headers(Request& req) {
 }
 
 static HeaderLineType
-_get_header_line(std::iostream& buffer, std::string& line) {
-	http::getline(buffer, line);
+_get_header_line(std::iostream& ios, std::string& line) {
+	http::getline(ios, line);
 	if (line.size() == 0)	// bare CRLF
 		return (HeaderLineType::end);
-	if (buffer.eof()) {		// no CRLF
-		buffer << line;
-		buffer.clear();
+	if (ios.eof()) {		// no CRLF
+		ios << line;
+		ios.clear();
 		return (HeaderLineType::incomplete);
 	} if (line[0] == ' ' || line[0] == '\t')	// leading whitespace
 		return (HeaderLineType::continuation);

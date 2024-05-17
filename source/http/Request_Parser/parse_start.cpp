@@ -1,8 +1,6 @@
 #include "http.hpp"
 #include "http/Request.hpp"
 
-#include <iostream>
-
 using http::Request;
 using Parser = Request::Parser;
 using http::Method;
@@ -13,8 +11,8 @@ static Method		_parse_method(std::string const&);
 static Version		_parse_version(std::string const&);
 
 Request
-Parser::parse_start() {
-	std::istringstream	iss(_get_start_line(_buffer));
+Parser::parse_start(std::iostream& ios) {
+	std::istringstream	iss(_get_start_line(ios));
 	std::string			s;
 
 	std::getline(iss, s, ' ');
@@ -30,15 +28,15 @@ Parser::parse_start() {
 }
 
 static std::string
-_get_start_line(std::iostream& buffer) {
+_get_start_line(std::iostream& ios) {
 	std::string	res;
 
-	http::getline(buffer, res);
+	http::getline(ios, res);
 	while (res.size() == 0)
-		http::getline(buffer, res);	// ignore leading bare CRLF
-	if (buffer.eof()) {			// line must end with CRLF
-		buffer << res;
-		buffer.clear();
+		http::getline(ios, res);	// ignore leading bare CRLF
+	if (ios.eof()) {			// line must end with CRLF
+		ios << res;
+		ios.clear();
 		throw (Parser::IncompleteLineException());
 	}
 	return (res);

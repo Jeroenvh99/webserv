@@ -11,16 +11,16 @@ static Parser::State	_parse_body_chunked(std::istream&, std::string&, size_t&);
 static Parser::State	_parse_body_until_eof(std::istream&, std::string&);
 
 void
-Parser::parse_body(Request& req) {
+Parser::parse_body(std::iostream& ios, Request& req) {
 	switch (_state) {
 	case State::body_by_length:
-		_state = _parse_body_by_length(_buffer, req.body(), _body_length);
+		_state = _parse_body_by_length(ios, req.body(), _body_length);
 		break;
 	case State::body_chunked:
-		_state = _parse_body_chunked(_buffer, req.body(), _chunk_length);
+		_state = _parse_body_chunked(ios, req.body(), _chunk_length);
 		break;
 	case State::body_until_eof:
-		_state = _parse_body_until_eof(_buffer, req.body());
+		_state = _parse_body_until_eof(ios, req.body());
 		break;
 	default:
 		break;

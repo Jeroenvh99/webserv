@@ -15,21 +15,12 @@ Parser::Parser():
 // Modifiers
 
 void
-Parser::append(Buffer const& src) {
-	if (src.size() > 0)
-		_buffer.clear();
-	for (auto const& c: src)
-		_buffer << c;
-}
-
-void
 Parser::clear() noexcept {
 	_state = State::start;
 	_tmp_hdr.first.clear();
 	_tmp_hdr.second.clear();
 	_body_length = 0;
 	_chunk_length = 0;
-	_buffer.str("");
 }
 
 // Accessors
@@ -42,21 +33,20 @@ Parser::state() const noexcept {
 // Other
 
 void
-Parser::parse(Buffer const& src, Request& req) {
-	append(src);
+Parser::parse(std::iostream& ios, Request& req) {
 	try {
-		while (!_buffer.eof()) {
+		while (!ios.eof()) {
 			switch (_state) {
 			case State::done:
 				return;
 			case State::start:
-				req = parse_start();
+				req = parse_start(ios);
 				break;
 			case State::header:
-				parse_headers(req);
+				parse_headers(ios, req);
 				break;
 			default:	// body
-				parse_body(req);
+				parse_body(ios, req);
 				break;
 			}
 		}

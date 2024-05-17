@@ -7,9 +7,11 @@ HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
 			Client.cpp \
-			ClientData.cpp \
+			Client_io.cpp \
+			Client_method.cpp \
 			Route.cpp \
 			Server_ctor.cpp \
+			Server_io.cpp \
 			Server_loop.cpp \
 			Server_method.cpp \
 			logging/Logger.cpp \
@@ -24,16 +26,17 @@ SRC_FILES	:= main.cpp \
 			network/Poller_method.cpp \
 			network/Poller_Event.cpp \
 			network/Address_IPv4.cpp \
+			http/Method.cpp \
 			http/Request.cpp \
 			http/Request_Parser/except.cpp \
 			http/Request_Parser/Parser.cpp \
 			http/Request_Parser/parse_body.cpp \
 			http/Request_Parser/parse_headers.cpp \
 			http/Request_Parser/parse_start.cpp \
-			http/Method.cpp \
+			http/Response.cpp \
+			http/Response_io.cpp \
 			http/Version.cpp \
-			http/utils.cpp \
-			http/Response.cpp
+			http/utils.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 

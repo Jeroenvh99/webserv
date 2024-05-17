@@ -107,6 +107,6 @@ Request::clear() noexcept {
 // cmp
 
 bool
-Request::cmp::operator()(std::string const& s1, std::string const& s2) const {
+Request::cmp::operator()(std::string const& s1, std::string const& s2) const noexcept {
 	return (strcmp_nocase(s1, s2));
 }

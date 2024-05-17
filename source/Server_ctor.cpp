@@ -20,7 +20,6 @@ Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remov
 	_clients(),
 	_routes(),
 	_error_pages(),
-	_buffer(),
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),

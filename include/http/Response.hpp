@@ -5,6 +5,7 @@
 # include "StatusCode.hpp"
 # include "Request.hpp"
 
+# include <iostream>
 # include <string>
 # include <map>
 # include <unordered_map>
@@ -47,6 +48,8 @@ namespace http
 
         void readFromFile(const std::string &path);
     };
+
+    std::ostream&	operator<<(std::ostream&, Response const&);
 }
 
 #endif // HTTP_RESPONSE_HPP
