@@ -10,7 +10,7 @@ Config::Config(std::string &filename) {
 	if (!in.is_open()) { 
         throw std::exception();
     }
-	RemoveComments(in);
+	PreParse(in);
 	Parse();
 	in.close();
 }
@@ -48,7 +48,11 @@ t_serverlog Config::ParseLog(std::string &word, std::stringstream &s) {
 	return log;
 }
 
-void Config::ParseMethods(int allow, std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed) {
+void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed) {
+	int allow = 0;
+	if (word.find("allow_") != std::string::npos) {
+		allow = 1;
+	}
 	std::string methods[http::RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 	while (1) {
 		std::getline(linestream, word, ' ');
@@ -80,7 +84,7 @@ void Config::Parse() {
 		} else if (temp == "access_log") {
 			_accesslog = ParseLog(temp, linestream);
 		} else if (temp == "server") {
-			ParseServer(s); // return with s after the }
+			ParseServer(s);
 		}
 	}
 }
@@ -102,10 +106,8 @@ void Config::ParseLocation(std::string &previousloc, std::string &word, std::str
 		if (temp == "location") {
 			std::getline(linestream, temp, ' ');
 			ParseLocation(loc.path, temp, s, server);
-		} else if (temp == "allow_methods"){
-			ParseMethods(1, temp, linestream, server.allowedmethods);
-		} else if (temp == "deny_methods"){
-			ParseMethods(0, temp, linestream, server.allowedmethods);
+		} else if (temp == "allow_methods" || temp == "deny_methods"){
+			ParseMethods(temp, linestream, loc.allowedmethods);
 		} else {
 			std::string name = temp;
 			while (1) {
@@ -156,10 +158,8 @@ void Config::ParseServer(std::stringstream &s) {
 			std::getline(linestream, temp, ' ');
 			std::string loc = "";
 			ParseLocation(loc, temp, s, server);
-		} else if (temp == "allow_methods"){
-			ParseMethods(1, temp, linestream, server.allowedmethods);
-		} else if (temp == "deny_methods"){
-			ParseMethods(0, temp, linestream, server.allowedmethods);
+		} else if (temp == "allow_methods" || temp == "deny_methods"){
+			ParseMethods(temp, linestream, server.allowedmethods);
 		} else if (temp == "listen") {
 			std::getline(linestream, temp, ' ');
 			temp.pop_back();
@@ -172,21 +172,21 @@ void Config::ParseServer(std::stringstream &s) {
 	}
 }
 
-void Config::RemoveComments(std::ifstream &in) {
+void Config::PreParse(std::ifstream &in) {
 	std::string line;
 	std::string res = "";
 	unsigned int openbrackets = 0;
 	while (!in.eof()) {
 		std::getline(in, line);
-		size_t comment = line.find('#');
+		int comment = line.find('#');
 		if (comment != std::string::npos) {
 			line.erase(comment);
 		}
 		size_t lastchar = line.find_last_not_of(" \n\r\t");
-		line.erase(lastchar + 1);
 		if (line == "" || lastchar == std::string::npos) {
 			continue;
 		}
+		line.erase(lastchar + 1);
 		size_t open = line.find('{');
 		while (open != std::string::npos) {
 			++openbrackets;
@@ -197,20 +197,17 @@ void Config::RemoveComments(std::ifstream &in) {
 			--openbrackets;
 			close = line.find('}', close + 1);
 		}
-		int size = line.length();
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < line.length(); i++) {
 			if (line[i] == '\t') {
 				line[i] = ' ';
 			}
-			if (i == size - 1 && line[i] != '{' && line[i] != '}' && line[i] != ';') {
-				throw Config::InvalidSyntaxException();
-			}
-		}
-		for (int i = 0; i < line.length(); i++) {
 			if (i > 0 && line[i - 1] == ' ' && line[i] == ' ') {
 				line.erase(i, 1);
 				--i;
 			}
+		}
+		if (line.back() != '{' && line.back() != '}' && line.back() != ';') {
+			throw Config::InvalidSyntaxException();
 		}
 		res += line + "\n";
 	}

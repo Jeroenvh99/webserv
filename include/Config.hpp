@@ -53,11 +53,11 @@ class Config {
 		Config(const Config& src);
 		Config &operator=(const Config& src);
 		t_serverlog ParseLog(std::string &word, std::stringstream &s);
-		void ParseMethods(int allow, std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed);
+		void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed);
 		void ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, t_server &server);
 		void Parse();
 		void ParseServer(std::stringstream &s);
-		void RemoveComments(std::ifstream &in);
+		void PreParse(std::ifstream &in);
 		const t_serverlog &getErrorLog() const;
 		const t_serverlog &getAccessLog() const;
 		const std::vector<t_server> &getServers() const;
