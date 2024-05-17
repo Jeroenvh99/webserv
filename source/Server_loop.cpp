@@ -43,7 +43,6 @@ Server::_process(Poller::Event const& event, ClientIt it) {
 		}
 		break;
 	case Client::State::wait:
-		_elog.log(LogLevel::debug, "Waiting for response...");
 		break;
 	}
 }

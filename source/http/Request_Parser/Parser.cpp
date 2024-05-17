@@ -53,4 +53,14 @@ Parser::parse(std::iostream& ios, Request& req) {
 		return;
 	}
 }
-	
+
+std::iostream&
+http::Request::Parser::getline(std::iostream& ios, std::string& line) {
+	http::getline(ios, line);
+	if (!ios.eof())
+		return (ios);
+	ios.clear();
+	ios << line;
+	line.clear();
+	throw (IncompleteLineException());
+}

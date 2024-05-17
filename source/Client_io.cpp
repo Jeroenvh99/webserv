@@ -1,7 +1,7 @@
 #include "Client.hpp"
 #include "network/Buffer.hpp"
 
-using Buffer = network::Buffer<512>;
+using Buffer = network::Buffer<256>;
 
 void
 Client::operator<<(http::Response const& that) {

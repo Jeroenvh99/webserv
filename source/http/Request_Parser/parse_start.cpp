@@ -29,16 +29,12 @@ Parser::_parse_start(std::iostream& ios) {
 
 static std::string
 _get_start_line(std::iostream& ios) {
-	std::string	res;
+	std::string	line;
 
-	http::getline(ios, res);
-	while (res.size() == 0)
-		http::getline(ios, res);	// ignore leading bare CRLF
-	if (ios.eof()) {				// line must end with CRLF
-		http::ios_restore(ios, res);
-		throw (Parser::IncompleteLineException());
-	}
-	return (res);
+	Parser::getline(ios, line);
+	while (line.size() == 0)
+		Parser::getline(ios, line);	// ignore leading bare CRLF
+	return (line);
 }
 
 static Method

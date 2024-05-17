@@ -70,6 +70,8 @@ namespace http
 		class VersionException;
 
 		Parser();
+		
+		static std::iostream&	getline(std::iostream&, std::string&);
 
 		void	clear() noexcept;
 		void	parse(std::iostream&, Request&);
@@ -130,8 +132,8 @@ namespace http
 	}; // class Request::Parser::HeaderException
 
 	std::istream&	getline(std::istream&, std::string&);
-	void			ios_restore(std::ostream&, std::string const&);
 	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;
+	bool			is_ws(char c);
 	std::string		trim_ws(std::string const&) noexcept;
 	std::string&	trim_ws(std::string&) noexcept;
 	std::string&	ltrim_ws(std::string&) noexcept;

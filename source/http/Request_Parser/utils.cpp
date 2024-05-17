@@ -20,12 +20,6 @@ http::getline(std::istream& is, std::string& str) {
 	return (is);
 }
 
-void
-http::ios_restore(std::ostream& os, std::string const& str) {
-	os << str;
-	os.clear();
-}
-
 std::string
 http::trim_ws(std::string const& str) noexcept {
 	std::string	res(str);
@@ -51,6 +45,11 @@ http::rtrim_ws(std::string& str) noexcept {
 }
 
 bool
+http::is_ws(char c) {
+	return (c == ' ' || c == '\t');
+}
+
+bool
 http::strcmp_nocase(std::string const& s1, std::string const& s2) noexcept {
 	return (std::equal(
 		s1.begin(), s1.end(),
@@ -58,4 +57,3 @@ http::strcmp_nocase(std::string const& s1, std::string const& s2) noexcept {
 		[](char c1, char c2) { return (std::tolower(c1) == std::tolower(c2)); }
 	));
 }
-

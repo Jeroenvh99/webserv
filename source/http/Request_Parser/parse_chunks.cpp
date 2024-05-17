@@ -22,11 +22,7 @@ static size_t
 _parse_chunk_size(std::iostream& ios) {
 	std::string	line;
 
-	http::getline(ios, line);
-	if (ios.eof()) {
-		http::ios_restore(ios, line);
-		throw (Parser::IncompleteLineException());
-	}
+	Parser::getline(ios, line);
 	return (std::stoul(line));
 }
 

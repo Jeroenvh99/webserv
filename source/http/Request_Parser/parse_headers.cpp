@@ -10,7 +10,6 @@ enum class HeaderLineType {
 	first,
 	continuation,
 	end,
-	incomplete,
 }; // enum class HeaderLineType
 
 static HeaderLineType	_get_header_line(std::iostream&, std::string&);
@@ -37,21 +36,16 @@ Parser::_parse_headers(std::iostream& ios, Request& req) {
 			_header_flush(req, std::move(_tmp_hdr));
 			_state = _parse_body_how(req, _body_length);
 			return;
-		case HeaderLineType::incomplete:
-			throw (IncompleteLineException());
 		}
 	}
 }
 
 static HeaderLineType
 _get_header_line(std::iostream& ios, std::string& line) {
-	http::getline(ios, line);
+	Parser::getline(ios, line);
 	if (line.size() == 0)	// bare CRLF
 		return (HeaderLineType::end);
-	if (ios.eof()) {		// no CRLF
-		http::ios_restore(ios, line);
-		return (HeaderLineType::incomplete);
-	} if (line[0] == ' ' || line[0] == '\t')	// leading whitespace
+	if (http::is_ws(line[0]))	// leading whitespace
 		return (HeaderLineType::continuation);
 	return (HeaderLineType::first);
 }
