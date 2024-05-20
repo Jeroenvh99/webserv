@@ -44,6 +44,14 @@ namespace http {
 
 	Version		version_from_string(std::string const&);
 	std::string	version_to_string(Version const&);
+
+	std::istream&	getline(std::istream&, std::string&);
+	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;
+	bool			is_ws(char c);
+	std::string		trim_ws(std::string const&) noexcept;
+	std::string&	trim_ws(std::string&) noexcept;
+	std::string&	ltrim_ws(std::string&) noexcept;
+	std::string&	rtrim_ws(std::string&) noexcept;
 }; // namespace http
 
 #endif // HTTP_HPP

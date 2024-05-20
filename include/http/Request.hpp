@@ -2,6 +2,7 @@
 # define HTTP_REQUEST_HPP
 
 # include "http.hpp"
+# include "http/Message.hpp"
 
 # include <iostream>
 # include <stdexcept>
@@ -11,9 +12,7 @@
 # include <utility>
 
 namespace http {
-	using Header = std::pair<std::string, std::string>;
-
-	class Request {
+	class Request: public Message {
 	public:
 		class Parser;
 
@@ -35,22 +34,12 @@ namespace http {
 		void	clear() noexcept;
 
 	private:
-		struct cmp {
-			bool	operator()(std::string const&, std::string const&) const noexcept;
-		}; // struct Request::cmp
-		using Headers = std::unordered_map<
-			std::string,
-			std::string,
-			std::hash<std::string>,
-			cmp
-		>;
-		
 		void	_header_add(Header&&);
 
 		Method		_method;
 		Version		_version;
 		std::string _uri;
-		Headers 	_headers;
+		HeaderMap 	_headers;
 		std::string _body;
 	}; // class Request
 
@@ -127,14 +116,6 @@ namespace http {
 	public:
 		HeaderException(char const*);
 	}; // class Request::Parser::HeaderException
-
-	std::istream&	getline(std::istream&, std::string&);
-	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;
-	bool			is_ws(char c);
-	std::string		trim_ws(std::string const&) noexcept;
-	std::string&	trim_ws(std::string&) noexcept;
-	std::string&	ltrim_ws(std::string&) noexcept;
-	std::string&	rtrim_ws(std::string&) noexcept;
 }; // namespace http
 
 #endif // HTTP_REQUEST_HPP

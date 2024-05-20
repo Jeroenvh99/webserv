@@ -4,24 +4,31 @@
 #include <fstream>
 
 using http::Response;
+using http::Request;
+using http::StatusCode;
+
+// Basic operations
 
 Response::Response(const Request &request) : 
-    _code(StatusCode::OK),
+    _code(StatusCode::ok),
     _body("")
 {
     (this->*_methodMap.at(request.method()))(request);
 }
 
-const std::string &Response::get()
-{
-    _response = "HTTP/1.1 ";
-    _response += std::to_string(static_cast<int>(_code)) + " " + _statusMap.at(static_cast<int>(_code)) + "\r\n";
-    _response += "Content-Length: " + std::to_string(_body.size()) + "\r\n";
-    _response += "Content-Type: text/html\r\n\r\n";
-    _response += _body;
+// Accessors
 
-    return _response;
+StatusCode
+Response::status() const noexcept {
+	return (_code);
 }
+
+std::string const&
+Response::body() const noexcept {
+	return (_body);
+}
+
+// Other methods
 
 void http::Response::getMethod(const Request &request)
 {
@@ -35,14 +42,14 @@ void Response::readFromFile(const std::string &path)
 
     if (!std::filesystem::exists(path))
     {
-        _code = StatusCode::NotFound;
+        _code = StatusCode::not_found;
         // TODO: Load 404 page
         _body = "404";
     }
     else if (std::filesystem::is_directory(path))
     {
         // TODO: list directory
-        _code = StatusCode::NotFound;
+        _code = StatusCode::not_found;
         // TODO: Load 404 page
         _body = "404";
     }
@@ -51,7 +58,7 @@ void Response::readFromFile(const std::string &path)
         file.open(path);
         if (!file.is_open())
         {
-            _code = StatusCode::Forbidden;
+            _code = StatusCode::forbidden;
             // TODO: Load 403 page
             _body = "403";
         }

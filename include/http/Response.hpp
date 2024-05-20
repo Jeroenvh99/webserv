@@ -2,41 +2,33 @@
 # define HTTP_RESPONSE_HPP
 
 # include "http.hpp"
-# include "StatusCode.hpp"
-# include "Request.hpp"
+# include "http/Message.hpp"
+# include "http/Request.hpp"
+# include "http/StatusCode.hpp"
 
 # include <iostream>
 # include <string>
 # include <map>
-# include <unordered_map>
 
 namespace http
 {
-    class Response
+    class Response: public Message
     {
     public:
         Response(const Request &request);
 
-        const std::string &get();
+		operator std::string() const;
+
+		std::string const&	body() const noexcept;
+		StatusCode			status() const noexcept;
 
     private:
-        using HeaderMap = std::map<std::string, std::string>;
-        using StatusMap = std::unordered_map<int, std::string>;
         using MethodMap = std::map<Method, void (Response::*)(const Request&)>;
 
         StatusCode _code;
         HeaderMap _headers;
 
         std::string _body;
-        std::string _response;
-
-        static const inline StatusMap _statusMap = {
-            {200, "OK"},
-            {403, "Forbidden"},
-            {404, "Not Found"},
-            {405, "Method Not Allowed"},
-            {500, "Internal Server Error"}
-        };
 
         void getMethod(const Request &request);
         

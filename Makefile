@@ -27,6 +27,7 @@ SRC_FILES	:= main.cpp \
 			network/Poller_Event.cpp \
 			network/Address_IPv4.cpp \
 			http/Method.cpp \
+			http/Message.cpp \
 			http/Request.cpp \
 			http/Request_Parser/except.cpp \
 			http/Request_Parser/Parser.cpp \
@@ -37,6 +38,7 @@ SRC_FILES	:= main.cpp \
 			http/Request_Parser/utils.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
+			http/StatusCode.cpp \
 			http/Version.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
