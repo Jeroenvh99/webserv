@@ -15,14 +15,14 @@ namespace http {
 	// HTTP methods
 
 	enum class Method {
-		GET = 0x1 < 0,
-		HEAD = 0x1 < 1,
-		POST = 0x1 < 2,
-		PUT = 0x1 < 3,
-		DELETE = 0x1 < 4,
-		CONNECT = 0x1 < 5,
-		OPTIONS = 0x1 < 6,
-		TRACE = 0x1 < 7,
+		GET = 0x1 << 0,
+		HEAD = 0x1 << 1,
+		POST = 0x1 << 2,
+		PUT = 0x1 << 3,
+		DELETE = 0x1 << 4,
+		CONNECT = 0x1 << 5,
+		OPTIONS = 0x1 << 6,
+		TRACE = 0x1 << 7,
 	}; // enum class Method
 
 	using MethodMap = std::array<std::pair<Method, char const*>, 8>;

@@ -34,7 +34,7 @@ namespace http {
 		void	clear() noexcept;
 
 	private:
-		void	_header_add(Header&&);
+		void	_header_append(Header&&);
 
 		Method		_method;
 		Version		_version;

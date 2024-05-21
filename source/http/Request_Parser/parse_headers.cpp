@@ -46,7 +46,7 @@ void
 Parser::_header_add(Request& req) {
 	if (_tmp_hdr.first.length() == 0)	// attempting to add an undefined header
 		return;
-	req._header_add(std::move(_tmp_hdr));
+	req._header_append(std::move(_tmp_hdr));
 	_tmp_hdr.first.clear();
 	_tmp_hdr.second.clear();
 }

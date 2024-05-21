@@ -87,7 +87,7 @@ Request::clear() noexcept {
 // Modifiers
 
 void
-Request::_header_add(Header&& hdr) {
+Request::_header_append(Header&& hdr) {
 	auto it = _headers.find(hdr.first);
 
 	if (it != _headers.end()) {

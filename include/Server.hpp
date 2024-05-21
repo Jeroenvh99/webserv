@@ -8,6 +8,7 @@
 # include "network/Poller.hpp"
 # include "logging.hpp"
 # include "http/Status.hpp"
+# include "http/Request.hpp"
 # include "Client.hpp"
 # include "Route.hpp"
 
@@ -37,11 +38,11 @@ public:
 	void			loop(int);
 
 	Route			route(std::string const&) const;
-	http::Response	respond(http::Request const&);
-	http::Response	respond_error(http::Status);
-	http::Status	get(std::string&, http::Request const&);
-	http::Status	post(std::string&, http::Request const&);
-	http::Status	delete_(std::string&, http::Request const&);
+	http::Response	respond(http::Request const&) const;
+	http::Response	respond_error(http::Status) const;
+	http::Status	get(std::string&, http::Request const&) const;
+	http::Status	post(std::string&, http::Request const&) const;
+	http::Status	delete_(std::string&, http::Request const&) const;
 
 	static constexpr Poller::EventTypes	poller_events = {
 		Poller::EventType::read, Poller::EventType::write
