@@ -12,7 +12,7 @@ Server::_read(Client& client) {
 		client.parse();
 	} catch (http::Request::Parser::Exception& e) {
 		_elog.log(LogLevel::error, "Parse error: ", e.what());
-		client << http::Response(e.what(), http::StatusCode::bad_request); // DB: replace with access error page
+		client << http::Response(e.what(), http::Status::bad_request); // DB: replace with access error page
 		return (false);
 	}
 	if (client.state() == Client::State::wait)

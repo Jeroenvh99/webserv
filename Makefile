@@ -14,6 +14,7 @@ SRC_FILES	:= main.cpp \
 			Server_io.cpp \
 			Server_loop.cpp \
 			Server_method.cpp \
+			Server_respond.cpp \
 			logging/Logger.cpp \
 			logging/AccessLogger.cpp \
 			logging/ErrorLogger.cpp \
@@ -38,7 +39,7 @@ SRC_FILES	:= main.cpp \
 			http/Request_Parser/utils.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
-			http/StatusCode.cpp \
+			http/Status.cpp \
 			http/Version.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))

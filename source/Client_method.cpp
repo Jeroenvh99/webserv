@@ -16,7 +16,7 @@ Client::fetch() {
 	// setup connection between server and CGI executable
 	// exec CGI
 	// _state = State::wait;
-	*this << http::Response("David is an absolute genius", http::StatusCode::ok);
+	*this << http::Response("David is an absolute genius", http::Status::ok);
 	_data._state = State::send;
 }
 

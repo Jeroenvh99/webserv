@@ -7,20 +7,20 @@
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
 # include "logging.hpp"
-# include "http/StatusCode.hpp"
+# include "http/Status.hpp"
 # include "Client.hpp"
 # include "Route.hpp"
 
-# include <map>
+# include <unordered_map>
 # include <string>
 # include <vector>
 
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using ErrorPageMap = std::map<http::StatusCode, std::string>;
+	using ErrorPageMap = std::unordered_map<http::Status, std::string>;
 	using Poller = network::Poller;
-	using RouteMap = std::map<std::string, Route>;
+	using RouteMap = std::unordered_map<std::string, Route>;
 	using SharedHandle = network::SharedHandle;
 
 	Server() = delete;
@@ -35,6 +35,13 @@ public:
 	Acceptor&		acceptor() noexcept;
 	Acceptor const&	acceptor() const noexcept;
 	void			loop(int);
+
+	Route			route(std::string const&) const;
+	http::Response	respond(http::Request const&);
+	http::Response	respond_error(http::Status);
+	http::Status	get(std::string&, http::Request const&);
+	http::Status	post(std::string&, http::Request const&);
+	http::Status	delete_(std::string&, http::Request const&);
 
 	static constexpr Poller::EventTypes	poller_events = {
 		Poller::EventType::read, Poller::EventType::write

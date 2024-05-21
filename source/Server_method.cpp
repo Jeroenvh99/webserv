@@ -12,6 +12,15 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
+Route
+Server::route(std::string const& path) const {
+	auto const	it = _routes.find(path);
+
+	if (it == _routes.end())
+		return (Route(path));
+	return (Route(it->second, path));
+}
+
 // Private methods
 
 void

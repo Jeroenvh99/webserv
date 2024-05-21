@@ -7,8 +7,11 @@
 # include <utility>
 
 namespace http {
+	// Forward class declarations
+
 	class Request;
 	class Response;
+
 	// HTTP methods
 
 	enum class Method {
@@ -33,6 +36,10 @@ namespace http {
 		{Method::OPTIONS, "OPTIONS"},
 		{Method::TRACE, "TRACE"}
 	}};
+	constexpr std::initializer_list<Method>	any_method = {
+		Method::GET, Method::HEAD, Method::POST, Method::PUT,
+		Method::DELETE, Method::CONNECT, Method::OPTIONS, Method::TRACE
+	};
 
 	Method		to_method(std::string const&);
 	char const*	to_string(Method);
