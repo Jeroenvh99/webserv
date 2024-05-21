@@ -30,8 +30,8 @@ Config &Config::operator=(const Config& src) {
 
 std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
 
-t_serverlog Config::ParseLog(std::string &word, std::stringstream &s) {
-	t_serverlog log = {"", logLevel::ERROR};
+Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
+	ServerLog log = {"", LogLevel::ERROR};
 	std::getline(s, word, ' ');
 	word.erase(word.find_last_not_of(";") + 1);
 	log.filename = word;
@@ -40,7 +40,7 @@ t_serverlog Config::ParseLog(std::string &word, std::stringstream &s) {
 		word.erase(word.find_last_not_of(";") + 1);
 		for (int i = 0; i <= 8; i++) {
 			if (word == loglevels[i]) {
-				log.level = static_cast<logLevel>(i);
+				log.level = static_cast<LogLevel>(i);
 				break;
 			}
 		}
@@ -89,8 +89,8 @@ void Config::Parse() {
 	}
 }
 
-void Config::ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, t_server &server) {
-	t_location loc {previousloc, {}, server.allowedmethods};
+void Config::ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, Server &server) {
+	Location loc {previousloc, {}, server.allowedmethods};
 	loc.path += word;
 	while (1) {
 		std::string line;
@@ -124,7 +124,7 @@ void Config::ParseLocation(std::string &previousloc, std::string &word, std::str
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	t_server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
+	Server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -217,15 +217,15 @@ void Config::PreParse(std::ifstream &in) {
 	_config = res;
 }
 
-const t_serverlog &Config::getErrorLog() const {
+const Config::ServerLog &Config::getErrorLog() const {
 	return _errorlog;
 }
 
-const t_serverlog &Config::getAccessLog() const {
+const Config::ServerLog &Config::getAccessLog() const {
 	return _accesslog;
 }
 
-const std::vector<t_server> &Config::getServers() const {
+const std::vector<Config::Server> &Config::getServers() const {
 	return _servers;
 }
 
@@ -239,7 +239,7 @@ Config::~Config() {}
 // 	try {
 // 		std::string file = "/home/jvan-hal/Desktop/webserv/test/test5.conf";
 // 		Config conf(file);
-// 		t_server server = conf.getServers()[0];
+// 		Server server = conf.getServers()[0];
 // 	} catch (std::exception &e) {
 // 		std::cerr << e.what();
 // 	}
