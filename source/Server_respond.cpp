@@ -103,7 +103,7 @@ _list_directory(std::string& body, std::string const& path) {
 	std::ostringstream	oss;
 
 	for (auto const& entry: std::filesystem::directory_iterator(path))
-		oss << entry.path() << '\n';
+		oss << entry.path() << "\r\n";
 	body = std::move(oss.str());
 	return (http::Status::ok);
 }

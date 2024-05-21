@@ -12,17 +12,23 @@ Server::_read(Client& client) {
 		client.parse();
 	} catch (http::Request::Parser::Exception& e) {
 		_elog.log(LogLevel::error, "Parse error: ", e.what());
-		client << http::Response(e.what(), http::Status::bad_request); // DB: replace with access error page
+		client << respond_error(http::Status::bad_request);
 		return (false);
 	}
-	if (client.state() == Client::State::wait)
+	if (client.state() == Client::State::fetch)
 		_elog.log(LogLevel::info, "Received request:\n", std::string(client.request()));
 	return (true);
 }
 
 bool
 Server::_fetch(Client& client) {
-	client.fetch();
+	if (is_cgi(client.request()))
+		client << http::Response("no CGI yet", http::Status::internal_error);
+		// setup connection between server and CGI executable
+		// exec CGI
+		// _state = State::wait;
+	else
+		client << respond(client.request());
 	return (true);
 }
 

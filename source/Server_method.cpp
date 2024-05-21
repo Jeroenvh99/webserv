@@ -21,6 +21,12 @@ Server::route(std::string const& path) const {
 	return (Route(it->second, path));
 }
 
+bool
+Server::is_cgi(http::Request const&) const noexcept {
+	/* implement */
+	return (false);
+}
+
 // Private methods
 
 void

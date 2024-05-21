@@ -10,16 +10,6 @@ Client::parse() {
 		_data._state = State::fetch;
 }
 
-void
-Client::fetch() {
-	// if CGI should be executed
-	// setup connection between server and CGI executable
-	// exec CGI
-	// _state = State::wait;
-	*this << http::Response("David is an absolute genius", http::Status::ok);
-	_data._state = State::send;
-}
-
 size_t
 Client::wait() {
 	_data._state = State::send;

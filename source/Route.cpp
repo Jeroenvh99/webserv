@@ -8,7 +8,7 @@ static std::string	_get_path(std::string const&, std::string const&);
 
 Route::Route(std::string const& to, std::string const& dfl,
 		std::initializer_list<http::Method> methods):
-	_to(to),
+	_to(std::string(".") + to),
 	_dfl(dfl),
 	_methods(network::_get_bitmask(methods)) {}
 
