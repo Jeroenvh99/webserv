@@ -1,15 +1,20 @@
-#ifndef CONFIG_C
-# define CONFIG_C
-# include <string>
-# include <sstream>
-# include <fstream>
-# include <iostream> 
-# include <unordered_map>
-# include <vector>
-# include <exception>
+#pragma once
 
-namespace configUtils {
-	enum logLevel {
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <exception>
+
+#include "http/Request.hpp"
+
+class Config
+{
+public:
+	enum class LogLevel : int
+	{
 		DEBUG,
 		INFO,
 		NOTICE,
@@ -20,56 +25,54 @@ namespace configUtils {
 		EMERG
 	};
 
-	// std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
-
-	struct t_serverlog
+	struct ServerLog
 	{
 		std::string filename;
-		logLevel level;
+		LogLevel level;
 	};
 
-	struct t_location {
+	struct Location
+	{
 		std::string path;
 		std::unordered_map<std::string, std::string> parameters;
-		std::vector<std::string> allowedmethods;
+		std::vector<http::RequestMethod> allowedmethods;
 	};
 
-	struct t_config {
-		struct t_serverlog errorlog;
-		struct t_serverlog accesslog;
+	struct Server
+	{
+		struct ServerLog errorlog;
+		struct ServerLog accesslog;
 		int port;
 		std::string servername;
 		std::unordered_map<int, std::string> errorpages;
-		std::vector<t_location> locations; // can be nested
-		std::vector<std::string> allowedmethods;
+		std::vector<Location> locations;
+		std::vector<http::RequestMethod> allowedmethods;
 	};
-}
 
-class Config {
-	private:
-		std::string _config;
-		struct configUtils::t_serverlog _errorlog;
-		struct configUtils::t_serverlog _accesslog;
-		std::vector<struct configUtils::t_config> _locals;
-	public:
-		Config(std::string &filename);
-		Config(const Config& src);
-		Config &operator=(const Config& src);
-		// t_serverlog ParseLog(std::string &word, std::stringstream &s);
-		// void Parse(std::stringstream &s);
-		// void parseServer(std::stringstream &s);
-		void removeComments(std::ifstream &in);
-		const configUtils::t_serverlog &getErrorLog() const;
-		const configUtils::t_serverlog &getAccessLog() const;
-		const std::vector<configUtils::t_config> &getLocals() const;
-		const std::string &getConfig() const;
-		~Config();
-		class InvalidSyntaxException: public std::exception {
-			virtual const char* what() const throw();
-		};
-		class InvalidServerblockException: public std::exception {
-			virtual const char* what() const throw();
-		};
+	class InvalidSyntaxException : public std::exception
+	{
+		virtual const char *what() const throw();
+	};
+
+	Config(std::string &filename);
+	Config(const Config &src);
+	~Config();
+	Config &operator=(const Config &src);
+
+	ServerLog ParseLog(std::string &word, std::stringstream &s);
+	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed);
+	void ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, Server &server);
+	void Parse();
+	void ParseServer(std::stringstream &s);
+	void PreParse(std::ifstream &in);
+	const ServerLog &getErrorLog() const;
+	const ServerLog &getAccessLog() const;
+	const std::vector<Server> &getServers() const;
+	const std::string &getConfig() const;
+
+private:
+	std::string _config;
+	struct ServerLog _errorlog;
+	struct ServerLog _accesslog;
+	std::vector<Server> _servers;
 };
-
-#endif
