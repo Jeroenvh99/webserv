@@ -8,7 +8,7 @@ static std::string	_get_path(std::string const&, std::string const&);
 
 Route::Route(std::string const& to, std::string const& dfl,
 		std::initializer_list<http::Method> methods):
-	_to(std::string(".") + to),
+	_to(to),
 	_dfl(dfl),
 	_methods(network::_get_bitmask(methods)) {}
 
@@ -38,5 +38,5 @@ Route::allows_method(http::Method method) const noexcept {
 
 static std::string
 _get_path(std::string const& templ, std::string const& spec) {
-	return (templ + spec); // DB: this should be greatly expanded
+	return (templ + spec); // DB: this does NOT do what it is supposed to
 }

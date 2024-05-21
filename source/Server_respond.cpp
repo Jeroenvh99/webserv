@@ -23,7 +23,7 @@ Server::respond(http::Request const& req) const {
 	case http::Method::DELETE:
 		status = delete_(body, req);
 		break;
-	default:
+	default: // unsupported methods
 		return (respond_error(http::Status::method_not_allowed));
 	}
 	if (http::is_error(status))
