@@ -40,7 +40,7 @@ _get_start_line(std::iostream& ios) {
 static Method
 _parse_method(std::string const& str) {
 	try {
-		return (http::method_from_string(str));
+		return (http::to_method(str));
 	} catch (std::invalid_argument& e) {
 		throw (Parser::MethodException(e.what()));
 	}
@@ -49,7 +49,7 @@ _parse_method(std::string const& str) {
 static Version
 _parse_version(std::string const& str) {
 	try {
-		Version const	version = http::version_from_string(str);
+		Version const	version = http::to_version(str);
 
 		if (version != http::one_zero && version != http::one_one)
 			throw (Parser::VersionException("unsupported HTTP version"));

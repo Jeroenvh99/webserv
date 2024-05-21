@@ -9,10 +9,17 @@ using http::StatusCode;
 
 // Basic operations
 
-Response::Response(const Request &request) : 
-    _code(StatusCode::ok),
-    _body("")
-{
+Response::Response(std::string const& body, StatusCode status):
+	_status(status),
+	_body(body) {}
+
+Response::Response(std::string&& body, StatusCode status):
+	_status(status),
+	_body(body) {}
+
+Response::Response(Request const& request): 
+    _status(StatusCode::ok),
+    _body("") {
     (this->*_methodMap.at(request.method()))(request);
 }
 
@@ -20,12 +27,22 @@ Response::Response(const Request &request) :
 
 StatusCode
 Response::status() const noexcept {
-	return (_code);
+	return (_status);
 }
 
 std::string const&
 Response::body() const noexcept {
 	return (_body);
+}
+
+http::Version
+Response::version() const noexcept {
+	return (_version);
+}
+
+Response::HeaderMap const&
+Response::headers() const noexcept {
+	return (_headers);
 }
 
 // Other methods
@@ -42,14 +59,14 @@ void Response::readFromFile(const std::string &path)
 
     if (!std::filesystem::exists(path))
     {
-        _code = StatusCode::not_found;
+        _status = StatusCode::not_found;
         // TODO: Load 404 page
         _body = "404";
     }
     else if (std::filesystem::is_directory(path))
     {
         // TODO: list directory
-        _code = StatusCode::not_found;
+        _status = StatusCode::not_found;
         // TODO: Load 404 page
         _body = "404";
     }
@@ -58,7 +75,7 @@ void Response::readFromFile(const std::string &path)
         file.open(path);
         if (!file.is_open())
         {
-            _code = StatusCode::forbidden;
+            _status = StatusCode::forbidden;
             // TODO: Load 403 page
             _body = "403";
         }

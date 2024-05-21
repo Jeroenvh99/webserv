@@ -5,7 +5,7 @@
 using http::Version;
 
 Version
-http::version_from_string(std::string const& that) {
+http::to_version(std::string const& that) {
 	std::istringstream	iss(that);
 	std::string			s;
 	Version				res;
@@ -21,7 +21,7 @@ http::version_from_string(std::string const& that) {
 }
 
 std::string
-http::version_to_string(Version const& that) {
+http::to_string(Version const& that) {
 	std::ostringstream	oss;
 
 	oss << "HTTP/"

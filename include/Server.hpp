@@ -51,8 +51,10 @@ private:
 	void	_to_graveyard(ClientIt);
 	void	_drop(ClientIt);
 
+	bool	_fetch(Client&);
 	bool	_read(Client&);
-	bool	_write(Client&);
+	bool	_wait(Client&);
+	bool	_send(Client&);
 
 	Poller					_poller;
 	SharedHandle			_acceptor;

@@ -9,6 +9,7 @@
 
 namespace http {
 	using Header = std::pair<std::string, std::string>;
+	std::string	to_string(Header const&);
 
 	class Message {
 	public:
@@ -19,8 +20,7 @@ namespace http {
 			std::string,
 			std::string,
 			std::hash<std::string>,
-			cmp
-		>;
+			cmp>;
 	}; // class Message
 }; // namespace http
 

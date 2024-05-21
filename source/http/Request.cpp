@@ -22,12 +22,12 @@ Request::Request(Method method, Version version, std::string&& uri):
 Request::operator std::string() const noexcept {
 	std::ostringstream	oss;
 
-	oss << method_to_string(_method) << ' '
+	oss << to_string(_method) << ' '
 		<< _uri << ' '
-		<< version_to_string(_version) << '\n';
-	for (auto const& [key, value]: _headers)
-		oss << key << ": " << value << '\n';
-	oss << "\n< body of size " << std::to_string(_body.size()) << " >";
+		<< to_string(_version) << '\n';
+	for (auto const& hdr: _headers)
+		oss << to_string(hdr) << '\n';
+	oss << "< body of size " << std::to_string(_body.size()) << " >";
 	return (oss.str());
 }
 

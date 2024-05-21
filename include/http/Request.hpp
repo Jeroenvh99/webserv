@@ -43,6 +43,8 @@ namespace http {
 		std::string _body;
 	}; // class Request
 
+	Response	respond(Request const&);
+
 	class Request::Parser {
 	public:
 		enum class State;

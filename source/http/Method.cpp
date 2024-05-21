@@ -1,10 +1,10 @@
-#include "http/Request.hpp"
+#include "http.hpp"
 
 #include <stdexcept>
 
 namespace http {
 	Method
-	method_from_string(std::string const& that) {
+	to_method(std::string const& that) {
 		for (auto const& [method, string]: http::methods)
 			if (that == string)
 				return (method);
@@ -12,7 +12,7 @@ namespace http {
 	}
 	
 	char const*
-	method_to_string(Method that) {
+	to_string(Method that) {
 		for (auto const& [method, string]: http::methods)
 			if (that == method)
 				return (string);

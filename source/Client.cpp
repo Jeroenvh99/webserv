@@ -25,21 +25,12 @@ Client::request() const noexcept {
 	return (_data._request);
 }
 
-http::Request&
-Client::request() noexcept {
-	return (_data._request);
+http::Response const&
+Client::response() const noexcept {
+	return (_data._response);
 }
 
 Client::State
 Client::state() const noexcept {
 	return (_data._state);
-}
-
-// Modifiers
-
-void
-Client::parse() {
-	_data._parser.parse(_data._buffer, _data._request);
-	if (_data._parser.state() == http::Request::Parser::State::done)
-		_data._state = State::wait;
 }

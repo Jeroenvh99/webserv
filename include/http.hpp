@@ -7,6 +7,8 @@
 # include <utility>
 
 namespace http {
+	class Request;
+	class Response;
 	// HTTP methods
 
 	enum class Method {
@@ -32,8 +34,8 @@ namespace http {
 		{Method::TRACE, "TRACE"}
 	}};
 
-	Method		method_from_string(std::string const&);
-	char const*	method_to_string(Method);
+	Method		to_method(std::string const&);
+	char const*	to_string(Method);
 
 	// HTTP versions
 
@@ -42,8 +44,8 @@ namespace http {
 	constexpr Version	one_zero(1, 0);
 	constexpr Version	one_one(1, 1);
 
-	Version		version_from_string(std::string const&);
-	std::string	version_to_string(Version const&);
+	Version		to_version(std::string const&);
+	std::string	to_string(Version const&);
 
 	std::istream&	getline(std::istream&, std::string&);
 	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;

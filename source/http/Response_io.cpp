@@ -4,13 +4,13 @@ using http::Response;
 
 std::ostream&
 http::operator<<(std::ostream& os, Response const& resp) {
-	StatusCode const	status = resp.status();
-	std::string const&	body = resp.body();
-
-	os << "HTTP/1.1 " << std::string(status) << ' ' << status.description() << "\r\n"
-		<< "Content-Length: " << std::to_string(body.size()) << "\r\n"
-		<< "Content-Type: text/html\r\n"
-		<< "\r\n"
-		<< body;
+	os << to_string(resp.version()) << ' '
+		<< std::string(resp.status()) << ' '
+		<< resp.status().description() << "\r\n"
+		<< "Content-Length: " << std::to_string(resp.body().size()) << "\r\n"
+		<< "Content-Type: text/html\r\n";
+	for (auto const& hdr: resp.headers())
+		os << to_string(hdr) << "\r\n";
+	os << "\r\n" << resp.body();
 	return (os);
 }

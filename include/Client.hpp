@@ -18,14 +18,16 @@ private:
 
 	State					_state;
 	std::stringstream		_buffer;
-	http::Request			_request;
 	http::Request::Parser	_parser;
+	http::Request			_request;
+	http::Response			_response;
 }; // class ClientData
 
 enum class ClientData::State {
 	idle,
 	parse,	// parsing a request
-	wait,	// waiting for request processing
+	fetch,	// about to fetch a resource
+	wait,	// waiting for CGI processing
 	send,	// sending response
 }; // enum class ClientData::State
 
@@ -45,12 +47,14 @@ public:
 	Socket const&			socket() const noexcept;
 	SocketBox const&		socket_box() const noexcept;
 	http::Request const&	request() const noexcept;
-	http::Request&			request() noexcept; // remove?
+	http::Response const&	response() const noexcept;
 	State					state() const noexcept;
 
 	void	parse();
 	size_t	recv();
+	void	fetch();
 	size_t	send();
+	size_t	wait();
 
 private:
 	SocketBox	_socket;

@@ -1,16 +1,18 @@
 #include "Server.hpp"
+#include "http/Response.hpp"
 
 bool
 Server::_read(Client& client) {
-	size_t const	bytes_read = client.recv();
+	size_t const	bytes = client.recv();
 
-	if (bytes_read == 0)
+	if (bytes == 0)
 		return (false);
-	_elog.log(LogLevel::debug, "Received ", bytes_read, " bytes.");
+	_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
 	try {
 		client.parse();
 	} catch (http::Request::Parser::Exception& e) {
 		_elog.log(LogLevel::error, "Parse error: ", e.what());
+		client << http::Response(e.what(), http::StatusCode::bad_request); // DB: replace with access error page
 		return (false);
 	}
 	if (client.state() == Client::State::wait)
@@ -19,11 +21,23 @@ Server::_read(Client& client) {
 }
 
 bool
-Server::_write(Client& client) {
-	size_t const	bytes_written = client.send();
+Server::_fetch(Client& client) {
+	client.fetch();
+	return (true);
+}
 
-	if (bytes_written == 0)
+bool
+Server::_wait(Client& client) {
+	client.wait();
+	return (true);
+}
+
+bool
+Server::_send(Client& client) {
+	size_t const	bytes = client.send();
+
+	if (bytes == 0)
 		return (false);
-	_elog.log(LogLevel::debug, "Sent ", bytes_written, " bytes.");
+	_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
 	return (true);
 }
