@@ -5,7 +5,16 @@ const char* Config::InvalidSyntaxException::what() const throw()
 	return "configException: syntax error in config file";
 }
 
+const char* Config::InvalidFileException::what() const throw()
+{
+	return "configException: invalid config file";
+}
+
 Config::Config(std::string &filename) {
+	size_t extension = filename.find_last_of(".");
+	if (extension == std::string::npos || filename.substr(extension + 1) != "conf") {
+		throw Config::InvalidFileException();
+	}
 	std::ifstream in(filename);
 	if (!in.is_open()) { 
         throw std::exception();
@@ -48,21 +57,21 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 	return log;
 }
 
-void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed) {
+void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed) {
 	int allow = 0;
 	if (word.find("allow_") != std::string::npos) {
 		allow = 1;
 	}
-	std::string methods[http::RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+	int methodcount = http::methods.size();
 	while (1) {
 		std::getline(linestream, word, ' ');
-		for (int i = 0; i < http::RequestMethod::NONE; i++) {
-			if (word.find(methods[i]) != std::string::npos) {
+		for (int i = 0; i < methodcount; i++) {
+			if (word.find(http::methods[i].second) != std::string::npos) {
 				if (!allow) {
-					allowed[i] = http::RequestMethod::NONE;
+					allowed[i] = http::Method::NONE;
 				}
 			} else if (allow) {
-				allowed[i] = http::RequestMethod::NONE;
+				allowed[i] = http::Method::NONE;
 			}
 		}
 		if (word.find(';') != std::string::npos) {
@@ -124,7 +133,7 @@ void Config::ParseLocation(std::string &previousloc, std::string &word, std::str
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	Server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
+	Server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -178,7 +187,7 @@ void Config::PreParse(std::ifstream &in) {
 	unsigned int openbrackets = 0;
 	while (!in.eof()) {
 		std::getline(in, line);
-		int comment = line.find('#');
+		size_t comment = line.find('#');
 		if (comment != std::string::npos) {
 			line.erase(comment);
 		}
@@ -197,7 +206,7 @@ void Config::PreParse(std::ifstream &in) {
 			--openbrackets;
 			close = line.find('}', close + 1);
 		}
-		for (int i = 0; i < line.length(); i++) {
+		for (size_t i = 0; i < line.length(); i++) {
 			if (line[i] == '\t') {
 				line[i] = ' ';
 			}

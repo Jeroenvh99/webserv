@@ -35,7 +35,7 @@ public:
 	{
 		std::string path;
 		std::unordered_map<std::string, std::string> parameters;
-		std::vector<http::RequestMethod> allowedmethods;
+		std::vector<http::Method> allowedmethods;
 	};
 
 	struct Server
@@ -46,10 +46,15 @@ public:
 		std::string servername;
 		std::unordered_map<int, std::string> errorpages;
 		std::vector<Location> locations;
-		std::vector<http::RequestMethod> allowedmethods;
+		std::vector<http::Method> allowedmethods;
 	};
 
 	class InvalidSyntaxException : public std::exception
+	{
+		virtual const char *what() const throw();
+	};
+
+	class InvalidFileException : public std::exception
 	{
 		virtual const char *what() const throw();
 	};
@@ -60,7 +65,7 @@ public:
 	Config &operator=(const Config &src);
 
 	ServerLog ParseLog(std::string &word, std::stringstream &s);
-	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed);
+	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed);
 	void ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, Server &server);
 	void Parse();
 	void ParseServer(std::stringstream &s);

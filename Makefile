@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ /logging
+SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ /logging config/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -39,7 +39,8 @@ SRC_FILES	:= main.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
 			http/StatusCode.cpp \
-			http/Version.cpp
+			http/Version.cpp \
+			config/Config.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
