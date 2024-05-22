@@ -29,8 +29,8 @@ Logger::timestamp_update() {
 	std::ostringstream	updated;
 	std::time_t			now = stdclock::to_time_t(stdclock::now());
 	std::tm*			local_tm = std::localtime(&now);
-	auto const			timezone = stdclock::from_time_t(now)
-							- stdclock::from_time_t(std::mktime(std::gmtime(&now)));
+	// auto const			timezone = stdclock::from_time_t(now)
+	// 						- stdclock::from_time_t(std::mktime(std::gmtime(&now)));
 
 	_timestamp.clear();
 	updated << std::put_time(local_tm, "%Y/%m/%d:%H:%M:%S")

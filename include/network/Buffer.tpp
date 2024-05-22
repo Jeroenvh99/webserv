@@ -9,6 +9,10 @@
 
 namespace network {
 	template<size_t SIZE>
+	Buffer<SIZE>::Buffer():
+		super(), _len(0) {}
+	
+	template<size_t SIZE>
 	Buffer<SIZE>::operator std::string() const {
 		return (std::string(this->begin(), this->end()));
 	}
@@ -62,14 +66,14 @@ namespace network {
 	template<size_t SIZE>
 	std::istream&
 	operator>>(std::istream& is, Buffer<SIZE>& that) {
-		while (!is.good() && that._len < SIZE)
-			is >> that[that._len++];
+		while (!is.eof() && that._len < SIZE)
+			that[that._len++] = is.get();
 		return (is);
 	}
 
 	template<size_t SIZE>
 	std::ostream&
-	operator<<(std::ostream& os, Buffer<SIZE> const& that ) {
+	operator<<(std::ostream& os, Buffer<SIZE> const& that) {
 		for (auto const& byte: that)
 			os << byte;
 		return (os);

@@ -1,72 +1,20 @@
-#include "webserv.hpp"
-#include "network/Buffer.hpp"
-#include "logging.hpp"
-#include "http/Request.hpp"
+#include "Server.hpp"
 
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <sstream>
-
-using namespace logging;
 
 int
-main() {
-	Poller					poller;
-	//std::ofstream	logf("log.txt");
-	AccessLogger	alog(std::cout, Format{
-		Variable("["), Variable(Variable::Type::time_local), Variable("]"),
-	});
-	ErrorLogger	elog(std::cerr, ErrorLogger::Level::debug);
+main(int argc, char** argv) {
+	if (argc > 2)
+		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
 
-	auto	abox = poller.add(
-		IPv4Acceptor(IPv4Acceptor::Address(1101, INADDR_ANY)),
-		{Poller::EventType::read},
-		{Poller::Mode::edge_triggered});
+	in_port_t const	port = (argc == 1) ? 1100 : std::stol(argv[1]); // temp
 
-	((IPv4Acceptor&)*abox).listen(1000);
+	try {
+		Server	server(port);
 
-	while (true) {
-		Poller::Events	events = poller.wait<128>(1000);
-
-		for (auto const& event: events) {
-			network::SharedHandle	handle = event.handle();
-
-			if (handle == abox) {
-				try {
-					IPv4Acceptor const&		acceptor = static_cast<IPv4Acceptor const&>(*handle);
-					IPv4Acceptor::Address	address;
-					IPv4StreamSocket		client = acceptor.accept(address);
-	
-					poller.add(std::move(client), dfl_events, dfl_mode);
-					elog.log(ErrorLogger::Level::notice, "Connection established");
-				} catch (std::exception& e) {
-					elog.log(ErrorLogger::Level::critical, "Error:", e.what());
-				}
-			} else {
-				IPv4StreamSocket const&	client = static_cast<IPv4StreamSocket const&>(*handle);
-				network::Buffer<512>	buf;
-				http::Request req;
-
-				if (event.happened(network::Poller::EventType::read)) {
-					client.read(buf);
-					if (buf.len() == 0) { // close host socket automatically?
-						poller.remove(handle);
-						req.addBuffer(buf);
-						elog.log(ErrorLogger::Level::notice, "Connection lost");
-					} else {
-						Client	c;
-						alog.log(c);
-						std::ostringstream	oss;
-						std::cout << buf;
-						oss << buf;
-						req.addBuffer(buf);
-					}
-				}
-				if (event.happened(network::Poller::EventType::write))
-					client.write(buf);
-				buf.empty();
-			}
-		}
+		server.loop(5192);
+	} catch (std::exception& e) {
+		return (std::cerr << "webserv: " << e.what() << '\n', 1);
 	}
+	return (0);
 }

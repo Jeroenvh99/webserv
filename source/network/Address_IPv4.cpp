@@ -6,6 +6,8 @@
 using network::Address;
 using network::Domain;
 
+// Basic operations
+
 Address<Domain::ipv4>::Address(in_port_t port, uint32_t address) {
 	_addr.sin_family = static_cast<int>(Domain::ipv4);
 	_addr.sin_port = htons(port);
@@ -15,7 +17,8 @@ Address<Domain::ipv4>::Address(in_port_t port, uint32_t address) {
 Address<Domain::ipv4>::Address(int sd) {
 	socklen_t	asize = size();
 
-	if (::getsockname(sd, reinterpret_cast<sockaddr*>(&_addr), &asize) == -1 || asize > size()) {
+	if (::getsockname(sd, reinterpret_cast<sockaddr*>(&_addr), &asize) == -1
+		|| asize > size()) {
 		throw (network::Exception("address", "getsockname")); // dedicated exception?
 	}
 }
@@ -25,7 +28,7 @@ Address<Domain::ipv4>::Address(int sd) {
 Address<Domain::ipv4>::operator std::string() const noexcept {
 	std::ostringstream	oss;
 	uint32_t const		addr = address();
-	uint8_t const		*octets = reinterpret_cast<uint8_t const*>(&addr);
+	uint8_t const*		octets = reinterpret_cast<uint8_t const*>(&addr);
 
 	for (size_t i = 0; i < 3; ++i)
 		oss << std::to_string(octets[i]) << '.';

@@ -1,48 +1,49 @@
-#pragma once
+#ifndef HTTP_RESPONSE_HPP
+# define HTTP_RESPONSE_HPP
 
-#include <string>
-#include <map>
-#include <unordered_map>
+# include "http.hpp"
+# include "http/Message.hpp"
+# include "http/Request.hpp"
+# include "http/StatusCode.hpp"
 
-#include "StatusCode.hpp"
-#include "Request.hpp"
+# include <iostream>
+# include <string>
+# include <map>
 
-namespace http
-{
-    class Response
-    {
-    public:
-        Response(const Request &request);
+namespace http {
+	class Response: public Message {
+	public:
+		Response(std::string const& = "", StatusCode = StatusCode::ok);
+		Response(std::string&&, StatusCode = StatusCode::ok);
+		Response(Request const&);
 
-        const std::string &get();
+		operator std::string() const;
 
-    private:
-        using HeaderMap = std::map<std::string, std::string>;
-        using StatusMap = std::unordered_map<int, std::string>;
-        using MethodMap = std::map<RequestMethod, void (Response::*)(const Request&)>;
+		std::string const&	body() const noexcept;
+		StatusCode			status() const noexcept;
+		Version				version() const noexcept;
+		HeaderMap const&	headers() const noexcept;
 
-        StatusCode _code;
-        HeaderMap _headers;
+	private:
+		using MethodMap = std::map<Method, void (Response::*)(const Request&)>;
+		
+		static constexpr Version	_version = one_one;
+		StatusCode					_status;
+		HeaderMap					_headers;
+		std::string					_body;
 
-        std::string _body;
-        std::string _response;
+		void getMethod(const Request &request);
+		
+		static const inline MethodMap _methodMap = {
+			{Method::GET, &Response::getMethod},
+			// TODO: {RequestMethod::POST, &Response::postMethod},
+			// TODO: {RequestMethod::DELETE, &Response::deleteMethod},
+		};
 
-        static const inline StatusMap _statusMap = {
-            {200, "OK"},
-            {403, "Forbidden"},
-            {404, "Not Found"},
-            {405, "Method Not Allowed"},
-            {500, "Internal Server Error"}
-        };
+		void readFromFile(const std::string &path);
+	}; // class Response
 
-        void getMethod(const Request &request);
-        
-        static const inline MethodMap _methodMap = {
-            {RequestMethod::GET, &Response::getMethod},
-            // TODO: {RequestMethod::POST, &Response::postMethod},
-            // TODO: {RequestMethod::DELETE, &Response::deleteMethod},
-        };
+	std::ostream&	operator<<(std::ostream&, Response const&);
+}; // namespace http
 
-        void readFromFile(const std::string &path);
-    };
-}
+#endif // HTTP_RESPONSE_HPP

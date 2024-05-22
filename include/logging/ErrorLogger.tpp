@@ -8,13 +8,13 @@
 namespace logging {
 	template<typename... Ts>
 	void
-	ErrorLogger::log(Level level, Ts... ARGS) {
+	ErrorLogger::log(Level level, Ts... args) {
 	if (level < _level)
 		return;
 	timestamp_update();
 	os() << "[" << level_to_string(level) << "] "
 		<< "[" << timestamp() << "] ";
-	(os() << ... << ARGS);
+	(os() << ... << args);
 	os() << std::endl;
 	}
 }; // namespace logging

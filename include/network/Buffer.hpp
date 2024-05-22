@@ -16,6 +16,8 @@ namespace network {
 		using iterator = typename super::iterator;
 		using const_iterator = typename super::const_iterator;
 
+		Buffer();
+
 		operator std::string() const;
 
 		void	empty() noexcept;
