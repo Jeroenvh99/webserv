@@ -51,7 +51,7 @@ Request::uri() const noexcept {
 std::string const&
 Request::header(std::string const& name) const {
 	auto const	it = _headers.find(name);
-
+ 
 	if (it == _headers.end())
 		throw (std::out_of_range("undefined header"));
 	return (it->first);
