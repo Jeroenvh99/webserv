@@ -27,20 +27,4 @@ private:
 	Bitmask		_methods;
 }; // class Route
 
-/*
-class Route {
-public:
-	Route(std::file
-private:
-	using MethodBitmask = std::underlying_type<http::Method>::type;
-	std::vector<Route>			_subroutes;
-	std::string					_from;
-	std::filesystem::path		_to;
-	MethodBitmask				_allowed_methods;
-	std::string					_default_file;
-	bool						_directory_listing;
-	std::vector<std::string>	_cgi;
-}; // class Route
-*/
-
 #endif // ROUTE_HPP
