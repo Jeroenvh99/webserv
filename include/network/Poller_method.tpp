@@ -13,23 +13,10 @@ namespace network {
 	template<typename T> // Requires a Handle-derived type.
 	SharedHandle
 	Poller::add(T&& handle, EventTypes events, Modes modes) {
-		Event::Raw	rev;
-
-		rev.events = _get_bitmask(events) | _get_bitmask(modes);
-		rev.data.fd = handle.raw();
+	SharedHandle	box = std::make_shared<T>(handle);
 	
-		SharedHandle	shandle = std::make_shared<T>(std::move(handle));
-
-		if (epoll_ctl(raw(), EPOLL_CTL_ADD, rev.data.fd, &rev) == -1) {
-			switch (errno) {
-				case EEXIST:	// attempt to add a handle twice
-					return (shandle);
-				default:
-					throw (Exception("epoll_ctl"));
-			}
-		}
-		_handles.emplace(shandle);
-		return (shandle);
+	add_shared(box, events, modes);
+	return (box);
 	}
 	
 	template<size_t MAX_EVENTS>

@@ -35,6 +35,7 @@ namespace network {
 
 		template<typename T>
 		SharedHandle	add(T&&, EventTypes, Modes);
+		void			add_shared(SharedHandle const&, EventTypes, Modes);
 		template<size_t MAX_EVENTS>
 		Events			wait(unsigned int) const;
 		void			modify(SharedHandle const&, EventTypes, Modes);
