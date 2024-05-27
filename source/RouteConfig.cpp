@@ -44,8 +44,11 @@ RouteConfig::from() const {
 
 Path
 RouteConfig::to() const {
-	if (_super && _redirection != no_redirection)
-		return (_super->to() / _fname);
+	if (_super) {
+		if (_redirection == no_redirection)
+			return (_super->to() / _fname);
+		return (_redirection);
+	}
 	return (from());
 }
 
