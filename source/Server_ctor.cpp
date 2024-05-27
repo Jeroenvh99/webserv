@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 /*
-Server::Server(Config&& config):
+Server::Server(RouteConfig&& config):
 	_poller(),
 	_acceptor(_poller.add(Acceptor::Address(config.port, INADDR_ANY)),
 							{Poller::EventType::read},

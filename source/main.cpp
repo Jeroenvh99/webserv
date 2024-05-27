@@ -1,7 +1,33 @@
-#include "Server.hpp"
+#include "Route.hpp"
 
 #include <iostream>
+#include <stdexcept>
 
+int
+main() {
+	Route	route("/var");
+
+	route.extend("/var/dir0");
+	route.extend("/var/dir1");
+
+	try {
+		route.extend("./dir0");
+	} catch (std::invalid_argument& e) {
+		std::cerr << e.what() << '\n';
+	}
+
+	RouteConfig	tip = route.follow("/var/dir1/file0");
+	std::cout << tip.directory_file() << '\n';
+	std::cout << tip.allows_cgi("php") << '\n';
+
+	route.set_directory_file("index.html");
+	route.allow_cgi("php");
+	std::cout << tip.directory_file() << '\n';
+	std::cout << tip.allows_cgi("php") << '\n';
+}
+	
+
+/*
 int
 main(int argc, char** argv) {
 	if (argc > 2)
@@ -18,3 +44,4 @@ main(int argc, char** argv) {
 	}
 	return (0);
 }
+*/

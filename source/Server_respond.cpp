@@ -93,9 +93,11 @@ _get_file(std::string& body, std::string const& path) {
 
 static http::Status
 _get_directory(std::string& body, Route const& rt) {
-	if (rt.default_file() == Route::directory_listing)
+	if (rt.forbids_directory())
+		return (http::Status::forbidden);
+	if (rt.lists_directory())
 		return (_list_directory(body, rt.to()));
-	return (_get_file(body, rt.default_file()));
+	return (_get_file(body, rt.directory_file()));
 }
 
 static http::Status

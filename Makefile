@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ /logging
+SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -9,24 +9,14 @@ SRC_FILES	:= main.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
-			Route.cpp \
+			Route_ctor.cpp \
+			Route_method.cpp \
+			RouteConfig.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
 			Server_loop.cpp \
 			Server_method.cpp \
 			Server_respond.cpp \
-			logging/Logger.cpp \
-			logging/AccessLogger.cpp \
-			logging/ErrorLogger.cpp \
-			logging/Variable.cpp \
-			network/Address_IPv4.cpp \
-			network/except.cpp\
-			network/Handle.cpp\
-			network/Poller_ctor.cpp \
-			network/Poller_Event.cpp \
-			network/Poller_method.cpp \
-			network/Poller_Event.cpp \
-			network/Address_IPv4.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
 			http/Request.cpp \
@@ -40,7 +30,19 @@ SRC_FILES	:= main.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
 			http/Status.cpp \
-			http/Version.cpp
+			http/Version.cpp \
+			logging/Logger.cpp \
+			logging/AccessLogger.cpp \
+			logging/ErrorLogger.cpp \
+			logging/Variable.cpp \
+			network/Address_IPv4.cpp \
+			network/except.cpp\
+			network/Handle.cpp\
+			network/Poller_ctor.cpp \
+			network/Poller_Event.cpp \
+			network/Poller_method.cpp \
+			network/Poller_Event.cpp \
+			network/Address_IPv4.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 

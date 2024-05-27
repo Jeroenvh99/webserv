@@ -14,11 +14,7 @@ Server::acceptor() const noexcept {
 
 Route
 Server::route(std::string const& path) const {
-	auto const	it = _routes.find(path); // DB: should search for the longest shared path key
-
-	if (it == _routes.end())
-		return (Route(path));
-	return (Route(it->second, path)); // DB: replace the portion of `path` which is identical to the map key with the map value
+	return Route(path); // replace
 }
 
 bool
