@@ -7,7 +7,7 @@ Route::Route(Path const& path):
 	auto const	end = path.end();
 
 	if (next != end && next->string().size() > 0)
-		_subroutes.push_back(Route(*this, next, path.end()));
+		_subroutes.push_front(Route(*this, next, path.end()));
 }
 
 Route::Route(Route const& super, std::string const& fname):
@@ -18,5 +18,5 @@ Route::Route(Route const& super, PathSegment seg, PathSegment end):
 	RouteConfig(super, *seg),
 	_subroutes() {
 	if (++seg != end)
-		_subroutes.push_back(Route(*this, seg, end));
+		_subroutes.push_front(Route(*this, seg, end));
 }

@@ -4,10 +4,10 @@
 # include "http.hpp"
 # include "http/Status.hpp"
 
+# include <forward_list>
 # include <filesystem>
 # include <unordered_set>
 # include <type_traits>
-# include <vector>
 
 using Path = std::filesystem::path;
 using PathSegment = Path::iterator;
@@ -66,6 +66,9 @@ private:
 
 class Route: public RouteConfig {
 public:
+	using SubrouteCtr = std::forward_list<Route>;
+	using SubrouteIt = SubrouteCtr::iterator;
+
 	Route(Path const&);
 
 	Route&		extend(Path const&);
@@ -80,7 +83,7 @@ private:
 	RouteConfig	_follow_core(PathSegment, PathSegment);
 	Route&		_seek_core(PathSegment, PathSegment);
 
-	std::vector<Route>	_subroutes;
+	std::forward_list<Route>	_subroutes;
 }; // class Route
 
 enum class RouteConfig::MethodOption {

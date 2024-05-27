@@ -3,11 +3,9 @@
 #include <algorithm>
 #include <iostream>
 
-using SubrouteIt = std::vector<Route>::iterator;
-
-static SubrouteIt	_find_subroute(std::vector<Route>&, std::string const&);
-static bool			_is_final(PathSegment, PathSegment);
-static std::string	_relative_path(PathSegment, PathSegment);
+static Route::SubrouteIt	_find_subroute(Route::SubrouteCtr&, std::string const&);
+static bool					_is_final(PathSegment, PathSegment);
+static std::string			_relative_path(PathSegment, PathSegment);
 
 // Modifiers
 
@@ -26,8 +24,8 @@ Route::_extend_core(PathSegment seg, PathSegment end) {
 	SubrouteIt	subroute = _find_subroute(_subroutes, seg->string());
 
 	if (subroute == _subroutes.end()) { // extend diverges here
-		_subroutes.push_back(Route(*this, std::move(*seg)));
-		return (_subroutes.rbegin()->_extend_core(++seg, end));
+		_subroutes.push_front(Route(*this, std::move(*seg)));
+		return (_subroutes.front()._extend_core(++seg, end));
 	}
 	else
 		return (subroute->_extend_core(++seg, end));
@@ -78,9 +76,9 @@ _is_final(PathSegment seg, PathSegment end) {
 	return (seg == end || seg->string().size() == 0);
 }
 
-static SubrouteIt
-_find_subroute(std::vector<Route>& vec, std::string const& fname) {
-	return (std::find_if(vec.begin(), vec.end(),
+static Route::SubrouteIt
+_find_subroute(Route::SubrouteCtr& ctr, std::string const& fname) {
+	return (std::find_if(ctr.begin(), ctr.end(),
 		[fname](Route const& route) { return (route.filename() == fname); } ));
 }
 

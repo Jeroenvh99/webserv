@@ -27,7 +27,6 @@ main() {
 	route.allow_cgi("php");
 	std::cout << tip0.directory_file() << '\n';
 	std::cout << tip0.allows_cgi("php") << '\n';
-
 }
 	
 
