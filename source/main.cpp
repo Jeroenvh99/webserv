@@ -7,7 +7,8 @@ int
 main() {
 	Route	route("/var");
 
-	route.extend("/var/dir0");
+	route.allow_cgi("py");
+	route.extend("/var/dir0").reset_cgi().redirect("/tmp/var/www/");
 	route.extend("/var/dir1");
 
 	try {
@@ -16,14 +17,17 @@ main() {
 		std::cerr << e.what() << '\n';
 	}
 
-	RouteConfig	tip = route.follow("/var/dir1/file0");
-	std::cout << tip.directory_file() << '\n';
-	std::cout << tip.allows_cgi("php") << '\n';
+	RouteConfig	tip0 = route.follow("/var/dir1/file0");
+	RouteConfig	tip1 = route.follow("/var/dir0/subdir0/lorem/ipsum/dolor");
+	std::cout << tip0.directory_file() << '\n';
+	std::cout << tip0.allows_cgi("php") << '\n';
+	std::cout << tip1.allows_cgi("py") << ' ' << tip1.to() << '\n';
 
 	route.set_directory_file("index.html");
 	route.allow_cgi("php");
-	std::cout << tip.directory_file() << '\n';
-	std::cout << tip.allows_cgi("php") << '\n';
+	std::cout << tip0.directory_file() << '\n';
+	std::cout << tip0.allows_cgi("php") << '\n';
+
 }
 	
 

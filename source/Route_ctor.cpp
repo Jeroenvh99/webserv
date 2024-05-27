@@ -10,6 +10,10 @@ Route::Route(Path const& path):
 		_subroutes.push_back(Route(*this, next, path.end()));
 }
 
+Route::Route(Route const& super, std::string const& fname):
+	RouteConfig(super, fname),
+	_subroutes() {}
+
 Route::Route(Route const& super, PathSegment seg, PathSegment end):
 	RouteConfig(super, *seg),
 	_subroutes() {

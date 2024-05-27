@@ -12,6 +12,14 @@ RouteConfig::RouteConfig(std::string&& fname):
 	_diropt(DirectoryOption::forbid), _directory_file(),
 	_cgiopt(CGIOption::disallow), _cgi() {}
 
+RouteConfig::RouteConfig(RouteConfig const& super, std::string const& fname):
+	_super(&super),
+	_fname(fname),
+	_redirection(no_redirection),
+	_methopt(MethodOption::inherits), _allowed_methods(0),
+	_diropt(DirectoryOption::inherits), _directory_file(),
+	_cgiopt(CGIOption::inherits), _cgi() {}
+
 RouteConfig::RouteConfig(RouteConfig const& super, std::string&& fname):
 	_super(&super),
 	_fname(fname),
@@ -79,76 +87,87 @@ RouteConfig::allows_cgi(std::string const& ext) const noexcept {
 
 // Modifier methods
 
-void
+RouteConfig&
 RouteConfig::redirect(Path const& path) {
 	_redirection = path;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::list_directory() noexcept {
 	_directory_file.clear();
 	_diropt = DirectoryOption::listing;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::forbid_directory() noexcept {
 	_directory_file.clear();
 	_diropt = DirectoryOption::forbid;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::set_directory_file(std::string const& fname) {
 	_diropt = DirectoryOption::default_file;
-	_directory_file = fname
+	_directory_file = fname;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::reset_diropts() noexcept {
 	_directory_file.clear();
 	if (_super)
 		_diropt = DirectoryOption::inherits;
 	else
 		_diropt = DirectoryOption::forbid;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::allow_method(http::Method method) noexcept {
 	_methopt = MethodOption::own;
 	_allowed_methods |= static_cast<MethodBitmask>(method);
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::disallow_method(http::Method method) noexcept {
 	_methopt = MethodOption::own;
 	_allowed_methods &= ~(static_cast<MethodBitmask>(method));
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::reset_methods() noexcept {
 	_allowed_methods = 0;
 	if (_super)
 		_methopt = MethodOption::inherits;
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::allow_cgi(std::string const& ext) {
 	_cgiopt = CGIOption::allow;
 	_cgi.insert(ext);
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::disallow_cgi(std::string const& ext) {
 	auto const	it = _cgi.find(ext);
 
 	if (it != _cgi.end())
 		_cgi.erase(it);
+	return (*this);
 }
 
-void
+RouteConfig&
 RouteConfig::reset_cgi() {
 	_cgi.clear();
 	if (_super)
 		_cgiopt = CGIOption::inherits;
 	else
 		_cgiopt = CGIOption::disallow;
+	return (*this);
 }

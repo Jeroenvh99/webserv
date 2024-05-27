@@ -29,17 +29,17 @@ public:
 	bool				allows_method(http::Method) const noexcept;
 	bool				allows_cgi(std::string const&) const noexcept;
 
-	void	redirect(Path const&);
-	void	list_directory() noexcept;
-	void	forbid_directory() noexcept;
-	void	set_directory_file() noexcept;
-	void	reset_diropts() noexcept;
-	void	allow_method(http::Method) noexcept;
-	void	disallow_method(http::Method) noexcept;
-	void	reset_methods() noexcept;
-	void	allow_cgi(std::string const&);
-	void	disallow_cgi(std::string const&);
-	void	reset_cgi();
+	RouteConfig&	redirect(Path const&);
+	RouteConfig&	list_directory() noexcept;
+	RouteConfig&	forbid_directory() noexcept;
+	RouteConfig&	set_directory_file(std::string const&);
+	RouteConfig&	reset_diropts() noexcept;
+	RouteConfig&	allow_method(http::Method) noexcept;
+	RouteConfig&	disallow_method(http::Method) noexcept;
+	RouteConfig&	reset_methods() noexcept;
+	RouteConfig&	allow_cgi(std::string const&);
+	RouteConfig&	disallow_cgi(std::string const&);
+	RouteConfig&	reset_cgi();
 
 private:
 	friend class Route;
@@ -50,31 +50,35 @@ private:
 	using ExtensionSet = std::unordered_set<std::string>;
 	using MethodBitmask = std::underlying_type<http::Method>::type;
 
+	RouteConfig(RouteConfig const&, std::string const&);
 	RouteConfig(RouteConfig const&, std::string&&);
 
 	RouteConfig const*	_super;
-	std::string		_fname;
-	Path			_redirection;
-	MethodOption	_methopt;
-	MethodBitmask	_allowed_methods;
-	DirectoryOption	_diropt;
-	std::string		_directory_file;
-	CGIOption		_cgiopt;
-	ExtensionSet	_cgi;
+	std::string			_fname;
+	Path				_redirection;
+	MethodOption		_methopt;
+	MethodBitmask		_allowed_methods;
+	DirectoryOption		_diropt;
+	std::string			_directory_file;
+	CGIOption			_cgiopt;
+	ExtensionSet		_cgi;
 }; // class RouteConfig
 
 class Route: public RouteConfig {
 public:
 	Route(Path const&);
 
-	void		extend(Path const&);
+	Route&		extend(Path const&);
 	RouteConfig	follow(Path const&);
+	Route&		seek(Path const&);
 
 private:
+	Route(Route const&, std::string const&);
 	Route(Route const&, PathSegment, PathSegment);
 
-	void		_extend_core(PathSegment, PathSegment);
+	Route&		_extend_core(PathSegment, PathSegment);
 	RouteConfig	_follow_core(PathSegment, PathSegment);
+	Route&		_seek_core(PathSegment, PathSegment);
 
 	std::vector<Route>	_subroutes;
 }; // class Route
