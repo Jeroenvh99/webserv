@@ -35,5 +35,7 @@ Server::Server(in_port_t port, int backlog_size,
 	_route.extend("/cgi")
 		.forbid_directory()
 		.allow_cgi("py");
+	_route.extend("/stuff")
+		.allow_method(http::Method::POST);
 	acceptor().listen(backlog_size);
 }

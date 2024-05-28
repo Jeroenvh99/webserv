@@ -90,7 +90,7 @@ static Parser::State
 _parse_body_how(Request const& req, size_t& body_length) {
 	if (_get_body_length(body_length, req)) {
 		if (req.has_header("Transfer-Encoding"))
-			throw (std::invalid_argument("duplicate body length specification")); // DB: other exception?
+			throw (Parser::HeaderException("duplicate body length specification"));
 		return (Parser::State::body_by_length);
 	}
 	try {
@@ -114,9 +114,9 @@ _get_body_length(size_t& len, Request const& req) {
 			len = std::stoul(strval);
 			return (true);
 		} catch (std::out_of_range& e) {		// overflow
-			throw (std::invalid_argument("bad header Content-Length"));
+			throw (Parser::HeaderException("bad header Content-Length"));
 		} catch (std::invalid_argument& e) {	// non-numeric value
-			throw (std::invalid_argument("bad header Content-Length"));
+			throw (Parser::HeaderException("bad header Content-Length"));
 		}
 	} catch (std::out_of_range& e) {	// Content-Length is not defined
 		return (false);

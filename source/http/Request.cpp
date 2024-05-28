@@ -54,7 +54,7 @@ Request::header(std::string const& name) const {
  
 	if (it == _headers.end())
 		throw (std::out_of_range("undefined header"));
-	return (it->first);
+	return (it->second);
 }
 
 bool
