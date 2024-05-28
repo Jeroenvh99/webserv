@@ -17,6 +17,7 @@ SRC_FILES	:= main.cpp \
 			Server_method.cpp \
 			Server_process.cpp \
 			Server_respond.cpp \
+			URI.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
 			http/Request.cpp \
