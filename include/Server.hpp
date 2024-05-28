@@ -21,7 +21,6 @@ public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
 	using ErrorPageMap = std::unordered_map<http::Status, std::string>;
 	using Poller = network::Poller;
-	using RouteMap = std::unordered_map<std::string, Route>;
 	using SharedHandle = network::SharedHandle;
 
 	Server() = delete;
@@ -37,7 +36,7 @@ public:
 	Acceptor const&	acceptor() const noexcept;
 	void			loop(int);
 
-	Route			route(std::string const&) const;
+	RouteConfig		reroute(std::string const&) const;
 	bool			is_cgi(http::Request const&) const noexcept;
 	http::Response	respond(http::Request const&) const;
 	http::Response	respond_error(http::Status) const;
@@ -69,7 +68,7 @@ private:
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;
-	RouteMap				_routes;
+	Route					_route;
 	ErrorPageMap			_error_pages;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;

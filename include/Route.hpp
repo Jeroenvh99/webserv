@@ -4,27 +4,106 @@
 # include "http.hpp"
 # include "http/Status.hpp"
 
-# include <initializer_list>
+# include <forward_list>
+# include <filesystem>
+# include <unordered_set>
 # include <type_traits>
 
-class Route {
-public:
-	Route(std::string const&, std::string const& = directory_listing,
-		std::initializer_list<http::Method> = http::any_method);
-	Route(Route const&, std::string const&);
+using Path = std::filesystem::path;
+using PathSegment = Path::iterator;
 
-	static constexpr char const*	directory_listing = "";
-	
-	std::string const&	to() const noexcept;
-	std::string const&	default_file() const noexcept;
+class RouteConfig {
+public:
+	RouteConfig(std::string&& = "");
+
+	static const Path				no_redirection;
+	static constexpr char const*	no_directory_file = "";
+
+	std::string const&	filename() const noexcept;
+	Path				from() const;
+	Path				to() const;
+
+	bool				lists_directory() const noexcept;
+	bool				forbids_directory() const noexcept;
+	std::string const&	directory_file() const noexcept;
 	bool				allows_method(http::Method) const noexcept;
+	bool				allows_cgi(std::string const&) const noexcept;
+
+	RouteConfig&	redirect(Path const&);
+	RouteConfig&	list_directory() noexcept;
+	RouteConfig&	forbid_directory() noexcept;
+	RouteConfig&	set_directory_file(std::string const&);
+	RouteConfig&	reset_diropts() noexcept;
+	RouteConfig&	allow_method(http::Method) noexcept;
+	RouteConfig&	disallow_method(http::Method) noexcept;
+	RouteConfig&	reset_methods() noexcept;
+	RouteConfig&	allow_cgi(std::string const&);
+	RouteConfig&	disallow_cgi(std::string const&);
+	RouteConfig&	reset_cgi();
 
 private:
-	using Bitmask = std::underlying_type<http::Method>::type;
+	friend class Route;
 
-	std::string	_to;
-	std::string	_dfl;
-	Bitmask		_methods;
+	enum class MethodOption;
+	enum class DirectoryOption;
+	enum class CGIOption;
+	using ExtensionSet = std::unordered_set<std::string>;
+	using MethodBitmask = std::underlying_type<http::Method>::type;
+
+	RouteConfig(RouteConfig const&, std::string const&);
+	RouteConfig(RouteConfig const&, std::string&&);
+
+	RouteConfig const*	_super;
+	std::string			_fname;
+	Path				_redirection;
+	MethodOption		_methopt;
+	MethodBitmask		_allowed_methods;
+	DirectoryOption		_diropt;
+	std::string			_directory_file;
+	CGIOption			_cgiopt;
+	ExtensionSet		_cgi;
+}; // class RouteConfig
+
+class Route: public RouteConfig {
+public:
+	Route(Path const&);
+
+	Route&		extend(Path const&);
+	RouteConfig	follow(Path const&) const;
+	Route&		seek(Path const&);
+
+private:
+	using Container = std::forward_list<Route>;
+
+	Route(Route const&, std::string const&);
+	Route(Route const&, PathSegment, PathSegment);
+
+	Route&		_extend_core(PathSegment, PathSegment);
+	RouteConfig	_follow_core(PathSegment, PathSegment) const;
+	Route&		_seek_core(PathSegment, PathSegment);
+
+	Container::iterator			_subroute(std::string const&) noexcept;
+	Container::const_iterator	_subroute(std::string const&) const noexcept;
+
+	Container	_subroutes;
 }; // class Route
+
+enum class RouteConfig::MethodOption {
+	inherits,
+	own,
+}; // enum class Route::Options::DirectoryOption
+
+enum class RouteConfig::DirectoryOption {
+	inherits,
+	forbid,
+	listing,
+	default_file,
+}; // enum class Route::Options::DirectoryOption
+
+enum class RouteConfig::CGIOption {
+	inherits,
+	disallow,
+	allow,
+}; // enum class Route::Options::DirectoryOption
 
 #endif // ROUTE_HPP

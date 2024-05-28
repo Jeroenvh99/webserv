@@ -12,13 +12,9 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
-Route
-Server::route(std::string const& path) const {
-	auto const	it = _routes.find(path); // DB: should search for the longest shared path key
-
-	if (it == _routes.end())
-		return (Route(path));
-	return (Route(it->second, path)); // DB: replace the portion of `path` which is identical to the map key with the map value
+RouteConfig
+Server::reroute(std::string const& path) const {
+	return (_route.follow(path));
 }
 
 bool

@@ -4,9 +4,9 @@
 #include <fstream>
 #include <streambuf>
 
-static http::Status	_get_file(std::string&, std::string const&);
-static http::Status	_get_directory(std::string&, Route const&);
-static http::Status	_list_directory(std::string&, std::string const&);
+static http::Status	_get_file(std::string&, Path const&);
+static http::Status	_get_directory(std::string&, RouteConfig const&, Path const&);
+static http::Status	_list_directory(std::string&, Path const&);
 
 http::Response
 Server::respond(http::Request const& req) const {
@@ -48,22 +48,23 @@ Server::respond_error(http::Status error) const {
 
 http::Status
 Server::get(std::string& body, http::Request const& req) const {
-	Route const	rt = route(req.uri());
+	RouteConfig const	rcfg = reroute(req.uri());
+	Path const			path = rcfg.to();
 
-	if (!rt.allows_method(req.method()))
+	if (!rcfg.allows_method(req.method()))
 		return (http::Status::method_not_allowed);
-	if (!std::filesystem::exists(rt.to()))
+	if (!std::filesystem::exists(path))
 		return (http::Status::not_found);
-	if (std::filesystem::is_directory(rt.to()))
-		return (_get_directory(body, rt));
-	return (_get_file(body, rt.to()));
+	if (std::filesystem::is_directory(path))
+		return (_get_directory(body, rcfg, path));
+	return (_get_file(body, path));
 }
 
 http::Status
 Server::post(std::string&, http::Request const& req) const {
-	Route const	rt = route(req.uri());
+	RouteConfig const	rcfg = reroute(req.uri());
 
-	if (!rt.allows_method(req.method()))
+	if (!rcfg.allows_method(req.method()))
 		return (http::Status::method_not_allowed);
 	/* implement */
 	return (http::Status::ok); // DB: placeholder
@@ -71,16 +72,16 @@ Server::post(std::string&, http::Request const& req) const {
 
 http::Status
 Server::delete_(std::string&, http::Request const& req) const {
-	Route const	rt = route(req.uri());
+	RouteConfig const	rcfg = reroute(req.uri());
 
-	if (!rt.allows_method(req.method()))
+	if (!rcfg.allows_method(req.method()))
 		return (http::Status::method_not_allowed);
 	/* implement */
 	return (http::Status::ok); // DB: placeholder
 }
 
 static http::Status
-_get_file(std::string& body, std::string const& path) {
+_get_file(std::string& body, Path const& path) {
 	std::ifstream		file(path);
 	std::stringstream	ss;
 
@@ -92,18 +93,20 @@ _get_file(std::string& body, std::string const& path) {
 }
 
 static http::Status
-_get_directory(std::string& body, Route const& rt) {
-	if (rt.default_file() == Route::directory_listing)
-		return (_list_directory(body, rt.to()));
-	return (_get_file(body, rt.default_file()));
+_get_directory(std::string& body, RouteConfig const& rcfg, Path const& path) {
+	if (rcfg.forbids_directory())
+		return (http::Status::forbidden);
+	if (rcfg.lists_directory())
+		return (_list_directory(body, path));
+	return (_get_file(body, path / rcfg.directory_file()));
 }
 
 static http::Status
-_list_directory(std::string& body, std::string const& path) {
+_list_directory(std::string& body, Path const& path) {
 	std::ostringstream	oss;
 
 	for (auto const& entry: std::filesystem::directory_iterator(path))
-		oss << entry.path() << "\r\n";
+		oss << entry.path() << ' ';
 	body = std::move(oss.str());
 	return (http::Status::ok);
 }
