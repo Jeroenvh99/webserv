@@ -27,14 +27,14 @@ public:
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&);
-	Server(in_port_t, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
 	Acceptor&		acceptor() noexcept;
 	Acceptor const&	acceptor() const noexcept;
-	void			loop(int);
+	void			process(int);
 
 	RouteConfig		reroute(std::string const&) const;
 	bool			is_cgi(http::Request const&) const noexcept;
@@ -54,7 +54,7 @@ private:
 	using ClientIt = ClientMap::iterator;
 
 	void	_accept();
-	void	_process(Poller::Event const&, ClientIt);
+	void	_process_core(Poller::Event const&, ClientIt);
 	void	_process_graveyard(Poller::Event const&, ClientIt);
 	void	_to_graveyard(ClientIt);
 	void	_drop(ClientIt);

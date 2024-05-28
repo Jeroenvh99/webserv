@@ -14,7 +14,8 @@ Server::Server(RouteConfig&& config):
 
 using namespace logging;
 
-Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remove this once config parser is done
+Server::Server(in_port_t port, int backlog_size,
+		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_poller(),
 	_acceptor(),
 	_clients(),
@@ -29,4 +30,5 @@ Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remov
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
 	_route.allow_method(http::Method::GET).redirect("./www").set_directory_file("index.html");
+	acceptor().listen(backlog_size);
 }

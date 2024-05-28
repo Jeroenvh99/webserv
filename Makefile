@@ -14,8 +14,8 @@ SRC_FILES	:= main.cpp \
 			RouteConfig.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
-			Server_loop.cpp \
 			Server_method.cpp \
+			Server_process.cpp \
 			Server_respond.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
