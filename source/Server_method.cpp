@@ -12,9 +12,9 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
-Route
-Server::route(std::string const& path) const {
-	return Route(path); // replace
+RouteConfig
+Server::reroute(std::string const& path) const {
+	return (_route.follow(path));
 }
 
 bool

@@ -3,9 +3,8 @@
 #include <algorithm>
 #include <iostream>
 
-static Route::SubrouteIt	_find_subroute(Route::SubrouteCtr&, std::string const&);
-static bool					_is_final(PathSegment, PathSegment);
-static std::string			_relative_path(PathSegment, PathSegment);
+static bool			_is_final(PathSegment, PathSegment);
+static std::string	_relative_path(PathSegment, PathSegment);
 
 // Modifiers
 
@@ -21,7 +20,7 @@ Route::_extend_core(PathSegment seg, PathSegment end) {
 	if (_is_final(seg, end)) // route already contains this path
 		return (*this);
 
-	SubrouteIt	subroute = _find_subroute(_subroutes, seg->string());
+	auto	subroute = _subroute(seg->string());
 
 	if (subroute == _subroutes.end()) { // extend diverges here
 		_subroutes.push_front(Route(*this, std::move(*seg)));
@@ -34,18 +33,18 @@ Route::_extend_core(PathSegment seg, PathSegment end) {
 // Accessors
 
 RouteConfig
-Route::follow(Path const& path) {
+Route::follow(Path const& path) const {
 	if (path.root_path() != _fname)
 		throw (std::invalid_argument("different root path"));
 	return (_follow_core(++path.begin(), path.end()));
 }
 
 RouteConfig
-Route::_follow_core(PathSegment seg, PathSegment end) {
+Route::_follow_core(PathSegment seg, PathSegment end) const {
 	if (_is_final(seg, end))
 		return (RouteConfig(*this, _relative_path(seg, end)));
 
-	SubrouteIt	subroute = _find_subroute(_subroutes, seg->string());
+	auto	subroute = _subroute(seg->string());
 
 	if (subroute == _subroutes.end())
 		return (RouteConfig(*this, _relative_path(seg, end)));
@@ -64,22 +63,30 @@ Route::_seek_core(PathSegment seg, PathSegment end) {
 	if (_is_final(seg, end))
 		return (*this);
 
-	SubrouteIt	subroute = _find_subroute(_subroutes, seg->string());
+	auto	subroute = _subroute(seg->string());
 
 	if (subroute == _subroutes.end())
 		throw (std::invalid_argument("route not found"));
 	return (subroute->_seek_core(++seg, end));
 }
 
+Route::Container::iterator
+Route::_subroute(std::string const& fname) noexcept {
+	return (std::find_if(_subroutes.begin(), _subroutes.end(),
+		[fname](Route const& route) { return (route.filename() == fname); } ));
+}
+
+Route::Container::const_iterator
+Route::_subroute(std::string const& fname) const noexcept {
+	return (std::find_if(_subroutes.begin(), _subroutes.end(),
+		[fname](Route const& route) { return (route.filename() == fname); } ));
+}
+
+// Non-member helpers
+
 static bool
 _is_final(PathSegment seg, PathSegment end) {
 	return (seg == end || seg->string().size() == 0);
-}
-
-static Route::SubrouteIt
-_find_subroute(Route::SubrouteCtr& ctr, std::string const& fname) {
-	return (std::find_if(ctr.begin(), ctr.end(),
-		[fname](Route const& route) { return (route.filename() == fname); } ));
 }
 
 static std::string

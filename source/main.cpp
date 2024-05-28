@@ -1,9 +1,9 @@
-#include "Route.hpp"
+#include "Server.hpp"
 
 #include <iostream>
 #include <stdexcept>
 
-int
+/*int
 main() {
 	Route	route("/var");
 
@@ -27,10 +27,8 @@ main() {
 	route.allow_cgi("php");
 	std::cout << tip0.directory_file() << '\n';
 	std::cout << tip0.allows_cgi("php") << '\n';
-}
-	
+}*/
 
-/*
 int
 main(int argc, char** argv) {
 	if (argc > 2)
@@ -47,4 +45,3 @@ main(int argc, char** argv) {
 	}
 	return (0);
 }
-*/

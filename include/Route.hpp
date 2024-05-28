@@ -66,24 +66,26 @@ private:
 
 class Route: public RouteConfig {
 public:
-	using SubrouteCtr = std::forward_list<Route>;
-	using SubrouteIt = SubrouteCtr::iterator;
-
 	Route(Path const&);
 
 	Route&		extend(Path const&);
-	RouteConfig	follow(Path const&);
+	RouteConfig	follow(Path const&) const;
 	Route&		seek(Path const&);
 
 private:
+	using Container = std::forward_list<Route>;
+
 	Route(Route const&, std::string const&);
 	Route(Route const&, PathSegment, PathSegment);
 
 	Route&		_extend_core(PathSegment, PathSegment);
-	RouteConfig	_follow_core(PathSegment, PathSegment);
+	RouteConfig	_follow_core(PathSegment, PathSegment) const;
 	Route&		_seek_core(PathSegment, PathSegment);
 
-	std::forward_list<Route>	_subroutes;
+	Container::iterator			_subroute(std::string const&) noexcept;
+	Container::const_iterator	_subroute(std::string const&) const noexcept;
+
+	Container	_subroutes;
 }; // class Route
 
 enum class RouteConfig::MethodOption {
