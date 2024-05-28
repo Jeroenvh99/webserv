@@ -3,6 +3,7 @@
 
 # include "http.hpp"
 # include "http/Message.hpp"
+# include "URI.hpp"
 
 # include <iostream>
 # include <stdexcept>
@@ -25,7 +26,7 @@ namespace http {
 
 		Method				method() const noexcept;
 		Version				version() const noexcept;
-		std::string const&	uri() const noexcept;
+		URI const&			uri() const noexcept;
 		std::string const&	header(std::string const&) const;
 		bool				has_header(std::string const&) const noexcept;
 		std::string const&	body() const noexcept;
@@ -38,7 +39,7 @@ namespace http {
 
 		Method		_method;
 		Version		_version;
-		std::string _uri;
+		URI			_uri;
 		HeaderMap 	_headers;
 		std::string _body;
 	}; // class Request
