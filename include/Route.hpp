@@ -91,19 +91,19 @@ private:
 enum class RouteConfig::MethodOption {
 	inherits,
 	own,
-}; // enum class Route::Options::DirectoryOption
+}; // enum class RouteConfig::MethodOption
 
 enum class RouteConfig::DirectoryOption {
 	inherits,
 	forbid,
 	listing,
 	default_file,
-}; // enum class Route::Options::DirectoryOption
+}; // enum class RouteConfig::DirectoryOption
 
 enum class RouteConfig::CGIOption {
 	inherits,
 	disallow,
 	allow,
-}; // enum class Route::Options::DirectoryOption
+}; // enum class RouteConfig::CGIOption
 
 #endif // ROUTE_HPP
