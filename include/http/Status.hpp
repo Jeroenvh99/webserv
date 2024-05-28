@@ -9,6 +9,7 @@ namespace http {
 	enum class Status: unsigned int {
 		ok = 200,
 		created = 201,
+		no_content = 204,
 		bad_request = 400,
 		unauthorized = 401,
 		forbidden = 403,
@@ -28,6 +29,7 @@ namespace http {
 	constexpr StatusDescriptionMap	_descriptions = {{
 		{Status::ok, "OK"},
 		{Status::created, "Created"},
+		{Status::no_content, "No Content"},
 		{Status::bad_request, "Bad Request"},
 		{Status::unauthorized, "Unauthorized"},
 		{Status::forbidden, "Forbidden"},
