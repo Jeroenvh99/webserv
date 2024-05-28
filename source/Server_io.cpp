@@ -10,6 +10,10 @@ Server::_read(Client& client) {
 	_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
 	try {
 		client.parse();
+	} catch (http::Request::Parser::VersionException& e) {
+		_elog.log(LogLevel::error, "Parse error: ", e.what());
+		client << respond_error(http::Status::version_not_supported);
+		return (false);
 	} catch (http::Request::Parser::Exception& e) {
 		_elog.log(LogLevel::error, "Parse error: ", e.what());
 		client << respond_error(http::Status::bad_request);
