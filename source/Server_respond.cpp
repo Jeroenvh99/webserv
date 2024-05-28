@@ -48,7 +48,7 @@ Server::respond_error(http::Status error) const {
 
 http::Status
 Server::get(std::string& body, http::Request const& req) const {
-	RouteConfig const	rcfg = reroute(req.uri());
+	RouteConfig const	rcfg = route(req.uri());
 	Path const			path = rcfg.to();
 
 	if (!rcfg.allows_method(req.method()))
@@ -62,7 +62,7 @@ Server::get(std::string& body, http::Request const& req) const {
 
 http::Status
 Server::post(std::string&, http::Request const& req) const {
-	RouteConfig const	rcfg = reroute(req.uri());
+	RouteConfig const	rcfg = route(req.uri());
 
 	if (!rcfg.allows_method(req.method()))
 		return (http::Status::method_not_allowed);
@@ -72,7 +72,7 @@ Server::post(std::string&, http::Request const& req) const {
 
 http::Status
 Server::delete_(std::string&, http::Request const& req) const {
-	RouteConfig const	rcfg = reroute(req.uri());
+	RouteConfig const	rcfg = route(req.uri());
 
 	if (!rcfg.allows_method(req.method()))
 		return (http::Status::method_not_allowed);

@@ -3,7 +3,7 @@
 Route::Route(Path const& path):
 	RouteConfig(*(path.begin())),
 	_subroutes() {
-	auto const	next = path.begin()++;
+	auto const	next = ++path.begin();
 	auto const	end = path.end();
 
 	if (next != end && next->string().size() > 0)

@@ -62,7 +62,7 @@ RouteConfig::lists_directory() const noexcept {
 bool
 RouteConfig::forbids_directory() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
-		return (_super->lists_directory());
+		return (_super->forbids_directory());
 	return (_diropt == DirectoryOption::forbid);
 }
 

@@ -36,7 +36,7 @@ public:
 	Acceptor const&	acceptor() const noexcept;
 	void			process(int);
 
-	RouteConfig		reroute(std::string const&) const;
+	RouteConfig		route(std::string const&) const;
 	bool			is_cgi(http::Request const&) const noexcept;
 	http::Response	respond(http::Request const&) const;
 	http::Response	respond_error(http::Status) const;

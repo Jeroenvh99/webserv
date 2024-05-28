@@ -13,7 +13,7 @@ Server::acceptor() const noexcept {
 }
 
 RouteConfig
-Server::reroute(std::string const& path) const {
+Server::route(std::string const& path) const {
 	return (_route.follow(path));
 }
 

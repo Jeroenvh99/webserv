@@ -29,6 +29,11 @@ Server::Server(in_port_t port, int backlog_size,
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
-	_route.allow_method(http::Method::GET).redirect("./www").set_directory_file("index.html");
+	_route.allow_method(http::Method::GET)
+		.redirect("./www")
+		.set_directory_file("index.html");
+	_route.extend("/cgi")
+		.forbid_directory()
+		.allow_cgi("py");
 	acceptor().listen(backlog_size);
 }
