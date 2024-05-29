@@ -1,10 +1,15 @@
 #include "http/Response.hpp"
+#include "html.hpp"
 
 using http::Response;
 using http::Request;
 using http::Status;
 
 // Basic operations
+
+Response::Response(Status status):
+	_status(status),
+	_body(default_html(status)) {}
 
 Response::Response(std::string const& body, Status status):
 	_status(status),

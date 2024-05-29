@@ -83,7 +83,7 @@ namespace http {
 		body_chunked,	// parsing body, processing chunks
 		body_until_eof, // parsing body until connection is closed
 		done,			// parsing has finished
-	}; // enum class Request::Parser::BodyParserMode
+	}; // enum class Request::Parser::State
 
 	class Request::Parser::Exception: public std::logic_error {
 	public:

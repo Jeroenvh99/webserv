@@ -12,6 +12,7 @@ Client::parse() {
 
 size_t
 Client::wait() {
+	/* implement */
 	_data._state = State::send;
 	return (0);
 }

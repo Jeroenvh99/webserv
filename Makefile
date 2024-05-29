@@ -9,6 +9,7 @@ SRC_FILES	:= main.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
+			html.cpp \
 			Route_ctor.cpp \
 			Route_method.cpp \
 			RouteConfig.cpp \

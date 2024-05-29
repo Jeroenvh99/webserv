@@ -12,14 +12,15 @@
 # include "Client.hpp"
 # include "Route.hpp"
 
-# include <unordered_map>
+# include <filesystem>
 # include <string>
+# include <unordered_map>
 # include <vector>
 
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using ErrorPageMap = std::unordered_map<http::Status, std::string>;
+	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
 	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 

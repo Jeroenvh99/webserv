@@ -23,7 +23,7 @@ Server::respond(http::Request const& req) const {
 	case http::Method::DELETE:
 		status = delete_(body, req);
 		break;
-	default: // unsupported methods
+	default: // unimplemented methods
 		return (respond_error(http::Status::not_implemented));
 	}
 	if (http::is_error(status))
@@ -36,14 +36,12 @@ Server::respond_error(http::Status error) const {
 	auto const	it = _error_pages.find(error);
 	std::string	body;
 
-	if (it != _error_pages.end()) {
-		if (is_error(_get_file(body, it->second))) {
-			error = http::Status::internal_error;
-			body = http::to_string(error) + " " + http::description(error);
-		}
-	} else
-		body = http::to_string(error) + " " + http::description(error);
-	return (http::Response(std::move(body), error));
+	if (it != _error_pages.end()) { // an error page is defined for this status
+		if (is_error(_get_file(body, it->second))) // but couldn't be accessed
+			return (http::Response(http::Status::internal_error));
+		return (http::Response(std::move(body), error));
+	}
+	return (http::Response(error));
 }
 
 http::Status

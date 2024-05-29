@@ -15,6 +15,7 @@ namespace http {
 	public:
 		Response(std::string const& = "", Status = Status::ok);
 		Response(std::string&&, Status = Status::ok);
+		Response(Status);
 
 		operator std::string() const;
 
