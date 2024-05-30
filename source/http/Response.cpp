@@ -40,3 +40,12 @@ Response::HeaderMap const&
 Response::headers() const noexcept {
 	return (_headers);
 }
+
+// Modifiers
+
+void
+Response::clear() noexcept {
+	_status = http::Status::ok;
+	_headers.clear();
+	_body.clear();
+}

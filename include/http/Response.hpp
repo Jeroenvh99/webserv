@@ -24,6 +24,8 @@ namespace http {
 		Version				version() const noexcept;
 		HeaderMap const&	headers() const noexcept; // DB: see below
 
+		void	clear() noexcept;
+
 	private:
 		static constexpr Version	_version = one_one;
 
