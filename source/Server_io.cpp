@@ -26,13 +26,12 @@ Server::_read(Client& client) {
 
 bool
 Server::_fetch(Client& client) {
-	if (is_cgi(client.request()))
-		client << http::Response("no CGI yet", http::Status::internal_error);
-		// setup connection between server and CGI executable
-		// exec CGI
-		// _state = State::wait;
-	else
-		client << respond(client.request());
+	// if the request requires CGI execution
+	// setup connection between server and CGI executable
+	// exec CGI
+	// _state = State::wait;
+	// else
+	client << respond(client.request());
 	return (true);
 }
 

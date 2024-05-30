@@ -5,9 +5,9 @@
 
 void
 Client::clear() noexcept {
+	_data._state = State::idle;
 	_data._buffer.str("");
 	_data._buffer.clear();
-	_data._state = State::idle;
 	_data._parser.clear();
 	_data._request.clear();
 	_data._response.clear();

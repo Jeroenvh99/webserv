@@ -9,9 +9,9 @@ static http::Status	_get_directory(std::string&, RouteConfig const&, Path const&
 static http::Status	_list_directory(std::string&, Path const&);
 
 http::Response
-Server::respond(http::Request const& req) const {
-	http::Status	status;
-	std::string		body;
+Server::respond(http::Request const& req) {
+	http::Status		status;
+	std::string			body;
 
 	switch (req.method()) {
 	case http::Method::GET:
@@ -32,7 +32,7 @@ Server::respond(http::Request const& req) const {
 }
 
 http::Response
-Server::respond_error(http::Status error) const {
+Server::respond_error(http::Status error) {
 	auto const	it = _error_pages.find(error);
 	std::string	body;
 
@@ -45,7 +45,7 @@ Server::respond_error(http::Status error) const {
 }
 
 http::Status
-Server::get(std::string& body, http::Request const& req) const {
+Server::get(std::string& body, http::Request const& req) {
 	RouteConfig const	rcfg = route(req.uri().path());
 	Path const			path = rcfg.to();
 
@@ -59,25 +59,37 @@ Server::get(std::string& body, http::Request const& req) const {
 }
 
 http::Status
-Server::post(std::string&, http::Request const& req) const {
+Server::post(std::string&, http::Request const& req) {
 	RouteConfig const	rcfg = route(req.uri().path());
 	Path const			path = rcfg.to();
 
-	if (!rcfg.allows_method(req.method()))
+	if (!rcfg.allows_method(req.method())) {
+		_elog.log(LogLevel::error,
+			"Method ", http::to_string(req.method()),
+			" not allowed at ", path, ".");
 		return (http::Status::method_not_allowed);
+	}
 	std::ofstream	ofs(path);
-	if (ofs.bad())
+
+	if (ofs.bad()) {
+		_elog.log(LogLevel::error, "Couldn't open file at ", path, ".");
 		return (http::Status::internal_error);
+	}
 	ofs << req.body();
 	return (http::Status::ok);
 }
 
 http::Status
-Server::delete_(std::string&, http::Request const& req) const {
+Server::delete_(std::string&, http::Request const& req) {
 	RouteConfig const	rcfg = route(req.uri().path());
+	Path const			path = rcfg.to();
 
-	if (!rcfg.allows_method(req.method()))
+	if (!rcfg.allows_method(req.method())) {
+		_elog.log(LogLevel::error,
+			"Method ", http::to_string(req.method()),
+			" not allowed at ", path, ".");
 		return (http::Status::method_not_allowed);
+	}
 	/* implement */
 	return (http::Status::ok);
 }
