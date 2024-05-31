@@ -10,7 +10,7 @@
 # include "http/Status.hpp"
 # include "http/Request.hpp"
 # include "Client.hpp"
-# include "Route.hpp"
+# include "route.hpp"
 
 # include <filesystem>
 # include <string>
@@ -37,7 +37,7 @@ public:
 	Acceptor const&	acceptor() const noexcept;
 	void			process(int);
 
-	RouteConfig		route(std::string const&) const;
+	route::Config	locate(std::filesystem::path const&) const;
 	http::Response	respond(http::Request const&);
 	http::Response	respond_error(http::Status);
 	http::Status	get(std::string&, http::Request const&);
@@ -68,7 +68,7 @@ private:
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;
-	Route					_route;
+	route::Route			_route;
 	ErrorPageMap			_error_pages;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;

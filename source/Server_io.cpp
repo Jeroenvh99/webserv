@@ -4,12 +4,12 @@
 bool
 Server::_read(Client& client) {
 	try {
-	size_t const	bytes = client.recv();
+		size_t const	bytes = client.recv();
 
-	if (bytes == 0)
-		return (false);
-	_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
-	} catch (network::Socket::Exception& e) {
+		if (bytes == 0)
+			return (false);
+		_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
+	} catch (Client::Socket::Exception& e) {
 		_elog.log(LogLevel::error, e.what());
 		return (false);
 	}
@@ -54,7 +54,7 @@ Server::_send(Client& client) {
 		if (bytes == 0)
 			return (false);
 		_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
-	} catch (network::Socket::Exception& e) {
+	} catch (Client::Socket::Exception& e) {
 		_elog.log(LogLevel::error, e.what());
 		return (false);
 	}

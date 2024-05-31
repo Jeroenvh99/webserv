@@ -12,8 +12,8 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
-RouteConfig
-Server::route(std::string const& path) const {
+route::Location
+Server::locate(std::filesystem::path const& path) const {
 	return (_route.follow(path));
 }
 

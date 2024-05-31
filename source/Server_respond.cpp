@@ -4,9 +4,9 @@
 #include <fstream>
 #include <streambuf>
 
-static http::Status	_get_file(std::string&, Path const&);
-static http::Status	_get_directory(std::string&, RouteConfig const&, Path const&);
-static http::Status	_list_directory(std::string&, Path const&);
+static http::Status	_get_file(std::string&, route::Path const&);
+static http::Status	_get_directory(std::string&, route::Location const&);
+static http::Status	_list_directory(std::string&, route::Path const&);
 
 http::Response
 Server::respond(http::Request const& req) {
@@ -23,7 +23,7 @@ Server::respond(http::Request const& req) {
 	case http::Method::DELETE:
 		status = delete_(body, req);
 		break;
-	default: // unimplemented methods
+	default:
 		return (respond_error(http::Status::not_implemented));
 	}
 	if (http::is_error(status))
@@ -46,56 +46,54 @@ Server::respond_error(http::Status error) {
 
 http::Status
 Server::get(std::string& body, http::Request const& req) {
-	RouteConfig const	rcfg = route(req.uri().path());
-	Path const			path = rcfg.to();
+	route::Location const	loc = locate(req.uri().path());
 
-	if (!rcfg.allows_method(req.method()))
+	if (!loc.allows_method(req.method()))
 		return (http::Status::method_not_allowed);
-	if (!std::filesystem::exists(path))
+	if (!std::filesystem::exists(loc.to()))
 		return (http::Status::not_found);
-	if (std::filesystem::is_directory(path))
-		return (_get_directory(body, rcfg, path));
-	return (_get_file(body, path));
+	if (std::filesystem::is_directory(loc.to()))
+		return (_get_directory(body, loc));
+	return (_get_file(body, loc.to()));
 }
 
 http::Status
 Server::post(std::string&, http::Request const& req) {
-	RouteConfig const	rcfg = route(req.uri().path());
-	Path const			path = rcfg.to();
+	route::Location const	loc = locate(req.uri().path());
 
-	if (!rcfg.allows_method(req.method())) {
+	if (!loc.allows_method(req.method())) {
 		_elog.log(LogLevel::error,
 			"Method ", http::to_string(req.method()),
-			" not allowed at ", path, ".");
+			" not allowed at ", loc.to(), ".");
 		return (http::Status::method_not_allowed);
 	}
-	std::ofstream	ofs(path);
+	std::ofstream	ofs(loc.to());
 
 	if (ofs.bad()) {
-		_elog.log(LogLevel::error, "Couldn't open file at ", path, ".");
+		_elog.log(LogLevel::error, "Couldn't open file at ", loc.to(), ".");
 		return (http::Status::internal_error);
 	}
 	ofs << req.body();
-	return (http::Status::ok);
+	return (http::Status::created);
 }
 
 http::Status
 Server::delete_(std::string&, http::Request const& req) {
-	RouteConfig const	rcfg = route(req.uri().path());
-	Path const			path = rcfg.to();
+	route::Location const	loc = locate(req.uri().path());
 
-	if (!rcfg.allows_method(req.method())) {
+	if (!loc.allows_method(req.method())) {
 		_elog.log(LogLevel::error,
 			"Method ", http::to_string(req.method()),
-			" not allowed at ", path, ".");
+			" not allowed at ", loc.to(), ".");
 		return (http::Status::method_not_allowed);
 	}
-	/* implement */
-	return (http::Status::ok);
+	if (!std::filesystem::remove(loc.to()))
+		return (http::Status::internal_error);
+	return (http::Status::no_content);
 }
 
 static http::Status
-_get_file(std::string& body, Path const& path) {
+_get_file(std::string& body, route::Path const& path) {
 	std::ifstream		file(path);
 	std::stringstream	ss;
 
@@ -107,16 +105,16 @@ _get_file(std::string& body, Path const& path) {
 }
 
 static http::Status
-_get_directory(std::string& body, RouteConfig const& rcfg, Path const& path) {
-	if (rcfg.forbids_directory())
+_get_directory(std::string& body, route::Location const& loc) {
+	if (loc.forbids_directory())
 		return (http::Status::forbidden);
-	if (rcfg.lists_directory())
-		return (_list_directory(body, path));
-	return (_get_file(body, path / rcfg.directory_file()));
+	if (loc.lists_directory())
+		return (_list_directory(body, loc.to()));
+	return (_get_file(body, loc.to() / loc.directory_file()));
 }
 
 static http::Status
-_list_directory(std::string& body, Path const& path) {
+_list_directory(std::string& body, route::Path const& path) {
 	std::ostringstream	oss;
 
 	for (auto const& entry: std::filesystem::directory_iterator(path))

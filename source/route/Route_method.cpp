@@ -1,7 +1,12 @@
-#include "Route.hpp"
+#include "route.hpp"
 
 #include <algorithm>
 #include <iostream>
+
+using route::Route;
+using route::Location;
+using route::Path;
+using route::PathSegment;
 
 static bool			_is_final(PathSegment, PathSegment);
 static std::string	_relative_path(PathSegment, PathSegment);
@@ -32,22 +37,22 @@ Route::_extend_core(PathSegment seg, PathSegment end) {
 
 // Accessors
 
-RouteConfig
+Location
 Route::follow(Path const& path) const {
 	if (path.root_path() != _fname)
 		throw (std::invalid_argument("different root path"));
 	return (_follow_core(++path.begin(), path.end()));
 }
 
-RouteConfig
+Location
 Route::_follow_core(PathSegment seg, PathSegment end) const {
 	if (_is_final(seg, end))
-		return (RouteConfig(*this, _relative_path(seg, end)));
+		return (Location(*this, _relative_path(seg, end)));
 
 	auto	subroute = _subroute(seg->string());
 
 	if (subroute == _subroutes.end())
-		return (RouteConfig(*this, _relative_path(seg, end)));
+		return (Location(*this, _relative_path(seg, end)));
 	return (subroute->_follow_core(++seg, end));
 }
 
