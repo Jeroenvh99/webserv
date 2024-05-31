@@ -3,11 +3,16 @@
 
 bool
 Server::_read(Client& client) {
+	try {
 	size_t const	bytes = client.recv();
 
 	if (bytes == 0)
 		return (false);
 	_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
+	} catch (network::Socket::Exception& e) {
+		_elog.log(LogLevel::error, e.what());
+		return (false);
+	}
 	try {
 		client.parse();
 	} catch (http::Request::Parser::VersionException& e) {
@@ -43,10 +48,15 @@ Server::_wait(Client& client) {
 
 bool
 Server::_send(Client& client) {
-	size_t const	bytes = client.send();
+	try {
+		size_t const	bytes = client.send();
 
-	if (bytes == 0)
+		if (bytes == 0)
+			return (false);
+		_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
+	} catch (network::Socket::Exception& e) {
+		_elog.log(LogLevel::error, e.what());
 		return (false);
-	_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
+	}
 	return (true);
 }

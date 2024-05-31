@@ -35,6 +35,7 @@ public:
 	RouteConfig&	set_directory_file(std::string const&);
 	RouteConfig&	reset_diropts() noexcept;
 	RouteConfig&	allow_method(http::Method) noexcept;
+	// RouteConfig&	allow_methods(std::vector<http::Method> const&) noexcept;
 	RouteConfig&	disallow_method(http::Method) noexcept;
 	RouteConfig&	reset_methods() noexcept;
 	RouteConfig&	allow_cgi(std::string const&);

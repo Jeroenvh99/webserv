@@ -121,6 +121,6 @@ _list_directory(std::string& body, Path const& path) {
 
 	for (auto const& entry: std::filesystem::directory_iterator(path))
 		oss << entry.path() << ' ';
-	body = std::move(oss.str());
+	body = oss.str();
 	return (http::Status::ok);
 }
