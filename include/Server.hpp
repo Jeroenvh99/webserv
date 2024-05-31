@@ -28,14 +28,15 @@ public:
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&);
-	Server(in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(std::string const&, in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&		acceptor() noexcept;
-	Acceptor const&	acceptor() const noexcept;
-	void			process(int);
+	Acceptor&			acceptor() noexcept;
+	Acceptor const&		acceptor() const noexcept;
+	void				process(int);
+	std::string const&	name() const noexcept;
 
 	route::Config	locate(std::filesystem::path const&) const;
 	http::Response	respond(http::Request const&);
@@ -64,6 +65,7 @@ private:
 	bool	_wait(Client&);
 	bool	_send(Client&);
 
+	std::string				_name;
 	Poller					_poller;
 	SharedHandle			_acceptor;
 	ClientMap				_clients;

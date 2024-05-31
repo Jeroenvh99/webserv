@@ -14,8 +14,9 @@ Server::Server(RouteConfig&& config):
 
 using namespace logging;
 
-Server::Server(in_port_t port, int backlog_size,
+Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
+	_name(name),
 	_poller(),
 	_acceptor(),
 	_clients(),

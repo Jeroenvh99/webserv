@@ -15,7 +15,7 @@ main(int argc, char** argv) {
 	in_port_t const	port = (argc == 1) ? dfl_port : std::stol(argv[1]); // temp
 
 	try {
-		Server	server(port, dfl_backlog_size);
+		Server	server("localhost", port, dfl_backlog_size);
 
 		while (true)
 			server.process(dfl_poller_timeout);
