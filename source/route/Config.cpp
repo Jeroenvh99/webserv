@@ -1,10 +1,14 @@
-#include "Route.hpp"
+#include "route.hpp"
+
+using route::Config;
+using route::Path;
+using route::PathSegment;
 
 // Basic operations
 
-Path const	RouteConfig::no_redirection = "";
+Path const	Config::no_redirection = "";
 
-RouteConfig::RouteConfig(std::string&& fname):
+Config::Config(std::string&& fname):
 	_super(nullptr),
 	_fname(fname),
 	_redirection(no_redirection),
@@ -12,7 +16,7 @@ RouteConfig::RouteConfig(std::string&& fname):
 	_diropt(DirectoryOption::forbid), _directory_file(),
 	_cgiopt(CGIOption::disallow), _cgi() {}
 
-RouteConfig::RouteConfig(RouteConfig const& super, std::string const& fname):
+Config::Config(Config const& super, std::string const& fname):
 	_super(&super),
 	_fname(fname),
 	_redirection(no_redirection),
@@ -20,7 +24,7 @@ RouteConfig::RouteConfig(RouteConfig const& super, std::string const& fname):
 	_diropt(DirectoryOption::inherits), _directory_file(),
 	_cgiopt(CGIOption::inherits), _cgi() {}
 
-RouteConfig::RouteConfig(RouteConfig const& super, std::string&& fname):
+Config::Config(Config const& super, std::string&& fname):
 	_super(&super),
 	_fname(fname),
 	_redirection(no_redirection),
@@ -31,19 +35,19 @@ RouteConfig::RouteConfig(RouteConfig const& super, std::string&& fname):
 // Accessor methods
 
 std::string const&
-RouteConfig::filename() const noexcept {
+Config::filename() const noexcept {
 	return (_fname);
 }
 
 Path
-RouteConfig::from() const {
+Config::from() const {
 	if (_super)
 		return (_super->from() / _fname);
 	return (_fname);
 }
 
 Path
-RouteConfig::to() const {
+Config::to() const {
 	if (_redirection == no_redirection) {
 		if (_super)
 			return (_super->to() / _fname);
@@ -53,35 +57,35 @@ RouteConfig::to() const {
 }
 
 bool
-RouteConfig::lists_directory() const noexcept {
+Config::lists_directory() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
 		return (_super->lists_directory());
 	return (_diropt == DirectoryOption::listing);
 }
 
 bool
-RouteConfig::forbids_directory() const noexcept {
+Config::forbids_directory() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
-		return (_super->lists_directory());
+		return (_super->forbids_directory());
 	return (_diropt == DirectoryOption::forbid);
 }
 
 std::string const&
-RouteConfig::directory_file() const noexcept {
+Config::directory_file() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
 		return (_super->directory_file());
 	return (_directory_file);
 }
 
 bool
-RouteConfig::allows_method(http::Method method) const noexcept {
+Config::allows_method(http::Method method) const noexcept {
 	if (_super && _methopt == MethodOption::inherits)
 		return (_super->allows_method(method));
 	return (_allowed_methods & static_cast<MethodBitmask>(method));
 }
 
 bool
-RouteConfig::allows_cgi(std::string const& ext) const noexcept {
+Config::allows_cgi(std::string const& ext) const noexcept {
 	if (_super && _cgiopt == CGIOption::inherits)
 		return (_super->allows_cgi(ext));
 	return (_cgiopt == CGIOption::allow
@@ -90,35 +94,35 @@ RouteConfig::allows_cgi(std::string const& ext) const noexcept {
 
 // Modifier methods
 
-RouteConfig&
-RouteConfig::redirect(Path const& path) {
+Config&
+Config::redirect(Path const& path) {
 	_redirection = path;
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::list_directory() noexcept {
+Config&
+Config::list_directory() noexcept {
 	_directory_file.clear();
 	_diropt = DirectoryOption::listing;
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::forbid_directory() noexcept {
+Config&
+Config::forbid_directory() noexcept {
 	_directory_file.clear();
 	_diropt = DirectoryOption::forbid;
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::set_directory_file(std::string const& fname) {
+Config&
+Config::set_directory_file(std::string const& fname) {
 	_diropt = DirectoryOption::default_file;
 	_directory_file = fname;
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::reset_diropts() noexcept {
+Config&
+Config::reset_diropts() noexcept {
 	_directory_file.clear();
 	if (_super)
 		_diropt = DirectoryOption::inherits;
@@ -127,37 +131,37 @@ RouteConfig::reset_diropts() noexcept {
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::allow_method(http::Method method) noexcept {
+Config&
+Config::allow_method(http::Method method) noexcept {
 	_methopt = MethodOption::own;
 	_allowed_methods |= static_cast<MethodBitmask>(method);
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::disallow_method(http::Method method) noexcept {
+Config&
+Config::disallow_method(http::Method method) noexcept {
 	_methopt = MethodOption::own;
 	_allowed_methods &= ~(static_cast<MethodBitmask>(method));
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::reset_methods() noexcept {
+Config&
+Config::reset_methods() noexcept {
 	_allowed_methods = 0;
 	if (_super)
 		_methopt = MethodOption::inherits;
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::allow_cgi(std::string const& ext) {
+Config&
+Config::allow_cgi(std::string const& ext) {
 	_cgiopt = CGIOption::allow;
 	_cgi.insert(ext);
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::disallow_cgi(std::string const& ext) {
+Config&
+Config::disallow_cgi(std::string const& ext) {
 	auto const	it = _cgi.find(ext);
 
 	if (it != _cgi.end())
@@ -165,8 +169,8 @@ RouteConfig::disallow_cgi(std::string const& ext) {
 	return (*this);
 }
 
-RouteConfig&
-RouteConfig::reset_cgi() {
+Config&
+Config::reset_cgi() {
 	_cgi.clear();
 	if (_super)
 		_cgiopt = CGIOption::inherits;

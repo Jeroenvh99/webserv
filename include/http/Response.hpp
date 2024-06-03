@@ -15,6 +15,7 @@ namespace http {
 	public:
 		Response(std::string const& = "", Status = Status::ok);
 		Response(std::string&&, Status = Status::ok);
+		Response(Status);
 
 		operator std::string() const;
 
@@ -22,6 +23,8 @@ namespace http {
 		Status				status() const noexcept;
 		Version				version() const noexcept;
 		HeaderMap const&	headers() const noexcept; // DB: see below
+
+		void	clear() noexcept;
 
 	private:
 		static constexpr Version	_version = one_one;

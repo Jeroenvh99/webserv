@@ -23,7 +23,7 @@ Request::operator std::string() const noexcept {
 	std::ostringstream	oss;
 
 	oss << to_string(_method) << ' '
-		<< _uri << ' '
+		<< std::string(_uri) << ' '
 		<< to_string(_version) << '\n';
 	for (auto const& hdr: _headers)
 		oss << to_string(hdr) << '\n';
@@ -43,7 +43,7 @@ Request::version() const noexcept {
 	return (_version);
 }
 
-std::string const&
+URI const&
 Request::uri() const noexcept {
 	return (_uri);
 }
@@ -54,7 +54,7 @@ Request::header(std::string const& name) const {
  
 	if (it == _headers.end())
 		throw (std::out_of_range("undefined header"));
-	return (it->first);
+	return (it->second);
 }
 
 bool
@@ -78,7 +78,7 @@ void
 Request::clear() noexcept {
 	_method = Method::GET;
 	_version = Version(0, 0);
-	_uri.clear();
+	_uri = URI();
 	_headers.clear();
 	_body.clear();
 }

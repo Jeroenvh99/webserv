@@ -3,13 +3,22 @@
 
 bool
 Server::_read(Client& client) {
-	size_t const	bytes = client.recv();
+	try {
+		size_t const	bytes = client.recv();
 
-	if (bytes == 0)
+		if (bytes == 0)
+			return (false);
+		_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
+	} catch (Client::Socket::Exception& e) {
+		_elog.log(LogLevel::error, e.what());
 		return (false);
-	_elog.log(LogLevel::debug, "Received ", bytes, " bytes.");
+	}
 	try {
 		client.parse();
+	} catch (http::Request::Parser::VersionException& e) {
+		_elog.log(LogLevel::error, "Parse error: ", e.what());
+		client << respond_error(http::Status::version_not_supported);
+		return (false);
 	} catch (http::Request::Parser::Exception& e) {
 		_elog.log(LogLevel::error, "Parse error: ", e.what());
 		client << respond_error(http::Status::bad_request);
@@ -22,13 +31,12 @@ Server::_read(Client& client) {
 
 bool
 Server::_fetch(Client& client) {
-	if (is_cgi(client.request()))
-		client << http::Response("no CGI yet", http::Status::internal_error);
-		// setup connection between server and CGI executable
-		// exec CGI
-		// _state = State::wait;
-	else
-		client << respond(client.request());
+	// if the request requires CGI execution
+	// setup connection between server and CGI executable
+	// exec CGI
+	// _state = State::wait;
+	// else
+	client << respond(client.request());
 	return (true);
 }
 
@@ -40,10 +48,15 @@ Server::_wait(Client& client) {
 
 bool
 Server::_send(Client& client) {
-	size_t const	bytes = client.send();
+	try {
+		size_t const	bytes = client.send();
 
-	if (bytes == 0)
+		if (bytes == 0)
+			return (false);
+		_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
+	} catch (Client::Socket::Exception& e) {
+		_elog.log(LogLevel::error, e.what());
 		return (false);
-	_elog.log(LogLevel::debug, "Sent ", bytes, " bytes.");
+	}
 	return (true);
 }

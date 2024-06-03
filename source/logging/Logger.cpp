@@ -32,6 +32,7 @@ Logger::timestamp_update() {
 	auto const			timezone = stdclock::from_time_t(now)
 							- stdclock::from_time_t(std::mktime(std::gmtime(&now)));
 
+	(void) timezone;
 	_timestamp.clear();
 	updated << std::put_time(local_tm, "%Y/%m/%d:%H:%M:%S")
 		<< std::showpos << std::put_time(local_tm, "%z");

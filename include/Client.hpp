@@ -54,6 +54,7 @@ public:
 	size_t	recv();
 	size_t	send();
 	size_t	wait();
+	void	clear() noexcept;
 
 private:
 	SocketBox	_socket;

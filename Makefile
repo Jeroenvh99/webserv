@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/
+SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/ route/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -9,14 +9,13 @@ SRC_FILES	:= main.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
-			Route_ctor.cpp \
-			Route_method.cpp \
-			RouteConfig.cpp \
+			html.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
-			Server_loop.cpp \
 			Server_method.cpp \
+			Server_process.cpp \
 			Server_respond.cpp \
+			URI.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
 			http/Request.cpp \
@@ -42,7 +41,10 @@ SRC_FILES	:= main.cpp \
 			network/Poller_Event.cpp \
 			network/Poller_method.cpp \
 			network/Poller_Event.cpp \
-			network/Address_IPv4.cpp
+			network/Address_IPv4.cpp \
+			route/Route_ctor.cpp \
+			route/Route_method.cpp \
+			route/Config.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
