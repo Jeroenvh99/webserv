@@ -18,7 +18,7 @@ main(int argc, char** argv) {
 		const std::vector<Config::Server> servers = conf.getServers();
 		for (Config::Server config : servers) {
 			Server	server(config.port);
-			server.loop(5192);
+			server.loop(5192); // make it non-blocking? one thread per server?
 		}
 	} catch (std::exception& e) {
 		return (std::cerr << "webserv: " << e.what() << '\n', 1);
