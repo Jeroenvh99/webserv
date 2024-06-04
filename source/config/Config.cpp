@@ -143,7 +143,7 @@ void Config::ParseServer(std::stringstream &s) {
 		std::getline(linestream, temp, ' ');
 		if (temp == "}") {
 			if (server.port == -1) {
-				throw Config::InvalidSyntaxException();
+				server.port = 1100;
 			}
 			_servers.push_back(server);
 			return;

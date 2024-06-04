@@ -4,7 +4,6 @@
 #include <iostream>
 #include <stdexcept>
 
-static constexpr in_port_t	dfl_port = 1100;
 static constexpr int		dfl_backlog_size = 5192;
 static constexpr int		dfl_poller_timeout = 1000;
 
@@ -20,14 +19,19 @@ main(int argc, char** argv) {
 			file = "configs/default.conf";
 		}
 		Config	conf(file);
-		const std::vector<Config::Server> servers = conf.getServers();
-		Server	server("localhost", port, dfl_backlog_size);
+		const std::vector<Config::Server> serverconfigs = conf.getServers();
+		std::vector<Server> servers;
 
-		while (true)
-			server.process(dfl_poller_timeout);
-		for (Config::Server config : servers) {
-			Server	server(config.port);
-
+		for (Config::Server config : serverconfigs) {
+			std::ofstream access(config.accesslog.filename);
+			std::ofstream error(config.errorlog.filename);
+			Server serv(config.servername, config.port, dfl_backlog_size, access, error);
+			servers.push_back(serv);
+		}
+		while (true) {
+			for (size_t i = 0; i < serverconfigs.size(); i++) {
+				servers[i].process(dfl_poller_timeout);
+			}
 		}
 	} catch (std::exception& e) {
 		return (std::cerr << "webserv: " << e.what() << '\n', 1);
