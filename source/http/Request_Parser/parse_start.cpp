@@ -18,7 +18,7 @@ Parser::_parse_start(std::iostream& ios) {
 	std::getline(iss, s, ' ');
 	Method const	method = _parse_method(s);
 	std::getline(iss, s, ' ');
-	std::string		uri(std::move(s));
+	URI				uri(s);
 	std::getline(iss, s, ' ');
 	if (!iss.eof())
 		throw (StartLineException("excess elements in first line"));

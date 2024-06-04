@@ -3,6 +3,7 @@
 
 # include "http.hpp"
 # include "http/Message.hpp"
+# include "URI.hpp"
 
 # include <iostream>
 # include <stdexcept>
@@ -25,7 +26,7 @@ namespace http {
 
 		Method				method() const noexcept;
 		Version				version() const noexcept;
-		std::string const&	uri() const noexcept;
+		URI const&			uri() const noexcept;
 		std::string const&	header(std::string const&) const;
 		bool				has_header(std::string const&) const noexcept;
 		std::string const&	body() const noexcept;
@@ -34,16 +35,14 @@ namespace http {
 		void	clear() noexcept;
 
 	private:
-		void	_header_add(Header&&);
+		void	_header_append(Header&&);
 
 		Method		_method;
 		Version		_version;
-		std::string _uri;
+		URI			_uri;
 		HeaderMap 	_headers;
 		std::string _body;
 	}; // class Request
-
-	Response	respond(Request const&);
 
 	class Request::Parser {
 	public:
@@ -84,7 +83,7 @@ namespace http {
 		body_chunked,	// parsing body, processing chunks
 		body_until_eof, // parsing body until connection is closed
 		done,			// parsing has finished
-	}; // enum class Request::Parser::BodyParserMode
+	}; // enum class Request::Parser::State
 
 	class Request::Parser::Exception: public std::logic_error {
 	public:

@@ -1,32 +1,26 @@
 #include "Server.hpp"
 
-# include <iostream>
-
 void
-Server::loop(int backlog_size) {
-	acceptor().listen(backlog_size);
-	while (true) { // DB: there ought to be a cleaner way to shut down the server
-		for (auto const& event: _poller.wait<128>(1000)) {
-			SharedHandle	box = event.handle();
+Server::process(int poller_timeout) { // DB: this could be made configurable
+	for (auto const& event: _poller.wait<128>(poller_timeout)) {
+		SharedHandle	box = event.handle();
 
-			if (box == _acceptor)
-				_accept();
-			else {
-				ClientIt	it = _clients.find(box);
-	
-				if (it == _clients.end()) {
-					it = _graveyard.find(box);
-					_process_graveyard(event, it);
-				} else
-					_process(event, it);
-			}
+		if (box == _acceptor)
+			_accept();
+		else {
+			ClientIt	it = _clients.find(box);
+
+			if (it == _clients.end()) {
+				it = _graveyard.find(box);
+				_process_graveyard(event, it);
+			} else
+				_process_core(event, it);
 		}
 	}
 }
-// DB: make poller timeout and backlog size configurable?
 
 void
-Server::_process(Poller::Event const& event, ClientIt it) {
+Server::_process_core(Poller::Event const& event, ClientIt it) {
 	Client	client(*it);
 
 	switch (client.state()) {

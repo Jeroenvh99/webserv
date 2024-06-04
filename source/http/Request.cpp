@@ -23,7 +23,7 @@ Request::operator std::string() const noexcept {
 	std::ostringstream	oss;
 
 	oss << to_string(_method) << ' '
-		<< _uri << ' '
+		<< std::string(_uri) << ' '
 		<< to_string(_version) << '\n';
 	for (auto const& hdr: _headers)
 		oss << to_string(hdr) << '\n';
@@ -43,7 +43,7 @@ Request::version() const noexcept {
 	return (_version);
 }
 
-std::string const&
+URI const&
 Request::uri() const noexcept {
 	return (_uri);
 }
@@ -51,10 +51,10 @@ Request::uri() const noexcept {
 std::string const&
 Request::header(std::string const& name) const {
 	auto const	it = _headers.find(name);
-
+ 
 	if (it == _headers.end())
 		throw (std::out_of_range("undefined header"));
-	return (it->first);
+	return (it->second);
 }
 
 bool
@@ -78,7 +78,7 @@ void
 Request::clear() noexcept {
 	_method = Method::GET;
 	_version = Version(0, 0);
-	_uri.clear();
+	_uri = URI();
 	_headers.clear();
 	_body.clear();
 }
@@ -86,45 +86,8 @@ Request::clear() noexcept {
 // Private methods
 // Modifiers
 
-// void Request::parseRequestLine(std::stringstream &s) {
-// 	std::string requestline;
-// 	std::getline(s, requestline);
-// 	if (countWords(requestline) != 3) {
-// 		throw Request::IncorrectRequestFormatException();
-// 	}
-// 	std::string temp;
-// 	std::stringstream s2(requestline);
-// 	std::getline(s2, temp, ' ');
-// 	std::string methods[RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
-// 	for (int i = 0; i < RequestMethod::NONE; i++) {
-// 		if (temp == methods[i]) {
-// 			_method = static_cast<http::RequestMethod>(i);
-// 			break;
-// 		}
-// 	}
-// 	if (_method == RequestMethod::NONE) {
-// 		throw Request::IncorrectRequestFormatException();
-// 	}
-// 	std::getline(s2, _requesturi, ' ');
-// 	std::getline(s2, temp, ' ');
-// 	if (temp.back() != '\r') {
-// 		throw Request::IncorrectRequestFormatException();
-// 	}
-// 	temp.erase(temp.find_last_not_of(" \n\r\t") + 1);
-// 	std::string versions[HttpVersion::NO] = {"HTTP/1.0", "HTTP/1.1"};
-// 	HttpVersion versiontype[HttpVersion::NO] = {HttpVersion::ONE, HttpVersion::ONEDOTONE};
-// 	for (int i = 0; i < HttpVersion::NO; i++) {
-// 		if (temp == versions[i]) {
-// 			_version = versiontype[i];
-// 			break;
-// 		}
-// 	}
-// 	if (_version == HttpVersion::NO) {
-// 		throw Request::IncorrectRequestFormatException();
-// 	}
-// }
 void
-Request::_header_add(Header&& hdr) {
+Request::_header_append(Header&& hdr) {
 	auto it = _headers.find(hdr.first);
 
 	if (it != _headers.end()) {

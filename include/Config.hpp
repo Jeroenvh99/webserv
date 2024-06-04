@@ -77,7 +77,7 @@ public:
 
 private:
 	std::string _config;
-	struct ServerLog _errorlog;
-	struct ServerLog _accesslog;
+	ServerLog _errorlog;
+	ServerLog _accesslog;
 	std::vector<Server> _servers;
 };

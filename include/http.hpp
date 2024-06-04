@@ -7,20 +7,23 @@
 # include <utility>
 
 namespace http {
+	// Forward class declarations
+
 	class Request;
 	class Response;
+
 	// HTTP methods
 
 	enum class Method {
-		GET = 0x1 < 0,
-		HEAD = 0x1 < 1,
-		POST = 0x1 < 2,
-		PUT = 0x1 < 3,
-		DELETE = 0x1 < 4,
-		CONNECT = 0x1 < 5,
-		OPTIONS = 0x1 < 6,
-		TRACE = 0x1 < 7,
-		NONE = 0x1 < 8,
+		GET = 0x1 << 0,
+		HEAD = 0x1 << 1,
+		POST = 0x1 << 2,
+		PUT = 0x1 << 3,
+		DELETE = 0x1 << 4,
+		CONNECT = 0x1 << 5,
+		OPTIONS = 0x1 << 6,
+		TRACE = 0x1 << 7,
+		NONE = 0x1 << 8,
 	}; // enum class Method
 
 	using MethodMap = std::array<std::pair<Method, char const*>, 8>;
@@ -34,6 +37,10 @@ namespace http {
 		{Method::OPTIONS, "OPTIONS"},
 		{Method::TRACE, "TRACE"}
 	}};
+	constexpr std::initializer_list<Method>	any_method = {
+		Method::GET, Method::HEAD, Method::POST, Method::PUT,
+		Method::DELETE, Method::CONNECT, Method::OPTIONS, Method::TRACE
+	};
 
 	Method		to_method(std::string const&);
 	char const*	to_string(Method);

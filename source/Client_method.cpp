@@ -4,24 +4,25 @@
 // Modifiers
 
 void
+Client::clear() noexcept {
+	_data._state = State::idle;
+	_data._buffer.str("");
+	_data._buffer.clear();
+	_data._parser.clear();
+	_data._request.clear();
+	_data._response.clear();
+}
+
+void
 Client::parse() {
 	_data._parser.parse(_data._buffer, _data._request);
 	if (_data._parser.state() == http::Request::Parser::State::done)
 		_data._state = State::fetch;
 }
 
-void
-Client::fetch() {
-	// if CGI should be executed
-	// setup connection between server and CGI executable
-	// exec CGI
-	// _state = State::wait;
-	*this << http::Response("David is an absolute genius", http::StatusCode::ok);
-	_data._state = State::send;
-}
-
 size_t
 Client::wait() {
+	/* implement */
 	_data._state = State::send;
 	return (0);
 }
@@ -40,7 +41,9 @@ Client::send() {
 	network::Buffer<512>	socket_buffer;
 
 	_data._buffer >> socket_buffer;
-	if (_data._buffer.eof())
+	if (_data._buffer.eof()) {
+		clear();
 		_data._state = Client::State::idle;
+	}
 	return (socket().write(socket_buffer));
 }

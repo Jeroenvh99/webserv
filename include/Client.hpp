@@ -52,9 +52,9 @@ public:
 
 	void	parse();
 	size_t	recv();
-	void	fetch();
 	size_t	send();
 	size_t	wait();
+	void	clear() noexcept;
 
 private:
 	SocketBox	_socket;

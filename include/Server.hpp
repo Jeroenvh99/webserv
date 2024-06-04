@@ -7,34 +7,43 @@
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
 # include "logging.hpp"
-# include "http/StatusCode.hpp"
+# include "http/Status.hpp"
+# include "http/Request.hpp"
 # include "Client.hpp"
-# include "Route.hpp"
+# include "route.hpp"
 
-# include <map>
+# include <filesystem>
 # include <string>
+# include <unordered_map>
 # include <vector>
 
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using ErrorPageMap = std::map<http::StatusCode, std::string>;
+	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
 	using Poller = network::Poller;
-	using RouteMap = std::map<std::string, Route>;
 	using SharedHandle = network::SharedHandle;
 
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&);
-	Server(in_port_t, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(std::string const&, in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&		acceptor() noexcept;
-	Acceptor const&	acceptor() const noexcept;
-	void			loop(int);
+	Acceptor&			acceptor() noexcept;
+	Acceptor const&		acceptor() const noexcept;
+	void				process(int);
+	std::string const&	name() const noexcept;
+
+	route::Config	locate(std::filesystem::path const&) const;
+	http::Response	respond(http::Request const&);
+	http::Response	respond_error(http::Status);
+	http::Status	get(std::string&, http::Request const&);
+	http::Status	post(std::string&, http::Request const&);
+	http::Status	delete_(std::string&, http::Request const&);
 
 	static constexpr Poller::EventTypes	poller_events = {
 		Poller::EventType::read, Poller::EventType::write
@@ -46,7 +55,7 @@ private:
 	using ClientIt = ClientMap::iterator;
 
 	void	_accept();
-	void	_process(Poller::Event const&, ClientIt);
+	void	_process_core(Poller::Event const&, ClientIt);
 	void	_process_graveyard(Poller::Event const&, ClientIt);
 	void	_to_graveyard(ClientIt);
 	void	_drop(ClientIt);
@@ -56,11 +65,12 @@ private:
 	bool	_wait(Client&);
 	bool	_send(Client&);
 
+	std::string				_name;
 	Poller					_poller;
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;
-	RouteMap				_routes;
+	route::Route			_route;
 	ErrorPageMap			_error_pages;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;

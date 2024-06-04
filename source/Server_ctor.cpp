@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 /*
-Server::Server(Config&& config):
+Server::Server(RouteConfig&& config):
 	_poller(),
 	_acceptor(_poller.add(Acceptor::Address(config.port, INADDR_ANY)),
 							{Poller::EventType::read},
@@ -14,11 +14,13 @@ Server::Server(Config&& config):
 
 using namespace logging;
 
-Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remove this once config parser is done
+Server::Server(std::string const& name, in_port_t port, int backlog_size,
+		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
+	_name(name),
 	_poller(),
 	_acceptor(),
 	_clients(),
-	_routes(),
+	_route("/"),
 	_error_pages(),
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
@@ -28,4 +30,13 @@ Server::Server(in_port_t port, std::ostream& alog, std::ostream& elog): // remov
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
+	_route.allow_method(http::Method::GET)
+		.redirect("./www")
+		.set_directory_file("index.html");
+	_route.extend("/cgi")
+		.forbid_directory()
+		.allow_cgi("py");
+	_route.extend("/stuff")
+		.allow_method(http::Method::POST);
+	acceptor().listen(backlog_size);
 }
