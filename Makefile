@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/ route/
+SRC_SUBDIRS	:= network/ cgi/ http/ http/Request_Parser/ logging/ route/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -16,6 +16,8 @@ SRC_FILES	:= main.cpp \
 			Server_process.cpp \
 			Server_respond.cpp \
 			URI.cpp \
+			cgi/CGI.cpp \
+			cgi/except.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
 			http/Request.cpp \
