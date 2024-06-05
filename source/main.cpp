@@ -25,8 +25,7 @@ main(int argc, char** argv) {
 		for (Config::Server config : serverconfigs) {
 			std::ofstream access(config.accesslog.filename);
 			std::ofstream error(config.errorlog.filename);
-			Server serv(config.servername, config.port, dfl_backlog_size, access, error);
-			servers.push_back(serv);
+			servers.push_back(Server(config.servername, config.port, dfl_backlog_size, access, error));
 		}
 		while (true) {
 			for (size_t i = 0; i < serverconfigs.size(); i++) {
