@@ -12,7 +12,10 @@ Server::Server(RouteConfig&& config):
 	_buffer() {}
 */
 
-using namespace logging;
+using logging::AccessLogger;
+using logging::ErrorLogger;
+using logging::Format;
+using logging::Variable;
 
 Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
