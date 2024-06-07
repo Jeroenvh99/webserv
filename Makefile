@@ -16,7 +16,9 @@ SRC_FILES	:= main.cpp \
 			Server_process.cpp \
 			Server_respond.cpp \
 			URI.cpp \
-			cgi/CGI.cpp \
+			cgi/CGI_ctor.cpp \
+			cgi/CGI_env.cpp \
+			cgi/CGI_method.cpp \
 			cgi/except.cpp \
 			http/Method.cpp \
 			http/Message.cpp \

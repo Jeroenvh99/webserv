@@ -12,16 +12,18 @@ public:
 	class Exception;
 	class PipeException;
 	class ForkException;
+	class Environment;
 
-	CGI() = delete;
+	CGI();
 	~CGI();
 	CGI(CGI const&) = delete;
 	CGI(CGI&&);
-	CGI(http::Request const&);
 
-	void	launch(http::Request const&);
-	size_t	read() const;
-	void	kill();
+	static Environment	env(http::Request const&) const;
+
+	void		launch(http::Request const&);
+	size_t		read() const;
+	void		kill();
 
 private:
 	friend int main(int, char**, char**);
@@ -33,15 +35,11 @@ private:
 	void	_fork(http::Request const&);
 	void	_exec(http::Request const&);
 
-	//char**	_new_argv(http::Request const&) const;
-	std::vector<std::string>	_get_envv(http::Request const&) const;
-
 	static char**				_envp;
 	static size_t				_envsize;
 	static constexpr pid_t		_no_child = 0;
 	static constexpr size_t		_read_end = 0;
 	static constexpr size_t		_write_end = 1;
-	static constexpr size_t		_additional_vars = 5;
 
 	pid_t	_pid;
 	fd		_ifd;
