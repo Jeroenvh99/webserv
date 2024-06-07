@@ -40,3 +40,7 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		.allow_method(http::Method::POST);
 	acceptor().listen(backlog_size);
 }
+
+Server::Server(Server&& serv) {
+	this = &serv;
+}
