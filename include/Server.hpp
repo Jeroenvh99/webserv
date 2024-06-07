@@ -27,7 +27,7 @@ public:
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
-	Server(Server&&);
+	Server(Server&&) = default;
 	Server(std::string const&, in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
