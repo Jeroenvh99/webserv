@@ -61,7 +61,10 @@ CGI::_exec(http::Request const& req) {
 
 void
 CGI::_redirect_stdout(fd ofd) {
-	::dup2(ofd, STDOUT_FILENO);
+	if (::dup2(ofd, STDOUT_FILENO) == -1) {
+		::perror("dup2");
+		::exit(EXIT_FAILURE);
+	}
 	::close(ofd);
 }
 

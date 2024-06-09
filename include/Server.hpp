@@ -38,7 +38,8 @@ public:
 	void				process(int);
 	std::string const&	name() const noexcept;
 
-	route::Config	locate(std::filesystem::path const&) const;
+	route::Location	locate(std::filesystem::path const&) const;
+	
 	http::Response	respond(http::Request const&);
 	http::Response	respond_error(http::Status);
 	http::Status	get(std::string&, http::Request const&);

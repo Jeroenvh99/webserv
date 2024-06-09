@@ -4,7 +4,8 @@ using route::Route;
 using route::Path;
 
 Route::Route(Path const& path):
-	Config(*(path.begin())),
+	BaseRoute(*(path.begin())),
+	_super(nullptr),
 	_subroutes() {
 	auto const	next = ++path.begin();
 	auto const	end = path.end();
@@ -14,11 +15,13 @@ Route::Route(Path const& path):
 }
 
 Route::Route(Route const& super, std::string const& fname):
-	Config(super, fname),
+	BaseRoute(fname),
+	_super(&super),
 	_subroutes() {}
 
 Route::Route(Route const& super, PathSegment seg, PathSegment end):
-	Config(super, *seg),
+	BaseRoute(*seg),
+	_super(&super),
 	_subroutes() {
 	if (++seg != end)
 		_subroutes.push_front(Route(*this, seg, end));
