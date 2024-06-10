@@ -10,11 +10,7 @@ Route::Route(Path const& path):
 	_super(nullptr),
 	_subroutes(),
 	_fname(*(path.begin())) {
-	auto const	next = ++path.begin();
-	auto const	end = path.end();
-
-	if (next != end && next->string().size() > 0)
-		_subroutes.push_front(Route(*this, next, path.end()));
+	extend(path);
 }
 
 Route::Route(Route const& super, std::string const& fname):

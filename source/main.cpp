@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "CGI.hpp"
+#include "route.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -16,6 +17,12 @@ int
 main(int argc, char** argv, char** envp) {
 	if (argc > 2)
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
+
+	route::Route	rt("/lorem/ipsum");
+	rt.redirect("./www");
+	route::Location	loc = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
+
+	std::cout << loc.from() << '\n' << loc.to() << std::endl;
 
 	CGI::_envp = envp;
 	CGI::_envsize = _get_envsize(envp);

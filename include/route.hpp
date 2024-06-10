@@ -95,15 +95,15 @@ namespace route {
 		DirectoryOption		_super_diropt() const noexcept;
 		std::string const&	_super_directory_file() const noexcept;
 		CGIOption			_super_cgiopt() const noexcept;
-		ExtensionSet		_super_cgi() const noexcept;
+		ExtensionSet const&	_super_cgi() const noexcept;
 
 		Container::iterator			_subroute(std::string const&) noexcept;
 		Container::const_iterator	_subroute(std::string const&) const noexcept;
 
-		Route const*	_super;
-		Container		_subroutes;
-		std::string		_fname;
-		Path			_redirection;
+		Route const* const	_super;
+		Container			_subroutes;
+		std::string			_fname;
+		Path				_redirection;
 	}; // class Route
 
 	class Location: public BaseRoute {

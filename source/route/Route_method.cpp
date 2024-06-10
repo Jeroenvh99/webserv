@@ -79,7 +79,7 @@ Route::follow(Path const& path) const {
 Location
 Route::_follow_core(Path::iterator seg, Path::iterator end) const {
 	if (_is_final(seg, end))
-		return (Location(*this, _relative_path(seg, end)));
+		return (Location(*this, ""));
 
 	auto	subroute = _subroute(seg->string());
 
@@ -258,7 +258,7 @@ Route::_super_cgiopt() const noexcept {
 	return (_cgiopt);
 }
 
-Route::ExtensionSet
+Route::ExtensionSet const&
 Route::_super_cgi() const noexcept {
 	if (_super && _cgiopt == CGIOption::inherits)
 		return (_super->_super_cgi());
@@ -274,9 +274,11 @@ _is_final(Path::iterator seg, Path::iterator end) {
 
 static std::string
 _relative_path(Path::iterator seg, Path::iterator end) {
-	Path	path;
+	std::string	path;
 
-	while (seg != end)
-		path /= *seg++;
-	return (path.string());
+	while (seg != end) {
+		path += "/";
+		path += *(seg++);
+	}
+	return (path);
 }
