@@ -22,7 +22,7 @@ main(int argc, char** argv, char** envp) {
 	rt.redirect("./www");
 	route::Location	loc = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
 
-	std::cout << loc.from() << '\n' << loc.to() << std::endl;
+	std::cout << loc.from() << '\n' << loc.to() << '\n' << loc.path_info() << std::endl;
 
 	CGI::_envp = envp;
 	CGI::_envsize = _get_envsize(envp);
@@ -35,7 +35,7 @@ main(int argc, char** argv, char** envp) {
 	http::Request::Parser	parser;
 
 	parser.parse(ss, req);
-	cgi.launch(req);
+	//cgi.launch(req);
 	/*
 	in_port_t const	port = (argc == 1) ? dfl_port : std::stol(argv[1]); // temp
 

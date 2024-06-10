@@ -115,6 +115,8 @@ namespace route {
 		std::string const&	path_info() const noexcept;
 
 	private:
+		Location(Route const&, Path::iterator, Path::iterator, Path::iterator);
+
 		Path		_from;
 		Path		_to;
 		std::string	_path_info;
