@@ -37,10 +37,8 @@ Config &Config::operator=(const Config& src) {
 	return *this;
 }
 
-std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
-
 Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
-	ServerLog log = {"", LogLevel::ERROR};
+	ServerLog log = {"", logging::ErrorLogger::Level::error};
 	std::getline(s, word, ' ');
 	word.erase(word.find_last_not_of(";") + 1);
 	log.filename = word;
@@ -48,8 +46,8 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 		std::getline(s, word, ' ');
 		word.erase(word.find_last_not_of(";") + 1);
 		for (int i = 0; i <= 8; i++) {
-			if (word == loglevels[i]) {
-				log.level = static_cast<LogLevel>(i);
+			if (word == logging::ErrorLogger::_levels[i].second) {
+				log.level = static_cast<logging::ErrorLogger::Level>(i);
 				break;
 			}
 		}

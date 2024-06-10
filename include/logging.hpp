@@ -83,8 +83,7 @@ namespace logging {
 	
 		static char const*			level_to_string(ErrorLogger::Level);
 		static ErrorLogger::Level	level_from_string(std::string const&);
-	
-	private:
+
 		using LevelStringMap = std::array<std::pair<Level, char const*>, 8>;
 	
 		static const LevelStringMap	_levels;

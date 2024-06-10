@@ -17,9 +17,9 @@ using logging::ErrorLogger;
 using logging::Format;
 using logging::Variable;
 
-Server::Server(std::string const& name, in_port_t port, int backlog_size,
+Server::Server(Config::Server config, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
-	_name(name),
+	_name(config.servername),
 	_poller(),
 	_acceptor(),
 	_clients(),
@@ -28,8 +28,8 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, ErrorLogger::Level::debug) {
-	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
+	_elog(elog, config.errorlog.level) {
+	_acceptor = _poller.add(Acceptor(Acceptor::Address((in_port_t)config.port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
@@ -42,8 +42,4 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 	_route.extend("/stuff")
 		.allow_method(http::Method::POST);
 	acceptor().listen(backlog_size);
-}
-
-Server::Server(Server&& serv) {
-	this = &serv;
 }

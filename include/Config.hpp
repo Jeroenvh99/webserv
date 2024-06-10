@@ -9,26 +9,15 @@
 #include <exception>
 
 #include "http/Request.hpp"
+#include "logging.hpp"
 
 class Config
 {
 public:
-	enum class LogLevel : int
-	{
-		DEBUG,
-		INFO,
-		NOTICE,
-		WARN,
-		ERROR,
-		CRIT,
-		ALERT,
-		EMERG
-	};
-
 	struct ServerLog
 	{
 		std::string filename;
-		LogLevel level;
+		logging::ErrorLogger::Level level;
 	};
 
 	struct Location
