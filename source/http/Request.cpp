@@ -72,6 +72,11 @@ Request::body() noexcept {
 	return (_body);
 }
 
+size_t
+Request::header_count() const noexcept {
+	return (_headers.size());
+}
+
 // Modifiers
 
 void

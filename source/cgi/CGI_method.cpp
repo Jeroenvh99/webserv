@@ -1,5 +1,11 @@
 #include "CGI.hpp"
 
+#include <cstdlib>
+#include <cstring>
+#include <sys/wait.h>
+#include <signal.h>
+#include <unistd.h>
+
 static char**		_make_cstrv(std::vector<std::string>&);
 
 // Public methods
@@ -47,7 +53,7 @@ CGI::_fork(http::Request const& req) {
 void
 CGI::_exec(http::Request const& req) {
 	std::string					pathname = req.uri().path();
-	std::vector<std::string>	envv = _get_envv(req);
+	std::vector<std::string>	envv = env(req);
 
 	char* const		cpathname = pathname.data();
 	char* const		cargv[2] = {cpathname, nullptr};
@@ -66,18 +72,6 @@ CGI::_redirect_stdout(fd ofd) {
 		::exit(EXIT_FAILURE);
 	}
 	::close(ofd);
-}
-
-std::vector<std::string>
-CGI::_get_envv(http::Request const& req) const {
-	std::vector<std::string>	envv;
-
-	envv.reserve(_envsize + 5); // Reserve enough space for _envv_append()
-	for (size_t i = 0; i < _envsize; ++i)
-		if (_envp[i])
-			envv.push_back(_envp[i]);
-	_envv_append(envv, req);
-	return (envv);
 }
 
 // Non-member helpers

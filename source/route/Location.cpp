@@ -3,16 +3,11 @@
 using route::Location;
 using route::Path;
 
-Location::Location(Route const& rt):
-	_methopt(MethodOption::own),
-	_allowed_methods(rt._super_allowed_methods()),
-	_diropt(rt._super_diropt()),
-	_directory_file(rt._super_directory_file()),
-	_cgiopt(rt._super_cgiopt()),
-	_cgi(rt._super_cgi()),
-	_from(rt.from()),
-	_to(rt.to()),
-	_path_info()) {}
+Location::Location(Route const& rt, Path const& relative_path):
+	BaseRoute(rt),
+	_from(rt.from() / relative_path),
+	_to(rt.to() / relative_path),
+	_path_info() {}
 
 std::filesystem::path const&
 Location::from() const noexcept {

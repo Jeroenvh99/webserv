@@ -12,14 +12,14 @@ public:
 	class Exception;
 	class PipeException;
 	class ForkException;
-	class Environment;
+	using Environment = std::vector<std::string>;
 
 	CGI();
 	~CGI();
 	CGI(CGI const&) = delete;
 	CGI(CGI&&);
 
-	static Environment	env(http::Request const&) const;
+	static Environment	env(http::Request const&);
 
 	void		launch(http::Request const&);
 	size_t		read() const;

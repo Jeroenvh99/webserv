@@ -31,6 +31,7 @@ namespace http {
 		bool				has_header(std::string const&) const noexcept;
 		std::string const&	body() const noexcept;
 		std::string&		body() noexcept;
+		size_t				header_count() const noexcept;
 
 		void	clear() noexcept;
 

@@ -1,26 +1,24 @@
 #include "route.hpp"
 
 using route::BaseRoute;
-using route::Path;
-using route::PathSegment;
 
 // Basic operations
 
-Path const	BaseRoute::no_redirection = "";
+BaseRoute::BaseRoute(bool inherit):
+	_methopt(inherit ? MethodOption::inherits : MethodOption::own),
+	_allowed_methods(0),
+	_diropt(inherit ? DirectoryOption::inherits : DirectoryOption::forbid),
+	_directory_file(),
+	_cgiopt(inherit ? CGIOption::inherits : CGIOption::disallow),
+	_cgi() {}
 
-BaseRoute::BaseRoute(std::string&& fname):
-	_fname(fname),
-	_redirection(no_redirection),
-	_methopt(MethodOption::own), _allowed_methods(0),
-	_diropt(DirectoryOption::forbid), _directory_file(),
-	_cgiopt(CGIOption::disallow), _cgi() {}
-
-BaseRoute::BaseRoute(std::string const& fname):
-	_fname(fname),
-	_redirection(no_redirection),
-	_methopt(MethodOption::inherits), _allowed_methods(0),
-	_diropt(DirectoryOption::inherits), _directory_file(),
-	_cgiopt(CGIOption::inherits), _cgi() {}
+BaseRoute::BaseRoute(Route const& that):
+	_methopt(MethodOption::own),
+	_allowed_methods(that._super_allowed_methods()),
+	_diropt(that._super_diropt()),
+	_directory_file(that._super_directory_file()),
+	_cgiopt(that._super_cgiopt()),
+	_cgi(that._super_cgi()) {}
 
 // Accessor methods
 
@@ -42,4 +40,9 @@ BaseRoute::directory_file() const noexcept {
 bool
 BaseRoute::allows_method(http::Method method) const noexcept {
 	return (_allowed_methods & static_cast<MethodBitmask>(method));
+}
+
+bool
+BaseRoute::allows_cgi(std::string const& ext) const noexcept {
+	return (_cgi.find(ext) != _cgi.end());
 }

@@ -17,13 +17,8 @@ namespace route {
 
 	class BaseRoute {
 	public:
-		BaseRoute(std::string const& = "");
-		BaseRoute(std::string&&);
-
-		static const Path				no_redirection;
-		static constexpr char const*	no_directory_file = "";
-
-		std::string const&	filename() const noexcept;
+		BaseRoute(bool = false);
+		BaseRoute(Route const&);
 
 		bool				lists_directory() const noexcept;
 		bool				forbids_directory() const noexcept;
@@ -31,8 +26,11 @@ namespace route {
 		bool				allows_method(http::Method) const noexcept;
 		bool				allows_cgi(std::string const&) const noexcept;
 
+		static constexpr char const*	no_directory_file = "";
+
 	private:
 		friend class Route;
+		friend class Location;
 
 		enum class MethodOption;
 		enum class DirectoryOption;
@@ -50,8 +48,7 @@ namespace route {
 
 	class Route: public BaseRoute {
 	public:
-		Route(std::string&& = "");
-		Route(Path const&);
+		Route(Path const& = "");
 
 		Path		from() const;
 		Path		to() const;
@@ -64,6 +61,7 @@ namespace route {
 		std::string const&	directory_file() const noexcept;
 		bool				allows_method(http::Method) const noexcept;
 		bool				allows_cgi(std::string const&) const noexcept;
+		std::string const&	filename() const noexcept;
 
 		Route&	redirect(Path const&);
 		Route&	list_directory() noexcept;
@@ -78,7 +76,11 @@ namespace route {
 		Route&	disallow_cgi(std::string const&);
 		Route&	reset_cgi();
 
+		static Path const	no_redirection;
+
 	private:
+		friend class BaseRoute;
+
 		using Container = std::forward_list<Route>;
 
 		Route(Route const&, std::string const&);
@@ -89,11 +91,11 @@ namespace route {
 		Location	_follow_core(Path::iterator, Path::iterator) const;
 		Route&		_seek_core(Path::iterator, Path::iterator);
 
-		BaseRoute::MethodBitmask	_super_allowed_methods() const noexcept;
-		BaseRoute::DirectoryOption	_super_diropt() const noexcept;
-		std::string const&			_super_directory_file() const noexcept;
-		BaseRoute::CGIOption		_super_cgiopt() const noexcept;
-		BaseRoute::ExtensionSet		_super_cgi() const noexcept;
+		MethodBitmask		_super_allowed_methods() const noexcept;
+		DirectoryOption		_super_diropt() const noexcept;
+		std::string const&	_super_directory_file() const noexcept;
+		CGIOption			_super_cgiopt() const noexcept;
+		ExtensionSet		_super_cgi() const noexcept;
 
 		Container::iterator			_subroute(std::string const&) noexcept;
 		Container::const_iterator	_subroute(std::string const&) const noexcept;
@@ -106,11 +108,11 @@ namespace route {
 
 	class Location: public BaseRoute {
 	public:
-		Location(Route const&);
+		Location(Route const&, Path const& = "");
 
 		Path const&			from() const noexcept;
 		Path const&			to() const noexcept;
-		std::string const&	path_info() const;
+		std::string const&	path_info() const noexcept;
 
 	private:
 		Path		_from;

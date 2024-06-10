@@ -45,7 +45,7 @@ bool
 Route::forbids_directory() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
 		return (_super->forbids_directory());
-	return (BaseRoute::forbids_directory);
+	return (BaseRoute::forbids_directory());
 }
 
 std::string const&
@@ -131,6 +131,91 @@ Route::_extend_core(Path::iterator seg, Path::iterator end) {
 		return (subroute->_extend_core(++seg, end));
 }
 
+Route&
+Route::redirect(Path const& path) {
+	_redirection = path;
+	return (*this);
+}
+
+Route&
+Route::list_directory() noexcept {
+	_directory_file.clear();
+	_diropt = DirectoryOption::listing;
+	return (*this);
+}
+
+Route&
+Route::forbid_directory() noexcept {
+	_directory_file.clear();
+	_diropt = DirectoryOption::forbid;
+	return (*this);
+}
+
+Route&
+Route::set_directory_file(std::string const& fname) {
+	_diropt = DirectoryOption::default_file;
+	_directory_file = fname;
+	return (*this);
+}
+
+Route&
+Route::reset_diropts() noexcept {
+	_directory_file.clear();
+	if (_super)
+		_diropt = DirectoryOption::inherits;
+	else
+		_diropt = DirectoryOption::forbid;
+	return (*this);
+}
+
+Route&
+Route::allow_method(http::Method method) noexcept {
+	_methopt = MethodOption::own;
+	_allowed_methods |= static_cast<MethodBitmask>(method);
+	return (*this);
+}
+
+Route&
+Route::disallow_method(http::Method method) noexcept {
+	_methopt = MethodOption::own;
+	_allowed_methods &= ~(static_cast<MethodBitmask>(method));
+	return (*this);
+}
+
+Route&
+Route::reset_methods() noexcept {
+	_allowed_methods = 0;
+	if (_super)
+		_methopt = MethodOption::inherits;
+	return (*this);
+}
+
+Route&
+Route::allow_cgi(std::string const& ext) {
+	_cgiopt = CGIOption::allow;
+	_cgi.insert(ext);
+	return (*this);
+}
+
+Route&
+Route::disallow_cgi(std::string const& ext) {
+	auto const	it = _cgi.find(ext);
+
+	if (it != _cgi.end())
+		_cgi.erase(it);
+	return (*this);
+}
+
+Route&
+Route::reset_cgi() {
+	_cgi.clear();
+	if (_super)
+		_cgiopt = CGIOption::inherits;
+	else
+		_cgiopt = CGIOption::disallow;
+	return (*this);
+}
+
 // Private accessors
 
 Route::Container::iterator
@@ -145,14 +230,14 @@ Route::_subroute(std::string const& fname) const noexcept {
 		[fname](Route const& route) { return (route.filename() == fname); } ));
 }
 
-BaseRoute::MethodBitmask
+Route::MethodBitmask
 Route::_super_allowed_methods() const noexcept {
 	if (_super && _methopt == MethodOption::inherits)
-		return (_super->_super_bitmask());
+		return (_super->_super_allowed_methods());
 	return (_allowed_methods);
 }
 
-BaseRoute::DirectoryOption
+Route::DirectoryOption
 Route::_super_diropt() const noexcept {
 	if (_super && _diropt == DirectoryOption::inherits)
 		return (_super->_super_diropt());
@@ -166,14 +251,14 @@ Route::_super_directory_file() const noexcept {
 	return (_directory_file);
 }
 
-BaseRoute::CGIOption
+Route::CGIOption
 Route::_super_cgiopt() const noexcept {
 	if (_super && _cgiopt == CGIOption::inherits)
 		return (_super->_super_cgiopt());
 	return (_cgiopt);
 }
 
-BaseRoute::ExtensionSet
+Route::ExtensionSet
 Route::_super_cgi() const noexcept {
 	if (_super && _cgiopt == CGIOption::inherits)
 		return (_super->_super_cgi());

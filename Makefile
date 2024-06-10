@@ -46,9 +46,10 @@ SRC_FILES	:= main.cpp \
 			network/Poller_method.cpp \
 			network/Poller_Event.cpp \
 			network/Address_IPv4.cpp \
+			route/BaseRoute.cpp \
+			route/Location.cpp \
 			route/Route_ctor.cpp \
-			route/Route_method.cpp \
-			route/Config.cpp
+			route/Route_method.cpp
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
