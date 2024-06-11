@@ -10,7 +10,7 @@ using PathIt = stdfs::path::iterator;
 
 static PathIt			_find_path_end(PathIt, PathIt, Route const&);
 static std::string_view	_get_ext(std::string const&);
-static void				_path_append(stdfs::path&, PathIt, PathIt);
+static stdfs::path&&	_path_append(stdfs::path&&, PathIt, PathIt);
 static std::string		_to_string(PathIt, PathIt);
 
 // Public constructors
@@ -25,8 +25,8 @@ Location::Location(Route const& rt, PathIt begin, PathIt end):
 
 Location::Location(Route const& rt, PathIt begin, PathIt path_end, PathIt end):
 	BaseRoute(rt),
-	_from(_path_append(rt.from(), begin, end)),
-	_to(_path_append(rt.to(), begin, path_end)),
+	_from(_path_append(std::move(rt.from()), begin, end)),
+	_to(_path_append(std::move(rt.to()), begin, path_end)),
 	_path_info(_to_string(path_end, end)) {}
 
 // Public accessors
@@ -48,10 +48,11 @@ Location::path_info() const noexcept {
 
 // Non-member helpers
 
-static void
-_path_append(stdfs::path& root, PathIt begin, PathIt end) {
+static stdfs::path&&
+_path_append(stdfs::path&& root, PathIt begin, PathIt end) {
 	while (begin != end)
 		root /= *begin++;
+	return (std::move(root));
 }
 
 static std::string

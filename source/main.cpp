@@ -21,6 +21,18 @@ main(int argc, char** argv, char** envp) {
 	if (argc > 2)
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
 
+	route::Route	rt("/lorem/ipsum");
+	rt.redirect("./www").allow_cgi("py");
+	route::Location	loc0 = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
+	route::Location	loc1 = rt.follow("/lorem/ipsum/dolor/sit.php/amet/consectetur");
+	route::Location	loc2 = rt.follow("/lorem/script.py/");
+	route::Location	loc3 = rt.follow("/lorem/script.py");
+	
+	std::cout << loc0.from() << '\n' << loc0.to() << '\n' << loc0.path_info() << std::endl;
+	std::cout << loc1.from() << '\n' << loc1.to() << '\n' << loc1.path_info() << std::endl;
+	std::cout << loc2.from() << '\n' << loc2.to() << '\n' << loc2.path_info() << std::endl;
+	std::cout << loc3.from() << '\n' << loc3.to() << '\n' << loc3.path_info() << std::endl;
+	
 	(void) argv;
  	CGI	cgi;
 	std::stringstream		ss("GET ./www/cgi/env.py HTTP/1.1\r\n\r\n");
