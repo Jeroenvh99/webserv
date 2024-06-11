@@ -10,8 +10,10 @@ using PathIt = stdfs::path::iterator;
 
 static PathIt			_find_path_end(PathIt, PathIt, Route const&);
 static std::string_view	_get_ext(std::string const&);
-static stdfs::path		_path_append(stdfs::path const&, PathIt, PathIt);
+static void				_path_append(stdfs::path&, PathIt, PathIt);
 static std::string		_to_string(PathIt, PathIt);
+
+// Public constructors
 
 Location::Location(Route const& rt, stdfs::path const& branch):
 	Location(rt, branch.begin(), branch.end()) {}
@@ -19,11 +21,15 @@ Location::Location(Route const& rt, stdfs::path const& branch):
 Location::Location(Route const& rt, PathIt begin, PathIt end):
 	Location(rt, begin, _find_path_end(begin, end, rt), end) {}
 
+// Private constructors
+
 Location::Location(Route const& rt, PathIt begin, PathIt path_end, PathIt end):
 	BaseRoute(rt),
 	_from(_path_append(rt.from(), begin, end)),
 	_to(_path_append(rt.to(), begin, path_end)),
 	_path_info(_to_string(path_end, end)) {}
+
+// Public accessors
 
 stdfs::path const&
 Location::from() const noexcept {
@@ -42,13 +48,10 @@ Location::path_info() const noexcept {
 
 // Non-member helpers
 
-static stdfs::path
-_path_append(stdfs::path const& root, PathIt begin, PathIt end) {
-	stdfs::path	pt(root);
-
+static void
+_path_append(stdfs::path& root, PathIt begin, PathIt end) {
 	while (begin != end)
-		pt /= *begin++;
-	return (pt);
+		root /= *begin++;
 }
 
 static std::string
@@ -61,10 +64,10 @@ _to_string(PathIt begin, PathIt end) {
 }
 
 static PathIt
-_find_path_end(PathIt seg, PathIt end, Route const& rt) {
-	for (; seg != end; ++seg)
-		if (rt.allows_cgi(_get_ext(*seg)))
-			return (std::next(seg, 1));
+_find_path_end(PathIt it, PathIt end, Route const& rt) {
+	for (; it != end; ++it)
+		if (rt.allows_cgi(_get_ext(*it)))
+			return (std::next(it, 1));
 	return (end);
 }
 
@@ -79,11 +82,11 @@ _get_ext(std::string const& fname) {
 			while (end != fname.end() && *end != '.')
 				++end;
 			if (end == fname.end())
-				return (std::string_view(std::next(begin, 1), end));
+				return (std::string_view(std::next(begin, 1), end)); // C++20
 			begin = end;
 		}
 		else
 			++begin;
 	}
-	return (std::string_view(begin, fname.end()));
+	return (std::string_view(begin, fname.end())); // C++20
 }

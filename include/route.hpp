@@ -87,9 +87,9 @@ namespace route {
 
 		using Container = std::forward_list<Route>;
 
+		Route(Route const&, stdfs::path::iterator, stdfs::path::iterator);
 		Route(Route const&, std::string const&);
 		Route(Route const&, std::string&&);
-		Route(Route const&, stdfs::path::iterator, stdfs::path::iterator);
 
 		Route&		_extend_core(stdfs::path::iterator, stdfs::path::iterator);
 		Location	_follow_core(stdfs::path::iterator, stdfs::path::iterator) const;
