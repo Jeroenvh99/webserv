@@ -3,6 +3,7 @@
 
 # include "http.hpp"
 # include "http/Status.hpp"
+# include "utils.hpp"
 
 # include <forward_list>
 # include <filesystem>
@@ -25,6 +26,7 @@ namespace route {
 		std::string const&	directory_file() const noexcept;
 		bool				allows_method(http::Method) const noexcept;
 		bool				allows_cgi(std::string const&) const noexcept;
+		bool				allows_cgi(std::string_view const&) const noexcept;
 
 		static constexpr char const*	no_directory_file = "";
 
@@ -35,7 +37,7 @@ namespace route {
 		enum class MethodOption;
 		enum class DirectoryOption;
 		enum class CGIOption;
-		using ExtensionSet = std::unordered_set<std::string>;
+		using ExtensionSet = std::unordered_set<std::string, utils::StringHash, std::equal_to<>>;
 		using MethodBitmask = std::underlying_type<http::Method>::type;
 
 		MethodOption	_methopt;
@@ -61,6 +63,7 @@ namespace route {
 		std::string const&	directory_file() const noexcept;
 		bool				allows_method(http::Method) const noexcept;
 		bool				allows_cgi(std::string const&) const noexcept;
+		bool				allows_cgi(std::string_view const&) const noexcept;
 		std::string const&	filename() const noexcept;
 
 		Route&	redirect(Path const&);

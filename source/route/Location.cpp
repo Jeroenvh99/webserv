@@ -19,8 +19,8 @@ Location::Location(Route const& rt, Path const& branch):
 
 Location::Location(Route const& rt, PathIt begin, PathIt path_end, PathIt end):
 	BaseRoute(rt),
-	_from(_path_append(rt.from(), path_end)),
-	_to(_path_append(rt.to(), path_end)),
+	_from(_path_append(rt.from(), begin, path_end)),
+	_to(_path_append(rt.to(), begin, path_end)),
 	_path_info(_get_path_info(path_end, end)) {}
 
 std::filesystem::path const&
@@ -45,26 +45,24 @@ _path_append(std::filesystem::path const& root, PathIt begin, PathIt end) {
 	std::filesystem::path	pt(root);
 
 	while (begin != end)
-		path /= *begin++;
-	return (path);
+		pt /= *begin++;
+	return (pt);
 }
 
 static std::string
 _get_path_info(PathIt begin, PathIt end) {
-	std::string	path_info;
+	std::ostringstream	oss;
 
 	while (begin != end)
-		path_info += *begin++;
-	return (path_info);
+		oss << "/" << (begin++)->string();
+	return (oss.str());
 }
 
 static PathIt
 _find_path_end(std::filesystem::path const& pt, Route const& rt) {
-	for (auto seg = pt.begin(); seg != pt.end(); ++seg) {
-		for (auto const& ext: rt._allowed_cgi())
-			if (_ends_with(seg->string(), ext))
-				return (seg);
-	}
+	for (auto seg = pt.begin(); seg != pt.end(); ++seg)
+		if (rt.allows_cgi(_get_ext(*seg)))
+			return (std::next(seg, 1));
 	return (pt.end());
 }
 
@@ -74,14 +72,16 @@ _get_ext(std::string const& fname) {
 
 	while (begin != fname.end()) {
 		if (*begin == '.') {
-			auto	end = begin;
+			auto	end = std::next(begin, 1);
+
 			while (end != fname.end() && *end != '.')
 				++end;
 			if (end == fname.end())
-				return (std::string_view(begin, end));
-			// ...
+				return (std::string_view(std::next(begin, 1), end));
+			begin = end;
 		}
+		else
+			++begin;
 	}
-
-	
+	return (std::string_view(begin, fname.end()));
 }

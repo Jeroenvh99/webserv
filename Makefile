@@ -53,8 +53,8 @@ SRC_FILES	:= main.cpp \
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
-CXX			:= g++
-CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++17 -g
+CXX			:= c++
+CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 

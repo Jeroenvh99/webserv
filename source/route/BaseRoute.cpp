@@ -44,5 +44,10 @@ BaseRoute::allows_method(http::Method method) const noexcept {
 
 bool
 BaseRoute::allows_cgi(std::string const& ext) const noexcept {
+	return (allows_cgi(std::string_view(ext)));
+}
+
+bool
+BaseRoute::allows_cgi(std::string_view const& ext) const noexcept {
 	return (_cgi.find(ext) != _cgi.end());
 }

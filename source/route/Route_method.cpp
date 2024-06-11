@@ -63,10 +63,15 @@ Route::allows_method(http::Method method) const noexcept {
 }
 
 bool
-Route::allows_cgi(std::string const& ext) const noexcept {
+Route::allows_cgi(std::string_view const& ext) const noexcept {
 	if (_super && _cgiopt == CGIOption::inherits)
 		return (_super->allows_cgi(ext));
 	return (BaseRoute::allows_cgi(ext));
+}
+
+bool
+Route::allows_cgi(std::string const& ext) const noexcept {
+	return (allows_cgi(std::string_view(ext)));
 }
 
 Location

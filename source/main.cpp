@@ -19,10 +19,12 @@ main(int argc, char** argv, char** envp) {
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
 
 	route::Route	rt("/lorem/ipsum");
-	rt.redirect("./www");
-	route::Location	loc = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
+	rt.redirect("./www").allow_cgi("py");
+	route::Location	loc0 = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
+	route::Location	loc1 = rt.follow("/lorem/ipsum/dolor/sit.php/amet/consectetur");
 
-	std::cout << loc.from() << '\n' << loc.to() << '\n' << loc.path_info() << std::endl;
+	std::cout << loc0.from() << '\n' << loc0.to() << '\n' << loc0.path_info() << std::endl;
+	std::cout << loc1.from() << '\n' << loc1.to() << '\n' << loc1.path_info() << std::endl;
 
 	CGI::_envp = envp;
 	CGI::_envsize = _get_envsize(envp);
