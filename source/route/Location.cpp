@@ -5,30 +5,32 @@
 
 using route::Location;
 using route::Route;
-using route::Path;
 
-using PathIt = std::filesystem::path::iterator;
+using PathIt = stdfs::path::iterator;
 
-static PathIt					_find_path_end(std::filesystem::path const&, Route const&);
-static std::string_view			_get_ext(std::string const&);
-static std::filesystem::path	_path_append(std::filesystem::path const&, PathIt, PathIt);
-static std::string				_get_path_info(PathIt, PathIt);
+static PathIt			_find_path_end(PathIt, PathIt, Route const&);
+static std::string_view	_get_ext(std::string const&);
+static stdfs::path		_path_append(stdfs::path const&, PathIt, PathIt);
+static std::string		_to_string(PathIt, PathIt);
 
-Location::Location(Route const& rt, Path const& branch):
-	Location(rt, branch.begin(), _find_path_end(branch, rt), branch.end()) {}
+Location::Location(Route const& rt, stdfs::path const& branch):
+	Location(rt, branch.begin(), branch.end()) {}
+
+Location::Location(Route const& rt, PathIt begin, PathIt end):
+	Location(rt, begin, _find_path_end(begin, end, rt), end) {}
 
 Location::Location(Route const& rt, PathIt begin, PathIt path_end, PathIt end):
 	BaseRoute(rt),
-	_from(_path_append(rt.from(), begin, path_end)),
+	_from(_path_append(rt.from(), begin, end)),
 	_to(_path_append(rt.to(), begin, path_end)),
-	_path_info(_get_path_info(path_end, end)) {}
+	_path_info(_to_string(path_end, end)) {}
 
-std::filesystem::path const&
+stdfs::path const&
 Location::from() const noexcept {
 	return (_from);
 }
 
-std::filesystem::path const&
+stdfs::path const&
 Location::to() const noexcept {
 	return (_to);
 }
@@ -40,9 +42,9 @@ Location::path_info() const noexcept {
 
 // Non-member helpers
 
-static std::filesystem::path
-_path_append(std::filesystem::path const& root, PathIt begin, PathIt end) {
-	std::filesystem::path	pt(root);
+static stdfs::path
+_path_append(stdfs::path const& root, PathIt begin, PathIt end) {
+	stdfs::path	pt(root);
 
 	while (begin != end)
 		pt /= *begin++;
@@ -50,20 +52,20 @@ _path_append(std::filesystem::path const& root, PathIt begin, PathIt end) {
 }
 
 static std::string
-_get_path_info(PathIt begin, PathIt end) {
+_to_string(PathIt begin, PathIt end) {
 	std::ostringstream	oss;
 
 	while (begin != end)
-		oss << "/" << (begin++)->string();
+		oss << stdfs::path::preferred_separator << (begin++)->string();
 	return (oss.str());
 }
 
 static PathIt
-_find_path_end(std::filesystem::path const& pt, Route const& rt) {
-	for (auto seg = pt.begin(); seg != pt.end(); ++seg)
+_find_path_end(PathIt seg, PathIt end, Route const& rt) {
+	for (; seg != end; ++seg)
 		if (rt.allows_cgi(_get_ext(*seg)))
 			return (std::next(seg, 1));
-	return (pt.end());
+	return (end);
 }
 
 static std::string_view

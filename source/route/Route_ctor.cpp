@@ -1,11 +1,10 @@
 #include "route.hpp"
 
 using route::Route;
-using route::Path;
 
-Path const	Route::no_redirection = "";
+stdfs::path const	Route::no_redirection = "";
 
-Route::Route(Path const& path):
+Route::Route(stdfs::path const& path):
 	BaseRoute(),
 	_super(nullptr),
 	_subroutes(),
@@ -27,7 +26,7 @@ Route::Route(Route const& super, std::string&& fname):
 	_fname(fname),
 	_redirection(no_redirection) {}
 
-Route::Route(Route const& super, Path::iterator seg, Path::iterator end):
+Route::Route(Route const& super, stdfs::path::iterator seg, stdfs::path::iterator end):
 	BaseRoute(true),
 	_super(&super),
 	_subroutes(),

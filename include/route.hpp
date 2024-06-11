@@ -10,11 +10,12 @@
 # include <unordered_set>
 # include <type_traits>
 
+namespace stdfs = std::filesystem;
+
 namespace route {
 	class BaseRoute;
 	class Route;
 	class Location;
-	using Path = std::filesystem::path;
 
 	class BaseRoute {
 	public:
@@ -50,13 +51,13 @@ namespace route {
 
 	class Route: public BaseRoute {
 	public:
-		Route(Path const& = "");
+		Route(stdfs::path const& = "");
 
-		Path		from() const;
-		Path		to() const;
-		Route&		extend(Path const&);
-		Location	follow(Path const&) const;
-		Route&		seek(Path const&);
+		stdfs::path	from() const;
+		stdfs::path	to() const;
+		Route&		extend(stdfs::path const&);
+		Location	follow(stdfs::path const&) const;
+		Route&		seek(stdfs::path const&);
 
 		bool				lists_directory() const noexcept;
 		bool				forbids_directory() const noexcept;
@@ -66,7 +67,7 @@ namespace route {
 		bool				allows_cgi(std::string_view const&) const noexcept;
 		std::string const&	filename() const noexcept;
 
-		Route&	redirect(Path const&);
+		Route&	redirect(stdfs::path const&);
 		Route&	list_directory() noexcept;
 		Route&	forbid_directory() noexcept;
 		Route&	set_directory_file(std::string const&);
@@ -79,7 +80,7 @@ namespace route {
 		Route&	disallow_cgi(std::string const&);
 		Route&	reset_cgi();
 
-		static Path const	no_redirection;
+		static stdfs::path const	no_redirection;
 
 	private:
 		friend class BaseRoute;
@@ -88,11 +89,11 @@ namespace route {
 
 		Route(Route const&, std::string const&);
 		Route(Route const&, std::string&&);
-		Route(Route const&, Path::iterator, Path::iterator);
+		Route(Route const&, stdfs::path::iterator, stdfs::path::iterator);
 
-		Route&		_extend_core(Path::iterator, Path::iterator);
-		Location	_follow_core(Path::iterator, Path::iterator) const;
-		Route&		_seek_core(Path::iterator, Path::iterator);
+		Route&		_extend_core(stdfs::path::iterator, stdfs::path::iterator);
+		Location	_follow_core(stdfs::path::iterator, stdfs::path::iterator) const;
+		Route&		_seek_core(stdfs::path::iterator, stdfs::path::iterator);
 
 		MethodBitmask		_super_allowed_methods() const noexcept;
 		DirectoryOption		_super_diropt() const noexcept;
@@ -106,22 +107,24 @@ namespace route {
 		Route const* const	_super;
 		Container			_subroutes;
 		std::string			_fname;
-		Path				_redirection;
+		stdfs::path			_redirection;
 	}; // class Route
 
 	class Location: public BaseRoute {
 	public:
-		Location(Route const&, Path const& = "");
+		Location(Route const&, stdfs::path const& = "");
+		Location(Route const&, stdfs::path::iterator, stdfs::path::iterator);
 
-		Path const&			from() const noexcept;
-		Path const&			to() const noexcept;
+		stdfs::path const&	from() const noexcept;
+		stdfs::path const&	to() const noexcept;
 		std::string const&	path_info() const noexcept;
 
 	private:
-		Location(Route const&, Path::iterator, Path::iterator, Path::iterator);
+		Location(Route const&,
+			stdfs::path::iterator, stdfs::path::iterator, stdfs::path::iterator);
 
-		Path		_from;
-		Path		_to;
+		stdfs::path	_from;
+		stdfs::path	_to;
 		std::string	_path_info;
 	}; // class Location
 

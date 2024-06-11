@@ -22,9 +22,11 @@ main(int argc, char** argv, char** envp) {
 	rt.redirect("./www").allow_cgi("py");
 	route::Location	loc0 = rt.follow("/lorem/ipsum/dolor/sit.py/amet/consectetur");
 	route::Location	loc1 = rt.follow("/lorem/ipsum/dolor/sit.php/amet/consectetur");
+	route::Location	loc2 = rt.follow("/lorem");
 
 	std::cout << loc0.from() << '\n' << loc0.to() << '\n' << loc0.path_info() << std::endl;
 	std::cout << loc1.from() << '\n' << loc1.to() << '\n' << loc1.path_info() << std::endl;
+	std::cout << loc2.from() << '\n' << loc2.to() << '\n' << loc2.path_info() << std::endl;
 
 	CGI::_envp = envp;
 	CGI::_envsize = _get_envsize(envp);

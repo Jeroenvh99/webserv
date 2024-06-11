@@ -5,10 +5,8 @@
 
 using route::Route;
 using route::Location;
-using route::Path;
 
-static bool			_is_final(Path::iterator, Path::iterator);
-static std::string	_relative_path(Path::iterator, Path::iterator);
+static bool	_is_final(stdfs::path::iterator, stdfs::path::iterator);
 
 // Public accessors
 
@@ -17,14 +15,14 @@ Route::filename() const noexcept {
 	return (_fname);
 }
 
-Path
+stdfs::path
 Route::from() const {
 	if (_super)
 		return (_super->from() / _fname);
 	return (_fname);
 }
 
-Path
+stdfs::path
 Route::to() const {
 	if (_redirection == no_redirection) {
 		if (_super)
@@ -75,33 +73,33 @@ Route::allows_cgi(std::string const& ext) const noexcept {
 }
 
 Location
-Route::follow(Path const& path) const {
+Route::follow(stdfs::path const& path) const {
 	if (path.root_path() != _fname)
 		throw (std::invalid_argument("different root path"));
 	return (_follow_core(++path.begin(), path.end()));
 }
 
 Location
-Route::_follow_core(Path::iterator seg, Path::iterator end) const {
+Route::_follow_core(stdfs::path::iterator seg, stdfs::path::iterator end) const {
 	if (_is_final(seg, end))
-		return (Location(*this, ""));
+		return (Location(*this));
 
 	auto	subroute = _subroute(seg->string());
 
 	if (subroute == _subroutes.end())
-		return (Location(*this, _relative_path(seg, end)));
+		return (Location(*this, seg, end));
 	return (subroute->_follow_core(++seg, end));
 }
 
 Route&
-Route::seek(Path const& path) {
+Route::seek(stdfs::path const& path) {
 	if (path.root_path() != _fname)
 		throw (std::invalid_argument("different root path"));
 	return (_seek_core(++path.begin(), path.end()));
 }
 
 Route&
-Route::_seek_core(Path::iterator seg, Path::iterator end) {
+Route::_seek_core(stdfs::path::iterator seg, stdfs::path::iterator end) {
 	if (_is_final(seg, end))
 		return (*this);
 
@@ -115,14 +113,14 @@ Route::_seek_core(Path::iterator seg, Path::iterator end) {
 // Public modifiers
 
 Route&
-Route::extend(Path const& path) {
+Route::extend(stdfs::path const& path) {
 	if (path.root_path() != _fname)
 		throw (std::invalid_argument("different root path"));
 	return (_extend_core(++path.begin(), path.end()));
 }
 
 Route&
-Route::_extend_core(Path::iterator seg, Path::iterator end) {
+Route::_extend_core(stdfs::path::iterator seg, stdfs::path::iterator end) {
 	if (_is_final(seg, end)) // route already contains this path
 		return (*this);
 
@@ -137,7 +135,7 @@ Route::_extend_core(Path::iterator seg, Path::iterator end) {
 }
 
 Route&
-Route::redirect(Path const& path) {
+Route::redirect(stdfs::path const& path) {
 	_redirection = path;
 	return (*this);
 }
@@ -273,17 +271,6 @@ Route::_super_cgi() const noexcept {
 // Non-member helpers
 
 static bool
-_is_final(Path::iterator seg, Path::iterator end) {
+_is_final(stdfs::path::iterator seg, stdfs::path::iterator end) {
 	return (seg == end || seg->string().size() == 0);
-}
-
-static std::string
-_relative_path(Path::iterator seg, Path::iterator end) {
-	std::string	path;
-
-	while (seg != end) {
-		path += "/";
-		path += *(seg++);
-	}
-	return (path);
 }

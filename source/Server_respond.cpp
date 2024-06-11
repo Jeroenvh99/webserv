@@ -4,9 +4,9 @@
 #include <fstream>
 #include <streambuf>
 
-static http::Status	_get_file(std::string&, route::Path const&);
+static http::Status	_get_file(std::string&, stdfs::path const&);
 static http::Status	_get_directory(std::string&, route::Location const&);
-static http::Status	_list_directory(std::string&, route::Path const&);
+static http::Status	_list_directory(std::string&, stdfs::path const&);
 
 http::Response
 Server::respond(http::Request const& req) {
@@ -93,7 +93,7 @@ Server::delete_(std::string&, http::Request const& req) {
 }
 
 static http::Status
-_get_file(std::string& body, route::Path const& path) {
+_get_file(std::string& body, stdfs::path const& path) {
 	std::ifstream		file(path);
 	std::stringstream	ss;
 
@@ -114,7 +114,7 @@ _get_directory(std::string& body, route::Location const& loc) {
 }
 
 static http::Status
-_list_directory(std::string& body, route::Path const& path) {
+_list_directory(std::string& body, stdfs::path const& path) {
 	std::ostringstream	oss;
 
 	for (auto const& entry: std::filesystem::directory_iterator(path))
