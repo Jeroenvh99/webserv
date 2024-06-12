@@ -38,7 +38,6 @@ Server::Server(Config::Server config, int backlog_size,
 	// 		_route.allow_method(config.allowedmethods[i]);
 	// 	}
 	// }
-	_route.allow_method(http::Method::POST);
 	// for (Config::Location loc : config.locations) {
 	// 	_route.extend(loc.path);
 	// 	for (int i = 0; i < http::Method::NONE; i++) {
