@@ -29,7 +29,7 @@ Server::Server(Config::Server config, int backlog_size,
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
 	_elog(elog, ErrorLogger::Level::debug) {
-	_acceptor = _poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
+	_acceptor = _poller.add(Acceptor(Acceptor::Address(static_cast<in_port_t>(config.port), INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
