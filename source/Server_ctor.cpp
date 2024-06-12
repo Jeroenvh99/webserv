@@ -29,15 +29,16 @@ Server::Server(Config::Server config, int backlog_size,
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
 	_elog(elog, config.errorlog.level) {
-	_acceptor = _poller.add(Acceptor(Acceptor::Address((in_port_t)config.port, INADDR_ANY)),
+	_acceptor = _poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
-	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
-		if (config.allowedmethods[i] != http::Method::NONE) {
-			_route.allow_method(config.allowedmethods[i]);
-		}
-	}
+	// for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+	// 	if (config.allowedmethods[i] != http::Method::NONE) {
+	// 		_route.allow_method(config.allowedmethods[i]);
+	// 	}
+	// }
+	_route.allow_method(http::Method::POST);
 	// for (Config::Location loc : config.locations) {
 	// 	_route.extend(loc.path);
 	// 	for (int i = 0; i < http::Method::NONE; i++) {
