@@ -33,6 +33,19 @@ Server::Server(Config::Server config, int backlog_size,
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
+	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+		if (config.allowedmethods[i] != http::Method::NONE) {
+			_route.allow_method(config.allowedmethods[i]);
+		}
+	}
+	// for (Config::Location loc : config.locations) {
+	// 	_route.extend(loc.path);
+	// 	for (int i = 0; i < http::Method::NONE; i++) {
+	// 		if (loc.allowedmethods[i] != http::Method::NONE) {
+	// 			_route.allow_method(loc.allowedmethods[i]);
+	// 		}
+	// 	}
+	// }
 	_route.allow_method(http::Method::GET)
 		.redirect("./www")
 		.set_directory_file("index.html");

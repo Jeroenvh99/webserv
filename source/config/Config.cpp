@@ -60,10 +60,9 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 	if (word.find("allow_") != std::string::npos) {
 		allow = 1;
 	}
-	int methodcount = http::methods.size();
 	while (1) {
 		std::getline(linestream, word, ' ');
-		for (int i = 0; i < methodcount; i++) {
+		for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
 			if (word.find(http::methods[i].second) != std::string::npos) {
 				if (!allow) {
 					allowed[i] = http::Method::NONE;

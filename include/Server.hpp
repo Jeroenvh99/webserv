@@ -7,6 +7,7 @@
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
 # include "logging.hpp"
+# include "http.hpp"
 # include "http/Status.hpp"
 # include "http/Request.hpp"
 # include "Client.hpp"
