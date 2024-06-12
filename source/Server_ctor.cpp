@@ -28,7 +28,7 @@ Server::Server(Config::Server config, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, config.errorlog.level) {
+	_elog(elog, ErrorLogger::Level::debug) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
