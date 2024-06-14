@@ -3,10 +3,10 @@
 // Basic operations
 
 Client::Client(ClientMap::value_type& pair):
-	_socket(pair.first), _data(pair.second) {}
+	_socket(pair.first), _impl(pair.second) {}
 
-Client::Client(SocketBox const& socket, ClientData& data):
-	_socket(socket), _data(data) {}
+Client::Client(SocketBox const& socket, ClientImpl& data):
+	_socket(socket), _impl(data) {}
 
 // Accessors
 
@@ -22,20 +22,20 @@ Client::socket_box() const noexcept {
 
 http::Request const&
 Client::request() const noexcept {
-	return (_data._request);
+	return (_impl._request);
 }
 
 http::Response const&
 Client::response() const noexcept {
-	return (_data._response);
+	return (_impl._response);
 }
 
 CGI&
 Client::cgi() noexcept {
-	return (_data._cgi);
+	return (_impl._cgi);
 }
 
 Client::State
 Client::state() const noexcept {
-	return (_data._state);
+	return (_impl._state);
 }

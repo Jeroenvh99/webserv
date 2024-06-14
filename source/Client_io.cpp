@@ -2,14 +2,14 @@
 
 void
 Client::operator<<(http::Request const& that) {
-	_data._request = that;
-	_data._state = State::fetch;
+	_impl._request = that;
+	_impl._state = State::fetch;
 }
 
 void
 Client::operator<<(http::Response const& that) {
-	_data._buffer.str("");
-	_data._buffer.clear();
-	_data._buffer << that;
-	_data._state = State::send;
+	_impl._buffer.str("");
+	_impl._buffer.clear();
+	_impl._buffer << that;
+	_impl._state = State::send;
 }

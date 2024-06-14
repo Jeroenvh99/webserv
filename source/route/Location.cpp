@@ -20,12 +20,14 @@ Location::Location(Route const& rt, stdfs::path const& branch):
 Location::Location(Route const& rt, PathIt begin, PathIt end):
 	Location(rt, begin, _find_cgi_end(begin, end, rt), end) {}
 
+// Location::Location(Route const& rt, stdfs::path&&, stdfs::path&&, bool, std::string&&);
+
 // Private constructors
 
 Location::Location(Route const& rt, PathIt begin, IsCGI is_cgi, PathIt end):
 	BaseRoute(rt),
-	_from(_path_append(std::move(rt.from()), begin, end)),
-	_to(_path_append(std::move(rt.to()), begin, is_cgi.second)),
+	_from(_path_append(rt.from(), begin, end)),
+	_to(_path_append(rt.to(), begin, is_cgi.second)),
 	_is_cgi(is_cgi.first),
 	_path_info(_to_string(is_cgi.second, end)) {}
 

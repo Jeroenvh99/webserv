@@ -10,6 +10,7 @@ SRC_FILES	:= main.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
+			ClientImpl.cpp \
 			html.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \

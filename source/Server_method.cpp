@@ -33,13 +33,13 @@ Server::port() const noexcept {
 
 void
 Server::_accept() {
-	Acceptor::Address	address;
-	Client::Socket		socket = acceptor().accept(address);
+	Client::Address	address;
+	Client::Socket	socket = acceptor().accept(address);
 
 	_elog.log(LogLevel::notice,
-		"Connection established at ", std::string(address));
+		"Connection established with peer at ", std::string(address));
 	Client::SocketBox	box = _poller.add(std::move(socket), poller_events, poller_mode);
-	_clients.insert(std::make_pair(box, ClientData()));
+	_clients.insert(std::make_pair(box, ClientImpl(address)));
 }
 
 void

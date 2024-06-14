@@ -2,19 +2,25 @@
 # define CLIENT_HPP
 
 # include "CGI.hpp"
-# include "Environment.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
 # include "route.hpp"
+
 # include "network/StreamSocket.hpp"
+# include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
 
 # include <unordered_map>
 # include <utility>
 
-class ClientData {
+class ClientImpl {
 public:
 	enum class State;
+	using Socket = network::StreamSocket<network::Domain::ipv4>;
+	using Address = Socket::Address;
+
+	ClientImpl() = default;
+	ClientImpl(Address const&);
 
 private:
 	friend class Client;
@@ -25,30 +31,33 @@ private:
 	http::Request			_request;
 	http::Response			_response;
 	CGI						_cgi;
-}; // class ClientData
+	Address					_address;
+}; // class ClientImpl
 
-enum class ClientData::State {
+enum class ClientImpl::State {
 	idle,
 	parse,	// parsing a request
 	fetch,	// about to fetch a resource
 	wait,	// waiting for CGI processing
 	send,	// sending response
-}; // enum class ClientData::State
+}; // enum class ClientImpl::State
 
-using ClientMap = std::unordered_map<network::SharedHandle, ClientData>;
+using ClientMap = std::unordered_map<network::SharedHandle, ClientImpl>;
 
 class Client {
 public:
-	using State = ClientData::State;
-	using Socket = network::StreamSocket<network::Domain::ipv4>;
+	using Address = ClientImpl::Address;
+	using Socket = ClientImpl::Socket;
 	using SocketBox = network::SharedHandle;
+	using State = ClientImpl::State;
 
 	Client(ClientMap::value_type&);
-	Client(SocketBox const&, ClientData&);
+	Client(SocketBox const&, ClientImpl&);
 
 	void	operator<<(http::Request const&);
 	void	operator<<(http::Response const&);
 
+	Address const&			address() const noexcept;
 	Socket const&			socket() const noexcept;
 	SocketBox const&		socket_box() const noexcept;
 	http::Request const&	request() const noexcept;
@@ -65,7 +74,7 @@ public:
 
 private:
 	SocketBox	_socket;
-	ClientData&	_data;
+	ClientImpl&	_impl;
 }; // class Client
 
 #endif // CLIENT_HPP

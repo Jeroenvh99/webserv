@@ -1,6 +1,7 @@
 #ifndef CGI_HPP
 # define CGI_HPP
 
+#include <initializer_list>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -9,16 +10,13 @@
 #include "Environment.hpp"
 #include "route.hpp"
 
-class Client;
-class Server;
-
 class CGI {
 public:
 	class Exception;
 	class PipeException;
 	class ForkException;
 
-	CGI();
+	CGI(std::initializer_list<std::string> = {});
 	~CGI();
 
 	void	launch(route::Location const&, Environment&);
@@ -38,9 +36,10 @@ private:
 	static constexpr size_t		_read_end = 0;
 	static constexpr size_t		_write_end = 1;
 
-	pid_t	_pid;
-	fd		_ifd;
-	fd		_ofd;
+	pid_t		_pid;
+	fd			_ifd;
+	fd			_ofd;
+	Environment	_env;
 }; // class CGI
 
 class CGI::Exception: public std::exception {};

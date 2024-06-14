@@ -5,25 +5,25 @@
 
 void
 Client::clear() noexcept {
-	_data._state = State::idle;
-	_data._buffer.str("");
-	_data._buffer.clear();
-	_data._parser.clear();
-	_data._request.clear();
-	_data._response.clear();
+	_impl._state = State::idle;
+	_impl._buffer.str("");
+	_impl._buffer.clear();
+	_impl._parser.clear();
+	_impl._request.clear();
+	_impl._response.clear();
 }
 
 void
 Client::parse() {
-	_data._parser.parse(_data._buffer, _data._request);
-	if (_data._parser.state() == http::Request::Parser::State::done)
-		_data._state = State::fetch;
+	_impl._parser.parse(_impl._buffer, _impl._request);
+	if (_impl._parser.state() == http::Request::Parser::State::done)
+		_impl._state = State::fetch;
 }
 
 size_t
 Client::wait() {
 	/* implement */
-	_data._state = State::send;
+	_impl._state = State::send;
 	return (0);
 }
 
@@ -32,7 +32,7 @@ Client::recv() {
 	network::Buffer<512>	socket_buffer;
 	
 	socket().read(socket_buffer);
-	_data._buffer << socket_buffer;
+	_impl._buffer << socket_buffer;
 	return (socket_buffer.len());
 }
 
@@ -40,10 +40,10 @@ size_t
 Client::send() {
 	network::Buffer<512>	socket_buffer;
 
-	_data._buffer >> socket_buffer;
-	if (_data._buffer.eof()) {
+	_impl._buffer >> socket_buffer;
+	if (_impl._buffer.eof()) {
 		clear();
-		_data._state = Client::State::idle;
+		_impl._state = Client::State::idle;
 	}
 	return (socket().write(socket_buffer));
 }
