@@ -6,6 +6,7 @@ OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
+			Environment.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \

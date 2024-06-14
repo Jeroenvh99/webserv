@@ -1,38 +1,71 @@
 #include "CGI.hpp"
 
-static std::string	_make_envstr(std::string const&, std::string const&);
-static void			_add_headers(CGI::Environment&, http::Request const&);
+#include <algorithm>
 
-CGI::Environment
-CGI::env(http::Request const& req) {
+using route::Location;
+ /*
+static inline void	_add_location_vars(Environment&, Location const&, Server const&);
+static inline void	_add_remote_vars(Environment&, Client const&);
+static inline void	_add_content_vars(Environment&, http::Request const&);
+static inline void	_add_request_vars(Environment&, http::Request const&);
+static inline void	_add_header_vars(Environment&, http::Request const&);
+
+Environment
+CGI::env(Client const& client, Location const& loc, Server const& server) {
 	Environment	env;
 
-	env.reserve(17 + req.header_count());
-	env.push_back("SERVER_SOFTWARE=Webserv/1.0");
-	env.push_back("SERVER_NAME="); // todo
-	env.push_back("GATEWAY_INTERFACE=CGI/1.1");
-
-	env.push_back(_make_envstr("SERVER_PROTOCOL", http::to_string(req.version())));
-	env.push_back("SERVER_PORT="); // todo
-
-	//env.push_back(_make_envstr("REQUEST_METHOD", http::to_string(req.method())));
-	//env.push_back(_make_envstr("REQUEST_URI", std::string(req.uri())));
-	//env.push_back(_make_envstr("PATH_INFO", req.uri().path_info));
-	//env.push_back(_make_envstr("PATH_TRANSLATED", req.))
-	//env.push_back(_make_envstr("SCRIPT_NAME", req.uri().path()));
-	env.push_back("REDIRECT_STATUS=200");
-	if (req.has_header("Content-Type"))
-		env.push_back(_make_envstr("CONTENT_TYPE", req.header("Content-Type")));
+	env.reserve(base_env_size + client.request().header_count());
+	_add_server_vars(env, server);
+	_add_location_vars(env, client, server);
+	_add_remote_vars(env, client);
+	_add_request_vars(env, client.request());
+	_add_header_vars(env, client.request());
 	_add_headers(env, req);
 
 	return (env);
 }
 
-static std::string
-_make_envstr(std::string const& key, std::string const& value) {
-	return (key + "=" + value);
+// Helpers
+
+static inline void
+_add_request_vars(Environment& env, http::Request const& req) {
+	URI const&	uri = req.uri();
+
+	env.append("AUTH_TYPE", "");
+	env.append("REQUEST_METHOD", http::to_string(req.method()));
+	env.append("REQUEST_URI", std::string(uri));
+	env.append("QUERY_STRING", uri.query());
+	env.append("SERVER_PROTOCOL", http::to_string(req.version()));
 }
 
-static void
-_add_headers(CGI::Environment&, http::Request const&) {
+static inline void
+_add_location_vars(Environment& env, Location const& loc, Server const& serv) {
+	if (loc.path_info()) {
+		env.append("PATH_INFO", loc.path_info());
+		env.append("PATH_TRANSLATED", serv.locate(loc.path_info()).to());
+	}
+	env.append("SCRIPT_NAME", loc.to());
 }
+
+static inline void	_add_remote_vars(Environment& env, Client const& client) {
+	env.append("REMOTE_ADDR", "");
+	env.append("REMOTE_HOST", "");
+	env.append("REMOTE_IDENT", "");
+	env.append("REMOTE_USER", "");
+}
+
+static inline void	_add_content_vars(Environment& env, http::Request const& req) {
+	if (!req.has_body())
+		return;
+	env.append("CONTENT_LENGTH", std::to_string(req.body().size()));
+	if (req.has_header("Content-Type"))
+		env.append("CONTENT_TYPE", req.header("Content-Type"));
+}
+
+// DB: Headers queried for non-protocol variables and relating to authentication
+// should be skipped.
+static inline void	_add_header_vars(Environment& env, http::Request const& req) {
+	for (auto const& hdr: req.headers())
+		env.append(hdr);
+}
+*/

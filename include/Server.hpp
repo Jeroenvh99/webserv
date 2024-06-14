@@ -9,6 +9,7 @@
 # include "logging.hpp"
 # include "http/Status.hpp"
 # include "http/Request.hpp"
+# include "Environment.hpp"
 # include "Client.hpp"
 # include "route.hpp"
 
@@ -37,6 +38,7 @@ public:
 	Acceptor const&		acceptor() const noexcept;
 	void				process(int);
 	std::string const&	name() const noexcept;
+	in_port_t			port() const noexcept;
 
 	route::Location	locate(std::filesystem::path const&) const;
 	
@@ -75,6 +77,7 @@ private:
 	ErrorPageMap			_error_pages;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
+	Environment				_env;
 }; // class Server
 
 #endif // SERVER_HPP

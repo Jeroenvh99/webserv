@@ -117,14 +117,22 @@ namespace route {
 
 		stdfs::path const&	from() const noexcept;
 		stdfs::path const&	to() const noexcept;
+		bool				is_cgi() const noexcept;
 		std::string const&	path_info() const noexcept;
 
 	private:
+		using IsCGI = std::pair<bool, stdfs::path::iterator>;
+
 		Location(Route const&,
-			stdfs::path::iterator, stdfs::path::iterator, stdfs::path::iterator);
+			stdfs::path::iterator, IsCGI, stdfs::path::iterator);
+
+		static IsCGI	_find_cgi_end(stdfs::path::iterator,
+			stdfs::path::iterator,
+			Route const&);
 
 		stdfs::path	_from;
 		stdfs::path	_to;
+		bool		_is_cgi;
 		std::string	_path_info;
 	}; // class Location
 

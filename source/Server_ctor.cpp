@@ -25,7 +25,11 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, ErrorLogger::Level::debug) {
+	_elog(elog, ErrorLogger::Level::debug),
+	_env{
+		Environment::env_string("SERVER_NAME", name),
+		Environment::env_string("SERVER_PORT", std::to_string(port))
+	} {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});

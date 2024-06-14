@@ -1,49 +1,46 @@
 #ifndef CGI_HPP
 # define CGI_HPP
 
+#include <iostream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #include "http/Request.hpp"
+#include "Environment.hpp"
 #include "route.hpp"
+
+class Client;
+class Server;
 
 class CGI {
 public:
 	class Exception;
 	class PipeException;
 	class ForkException;
-	using Environment = std::vector<std::string>;
 
 	CGI();
 	~CGI();
-	CGI(CGI const&) = delete;
-	CGI(CGI&&);
 
-	static Environment	env(http::Request const&);
-
-	void		launch(http::Request const&);
-	size_t		read() const;
-	void		kill();
+	void	launch(route::Location const&, Environment&);
+	size_t	write(std::ostream&) const;
+	size_t	read(std::istream&) const;
+	void	kill();
 
 private:
-	friend int main(int, char**, char**);
-
 	using fd = int;
 
 	static void	_redirect_stdout(fd);
 
-	void	_fork(http::Request const&);
-	void	_exec(http::Request const&);
+	void	_fork(route::Location const&, Environment&);
+	void	_exec(route::Location const&, Environment&);
 
-	static char**				_envp;
-	static size_t				_envsize;
 	static constexpr pid_t		_no_child = 0;
 	static constexpr size_t		_read_end = 0;
 	static constexpr size_t		_write_end = 1;
 
 	pid_t	_pid;
 	fd		_ifd;
+	fd		_ofd;
 }; // class CGI
 
 class CGI::Exception: public std::exception {};

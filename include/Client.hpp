@@ -1,10 +1,13 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-# include "network/StreamSocket.hpp"
-# include "network/Handle.hpp"
+# include "CGI.hpp"
+# include "Environment.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
+# include "route.hpp"
+# include "network/StreamSocket.hpp"
+# include "network/Handle.hpp"
 
 # include <unordered_map>
 # include <utility>
@@ -21,6 +24,7 @@ private:
 	http::Request::Parser	_parser;
 	http::Request			_request;
 	http::Response			_response;
+	CGI						_cgi;
 }; // class ClientData
 
 enum class ClientData::State {
@@ -42,15 +46,18 @@ public:
 	Client(ClientMap::value_type&);
 	Client(SocketBox const&, ClientData&);
 
+	void	operator<<(http::Request const&);
 	void	operator<<(http::Response const&);
 
 	Socket const&			socket() const noexcept;
 	SocketBox const&		socket_box() const noexcept;
 	http::Request const&	request() const noexcept;
+	CGI&					cgi() noexcept;
 	http::Response const&	response() const noexcept;
 	State					state() const noexcept;
 
 	void	parse();
+	void	fetch(route::Location const&, Environment const&);
 	size_t	recv();
 	size_t	send();
 	size_t	wait();

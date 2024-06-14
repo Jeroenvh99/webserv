@@ -31,12 +31,9 @@ Server::_read(Client& client) {
 
 bool
 Server::_fetch(Client& client) {
-	// if the request requires CGI execution
-	// setup connection between server and CGI executable
-	// exec CGI
-	// _state = State::wait;
-	// else
-	client << respond(client.request());
+	route::Location const	loc = locate(client.request().uri().path());
+
+	(void) loc;
 	return (true);
 }
 

@@ -28,10 +28,12 @@ namespace http {
 		Version				version() const noexcept;
 		URI const&			uri() const noexcept;
 		std::string const&	header(std::string const&) const;
+		HeaderMap const&	headers() const noexcept;
 		bool				has_header(std::string const&) const noexcept;
+		size_t				header_count() const noexcept;
 		std::string const&	body() const noexcept;
 		std::string&		body() noexcept;
-		size_t				header_count() const noexcept;
+		bool				has_body() const noexcept;
 
 		void	clear() noexcept;
 

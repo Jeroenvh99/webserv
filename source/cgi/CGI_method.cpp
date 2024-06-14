@@ -6,18 +6,18 @@
 #include <signal.h>
 #include <unistd.h>
 
-static char**		_make_cstrv(std::vector<std::string>&);
+using route::Location;
 
 // Public methods
 
 void
-CGI::launch(http::Request const& req) {
+CGI::launch(Location const& loc, Environment& env) {
 	int status;
 	// if (this->bodyLength > 0)
 	//     fcntl(pipefds[WRITE_END], F_SETPIPE_SZ, this->bodyLength);
 
 	// write(pipefds[WRITE_END], this->request.data(), this->bodyLength);
-	_fork(req);
+	_fork(loc, env);
 	waitpid(_pid, &status, 0); // replace to enable asynchronous CGI
 	std::cout << std::to_string(status) << std::endl;
 }
@@ -33,7 +33,7 @@ CGI::kill() {
 // Private methods
 
 void
-CGI::_fork(http::Request const& req) {
+CGI::_fork(Location const& loc, Environment& env) {
 	fd	pipefd[2];
 
 	if (::pipe(pipefd) == -1)
@@ -46,18 +46,16 @@ CGI::_fork(http::Request const& req) {
 		_ifd = pipefd[_read_end];
 	} else {
 		_redirect_stdout(pipefd[_write_end]);
-		_exec(req);
+		_exec(loc, env);
 	}
 }
 
 void
-CGI::_exec(http::Request const& req) {
-	std::string					pathname = req.uri().path();
-	std::vector<std::string>	envv = env(req);
-
+CGI::_exec(Location const& loc, Environment& env) {
+	std::string		pathname(loc.to());
 	char* const		cpathname = pathname.data();
 	char* const		cargv[2] = {cpathname, nullptr};
-	char** const	cenvp = _make_cstrv(envv);
+	char** const	cenvp = env.make_cenv();
 
 	if (::execve(cpathname, cargv, cenvp) == -1) {
 		::perror("execve");
@@ -72,16 +70,4 @@ CGI::_redirect_stdout(fd ofd) {
 		::exit(EXIT_FAILURE);
 	}
 	::close(ofd);
-}
-
-// Non-member helpers
-
-static char**
-_make_cstrv(std::vector<std::string>& vec) {
-	char**	cstrv = new char*[vec.size() + 1];
-
-	for (size_t i = 0; i < vec.size(); ++i)
-		cstrv[i] = vec[i].data();
-	cstrv[vec.size()] = nullptr;
-	return (cstrv);
 }

@@ -57,9 +57,24 @@ Request::header(std::string const& name) const {
 	return (it->second);
 }
 
+Request::HeaderMap const&
+Request::headers() const noexcept {
+	return (_headers);
+}
+
 bool
 Request::has_header(std::string const& name) const noexcept {
 	return (_headers.find(name) != _headers.end()); // C++20 has .contains()
+}
+
+size_t
+Request::header_count() const noexcept {
+	return (_headers.size());
+}
+
+bool
+Request::has_body() const noexcept {
+	return (_body.size() > 0);
 }
 
 std::string const&
@@ -70,11 +85,6 @@ Request::body() const noexcept {
 std::string&
 Request::body() noexcept {
 	return (_body);
-}
-
-size_t
-Request::header_count() const noexcept {
-	return (_headers.size());
 }
 
 // Modifiers

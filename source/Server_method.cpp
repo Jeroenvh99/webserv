@@ -22,6 +22,13 @@ Server::name() const noexcept {
 	return (_name);
 }
 
+in_port_t
+Server::port() const noexcept {
+	Acceptor::Address	addr = acceptor().address();
+
+	return (addr.port());
+}
+
 // Private methods
 
 void

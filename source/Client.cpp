@@ -30,6 +30,11 @@ Client::response() const noexcept {
 	return (_data._response);
 }
 
+CGI&
+Client::cgi() noexcept {
+	return (_data._cgi);
+}
+
 Client::State
 Client::state() const noexcept {
 	return (_data._state);
