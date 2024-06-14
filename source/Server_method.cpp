@@ -37,14 +37,14 @@ Server::_accept() {
 	Client::Socket	socket = acceptor().accept(address);
 
 	_elog.log(LogLevel::notice,
-		"Connection established with peer at ", std::string(address));
+		"Established connection with peer at ", std::string(address)), ".";
 	Client::SocketBox	box = _poller.add(std::move(socket), poller_events, poller_mode);
 	_clients.insert(std::make_pair(box, ClientImpl(address)));
 }
 
 void
 Server::_drop(ClientMap::iterator it) {
+	_elog.log(LogLevel::notice, "Terminated connection with peer at ", std::string(it->second.address()), ".");
 	_poller.remove(it->first);
 	_graveyard.erase(it);
-	_elog.log(LogLevel::notice, "Connection terminated.");
 }

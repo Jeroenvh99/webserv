@@ -16,9 +16,10 @@ public:
 	class PipeException;
 	class ForkException;
 
-	CGI(std::initializer_list<std::string> = {});
+	CGI();
 	~CGI();
 
+	void	launch(Client const&);
 	void	launch(route::Location const&, Environment&);
 	size_t	write(std::ostream&) const;
 	size_t	read(std::istream&) const;
@@ -39,7 +40,6 @@ private:
 	pid_t		_pid;
 	fd			_ifd;
 	fd			_ofd;
-	Environment	_env;
 }; // class CGI
 
 class CGI::Exception: public std::exception {};
