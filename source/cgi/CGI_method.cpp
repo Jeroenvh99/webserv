@@ -1,4 +1,5 @@
 #include "CGI.hpp"
+#include "Environment.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -11,13 +12,13 @@ using route::Location;
 // Public methods
 
 void
-CGI::launch(Location const& loc, Environment& env) {
+CGI::launch(Location const& loc, Client const& client, Environment const& base_env) {
 	int status;
 	// if (this->bodyLength > 0)
 	//     fcntl(pipefds[WRITE_END], F_SETPIPE_SZ, this->bodyLength);
 
 	// write(pipefds[WRITE_END], this->request.data(), this->bodyLength);
-	_fork(loc, env);
+	_fork(loc, client, base_env);
 	waitpid(_pid, &status, 0); // replace to enable asynchronous CGI
 	std::cout << std::to_string(status) << std::endl;
 }
@@ -33,7 +34,7 @@ CGI::kill() {
 // Private methods
 
 void
-CGI::_fork(Location const& loc, Environment& env) {
+CGI::_fork(Location const& loc, Client const& client, Environment const& base_env) {
 	fd	pipefd[2];
 
 	if (::pipe(pipefd) == -1)
@@ -46,13 +47,14 @@ CGI::_fork(Location const& loc, Environment& env) {
 		_ifd = pipefd[_read_end];
 	} else {
 		_redirect_stdout(pipefd[_write_end]);
-		_exec(loc, env);
+		_exec(loc, client, base_env);
 	}
 }
 
 void
-CGI::_exec(Location const& loc, Environment& env) {
+CGI::_exec(Location const& loc, Client const& client, Environment const& base_env) {
 	std::string		pathname(loc.to());
+	Environment		env(base_env, loc, client);
 	char* const		cpathname = pathname.data();
 	char* const		cargv[2] = {cpathname, nullptr};
 	char** const	cenvp = env.make_cenv();

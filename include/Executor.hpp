@@ -1,6 +1,7 @@
 #ifndef EXECUTOR_HPP
 # define EXECUTOR_HPP
 
+# include "webserv.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
 

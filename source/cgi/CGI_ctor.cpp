@@ -2,11 +2,10 @@
 
 #include <unistd.h>
 
-CGI::CGI(std::initializer_list<std::string> ilist):
+CGI::CGI():
 	_pid(_no_child),
 	_ifd(-1),
-	_ofd(-1),
-	_env{ilist} {}
+	_ofd(-1) {}
 
 CGI::~CGI() {
 	kill();

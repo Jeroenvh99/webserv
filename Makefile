@@ -6,7 +6,8 @@ OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
-			Environment.cpp \
+			Environment_ctor.cpp \
+			Environment_method.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
@@ -19,7 +20,6 @@ SRC_FILES	:= main.cpp \
 			Server_respond.cpp \
 			URI.cpp \
 			cgi/CGI_ctor.cpp \
-			cgi/CGI_env.cpp \
 			cgi/CGI_method.cpp \
 			cgi/except.cpp \
 			http/Method.cpp \

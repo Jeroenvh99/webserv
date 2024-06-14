@@ -33,7 +33,10 @@ bool
 Server::_fetch(Client& client) {
 	route::Location const	loc = locate(client.request().uri().path());
 
-	(void) loc;
+	if (loc.is_cgi())
+		client.cgi().launch(loc, client, _env);
+	else
+		client << respond(client.request());
 	return (true);
 }
 

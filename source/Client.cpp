@@ -39,3 +39,8 @@ Client::State
 Client::state() const noexcept {
 	return (_impl._state);
 }
+
+Client::Address const&
+Client::address() const noexcept {
+	return (_impl._address);
+}

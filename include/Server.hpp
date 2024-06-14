@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "webserv.hpp"
 # include "network/Acceptor.hpp"
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"

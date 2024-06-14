@@ -1,6 +1,7 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
+# include "webserv.hpp"
 # include "CGI.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"

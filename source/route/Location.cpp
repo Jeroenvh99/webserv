@@ -1,5 +1,6 @@
 #include "route.hpp"
 
+#include <stdexcept>
 #include <iterator>
 #include <string_view>
 
@@ -29,7 +30,8 @@ Location::Location(Route const& rt, PathIt begin, IsCGI is_cgi, PathIt end):
 	_from(_path_append(rt.from(), begin, end)),
 	_to(_path_append(rt.to(), begin, is_cgi.second)),
 	_is_cgi(is_cgi.first),
-	_path_info(_to_string(is_cgi.second, end)) {}
+	_path_info(_to_string(is_cgi.second, end)),
+	_root(&rt) {}
 
 // Public accessors
 
@@ -51,6 +53,13 @@ Location::is_cgi() const noexcept {
 std::string const&
 Location::path_info() const noexcept {
 	return (_path_info);
+}
+
+Location
+Location::translate() const {
+	if (!_root)
+		throw (std::logic_error("cannot translate underived location"));
+	return (_root->follow(_path_info));
 }
 
 // Private methods

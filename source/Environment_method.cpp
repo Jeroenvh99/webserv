@@ -3,15 +3,7 @@
 #include <cstring>
 #include <sstream>
 
-std::array<std::string, Environment::base_size> const	Environment::base_vars{
-	"SERVER_SOFTWARE=Webserv/1.0",
-	"GATEWAY_INTERFACE=CGI/1.1"};
-
-char**	Environment::_cenv;
-size_t	Environment::_cenv_size;
-
-Environment::Environment(std::initializer_list<std::string> ilist):
-	_local(ilist) {}
+// Static methods
 
 std::string
 Environment::env_string(std::string const& key, std::string const& value) {
@@ -33,25 +25,38 @@ Environment::env_string(http::Header const& hdr) {
 	return (oss.str());
 }
 
+// Public accessors
+
+Environment::Container const&
+Environment::ctr() const noexcept {
+	return (_ctr);
+}
+
+// Public modifiers
+
 void
 Environment::append(http::Header const& hdr) {
-	_local.push_back(env_string(hdr));
+	_ctr.push_back(env_string(hdr));
 }
 
 void
 Environment::append(std::string const& key, std::string const& value) {
-	_local.push_back(env_string(key, value));
+	_ctr.push_back(env_string(key, value));
 }
+
+// Conversions
 
 char**
 Environment::make_cenv() {
-	size_t const	total_size = base_size + _cenv_size + _local.size();
+	size_t const	total_size = _cenv_size + static_size + _ctr.size();
 	char**			p = new char*[total_size + 1];
+	char** const&	cenv_offset = p + _cenv_size;
+	char** const&	static_offset = cenv_offset + static_size;
 
-	for (size_t i = 0; i < _local.size(); ++i)
-		p[i] = _local.at(i).data();
-	::memmove(p + _local.size(), base_vars.data(), base_size * sizeof(char*));
-	::memmove(p + _local.size() + base_size, _cenv, _cenv_size * sizeof(char*));
+	::memmove(p, _cenv, _cenv_size * sizeof(char*));
+	::memmove(cenv_offset, static_env.data(), static_size * sizeof(char*));
+	for (size_t i = 0; i < _ctr.size(); ++i)
+		static_offset[i] = _ctr.at(i).data();
 	p[total_size] = nullptr;
 	return (p);
 }
