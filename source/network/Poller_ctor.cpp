@@ -13,7 +13,8 @@ Poller::Poller():
 }
 
 Poller::Poller(Poller&& that):
-	Handle(static_cast<Handle&&>(that)) {}
+	Handle(static_cast<Handle&&>(that)),
+	_handles(that._handles) {}
 
 Poller&
 Poller::operator=(Poller&& that) {
