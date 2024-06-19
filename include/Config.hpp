@@ -22,7 +22,9 @@ public:
 
 	struct Location
 	{
-		std::string path;
+		std::vector<std::string> paths;
+		std::string root;
+		std::string index;
 		std::unordered_map<std::string, std::string> parameters;
 		std::vector<http::Method> allowedmethods;
 	};
@@ -55,10 +57,11 @@ public:
 
 	ServerLog ParseLog(std::string &word, std::stringstream &s);
 	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed);
-	void ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, Server &server);
+	void ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server);
 	void Parse();
 	void ParseServer(std::stringstream &s);
 	void PreParse(std::ifstream &in);
+	void MatchErrorPages();
 	const ServerLog &getErrorLog() const;
 	const ServerLog &getAccessLog() const;
 	const std::vector<Server> &getServers() const;

@@ -22,14 +22,16 @@ main(int argc, char** argv) {
 		const std::vector<Config::Server> serverconfigs = conf.getServers();
 		std::vector<Server> servers;
 
-		for (Config::Server config : serverconfigs) {
-			std::ofstream access(config.accesslog.filename);
-			std::ofstream error(config.errorlog.filename);
-			servers.push_back(Server(config, dfl_backlog_size, access, error));
-		}
-		while (true) {
-			for (size_t i = 0; i < serverconfigs.size(); i++) {
-				servers[i].process(dfl_poller_timeout);
+		for (size_t i = 0; i < serverconfigs.size(); i++) {
+			std::ofstream access(serverconfigs[i].accesslog.filename);
+			std::ofstream error(serverconfigs[i].errorlog.filename);
+			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
+			if (i == serverconfigs.size() - 1) {
+				while (true) {
+					for (size_t j = 0; j < servers.size(); j++) {
+						servers[j].process(dfl_poller_timeout);
+					}
+				}
 			}
 		}
 	} catch (std::exception& e) {

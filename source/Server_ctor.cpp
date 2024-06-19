@@ -33,26 +33,29 @@ Server::Server(Config::Server config, int backlog_size,
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
 	// if this can be moved to the initializer list, it'd be great
-	// for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
-	// 	if (config.allowedmethods[i] != http::Method::NONE) {
-	// 		_route.allow_method(config.allowedmethods[i]);
-	// 	}
-	// }
-	// for (Config::Location loc : config.locations) {
-	// 	_route.extend(loc.path);
-	// 	for (int i = 0; i < http::Method::NONE; i++) {
-	// 		if (loc.allowedmethods[i] != http::Method::NONE) {
-	// 			_route.allow_method(loc.allowedmethods[i]);
-	// 		}
-	// 	}
-	// }
-	_route.allow_method(http::Method::GET)
-		.redirect("./www")
-		.set_directory_file("index.html");
-	_route.extend("/cgi")
-		.forbid_directory()
-		.allow_cgi("py");
-	_route.extend("/stuff")
-		.allow_method(http::Method::POST);
+	_route.redirect("./");
+	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+		if (config.allowedmethods[i] != http::Method::NONE) {
+			_route.allow_method(config.allowedmethods[i]);
+		}
+	}
+	for (Config::Location loc : config.locations) {
+		for (size_t j = 0; j < loc.paths.size(); j++) {
+			_route.extend(loc.paths[j])
+				.redirect(loc.root)
+				.list_directory();
+			if (!loc.index.empty()) {
+				_route.set_directory_file(loc.index);
+			}
+		}
+		for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+			if (loc.allowedmethods[i] != http::Method::NONE) {
+				_route.allow_method(loc.allowedmethods[i]);
+			}
+		}
+	}
+	for (auto& errorpage : config.errorpages) {
+		_error_pages.insert(std::pair<http::Status, std::filesystem::path>(static_cast<http::Status>(errorpage.first), errorpage.second));
+	}
 	acceptor().listen(backlog_size);
 }
