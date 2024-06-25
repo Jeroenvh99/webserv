@@ -31,13 +31,13 @@ Parser::state() const noexcept {
 
 // Other
 
-void
+Parser::State
 Parser::parse(std::iostream& ios, Request& req) {
 	try {
 		while (!ios.eof()) {
 			switch (_state) {
 			case State::done:
-				return;
+				return (_state);
 			case State::start:
 				req = _parse_start(ios);
 				break;
@@ -50,7 +50,7 @@ Parser::parse(std::iostream& ios, Request& req) {
 			}
 		}
 	} catch (IncompleteLineException&) {
-		return;
+		return (_state);
 	}
 }
 

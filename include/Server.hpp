@@ -37,26 +37,26 @@ public:
 
 	Acceptor&			acceptor() noexcept;
 	Acceptor const&		acceptor() const noexcept;
-	void				process(int);
+	Environment const&	environment() const noexcept;
 	std::string const&	name() const noexcept;
 	in_port_t			port() const noexcept;
 
-	route::Location	locate(std::filesystem::path const&) const;
-	
-	http::Response	respond(http::Request const&);
-	http::Response	respond_error(http::Status);
-	http::Status	get(std::string&, http::Request const&);
-	http::Status	post(std::string&, http::Request const&);
-	http::Status	delete_(std::string&, http::Request const&);
+	route::Location		locate(std::filesystem::path const&) const;
+	route::Location		locate(URI const&) const;
+	stdfs::path const&	locate_errpage(http::Status) const noexcept;
+
+	void	process(int);
 
 	static constexpr Poller::EventTypes	poller_events = {
 		Poller::EventType::read, Poller::EventType::write
 	};
 	static constexpr Poller::Modes		poller_mode = {};
+	static stdfs::path const			no_errpage;
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
 	using ClientIt = ClientMap::iterator;
+	enum class IOStatus;
 
 	void	_accept();
 	void	_process_core(Poller::Event const&, ClientIt);
@@ -64,10 +64,12 @@ private:
 	void	_to_graveyard(ClientIt);
 	void	_drop(ClientIt);
 
-	bool	_fetch(Client&);
-	bool	_read(Client&);
-	bool	_wait(Client&);
-	bool	_send(Client&);
+	IOStatus	_recv(Client&, webserv::Buffer&);
+	IOStatus	_parse(Client&);
+	IOStatus	_fetch_headers(Client&);
+	IOStatus	_fetch_body(Client&);
+	IOStatus	_deliver(Client&);
+	IOStatus	_send(Client&, webserv:: Buffer const&);
 
 	std::string				_name;
 	Poller					_poller;
@@ -78,7 +80,11 @@ private:
 	ErrorPageMap			_error_pages;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
-	Environment				_env;
 }; // class Server
+
+enum class Server::IOStatus {
+	success,
+	failure,
+}; // enum class Server::IOStatus
 
 #endif // SERVER_HPP

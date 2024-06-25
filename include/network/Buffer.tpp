@@ -64,6 +64,21 @@ namespace network {
 	}
 
 	template<size_t SIZE>
+	size_t
+	Buffer<SIZE>::read(std::istream& is) {
+		is.read(this->data(), SIZE); // signedness mismatch!
+		_len = is.gcount();
+		return (_len);
+	}
+
+	template<size_t SIZE>
+	size_t
+	Buffer<SIZE>::write(std::ostream& os) const {
+		os.write(this->data(), _len); // signedness mismatch!
+		return (os.good() ? _len : 0);
+	}
+
+	template<size_t SIZE>
 	std::istream&
 	operator>>(std::istream& is, Buffer<SIZE>& that) {
 		while (!is.eof() && that._len < SIZE)

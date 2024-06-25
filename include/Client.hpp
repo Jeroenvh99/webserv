@@ -2,7 +2,9 @@
 # define CLIENT_HPP
 
 # include "webserv.hpp"
-# include "CGI.hpp"
+# include "Buffer.hpp"
+# include "Worker.hpp"
+# include "job/job.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
 # include "route.hpp"
@@ -31,16 +33,15 @@ private:
 	http::Request::Parser	_parser;
 	http::Request			_request;
 	http::Response			_response;
-	CGI						_cgi;
 	Address					_address;
+	Worker					_worker;
 }; // class ClientImpl
 
 enum class ClientImpl::State {
 	idle,
-	parse,	// parsing a request
-	fetch,	// about to fetch a resource
-	wait,	// waiting for CGI processing
-	send,	// sending response
+	parse,        // parsing request
+	work_message, // receiving request body and/or parsing response headers
+	work_body,    // receiving request body and/or sending response body
 }; // enum class ClientImpl::State
 
 using ClientMap = std::unordered_map<network::SharedHandle, ClientImpl>;
@@ -55,22 +56,22 @@ public:
 	Client(ClientMap::value_type&);
 	Client(SocketBox const&, ClientImpl&);
 
-	void	operator<<(http::Request const&);
-	void	operator<<(http::Response const&);
-
 	Address const&			address() const noexcept;
 	Socket const&			socket() const noexcept;
 	SocketBox const&		socket_box() const noexcept;
 	http::Request const&	request() const noexcept;
-	CGI&					cgi() noexcept;
 	http::Response const&	response() const noexcept;
 	State					state() const noexcept;
+	Worker const&			worker() const noexcept;
 
-	void	parse();
-	void	fetch(route::Location const&, Environment const&);
-	size_t	recv();
-	size_t	send();
-	size_t	wait();
+	http::Request::Parser::State	parse(webserv::Buffer&);
+	// http::Response::Parser::State	fetch_headers(webserv::Buffer&);
+	job::StatusOption	respond(job::Job const&);
+	void				respond(job::ErrorJob const&);
+	job::StatusOption	deliver(webserv::Buffer const&);
+	job::StatusOption	fetch_body(webserv::Buffer&);
+	size_t				flush(webserv::Buffer&);
+
 	void	clear() noexcept;
 
 private:

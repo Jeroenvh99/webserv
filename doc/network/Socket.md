@@ -9,6 +9,7 @@ Class representing a network socket belonging to a particular `DOMAIN` and confo
 - `enum class Domain`
 The socket's communication domain. Possible values:
 	- `ipv4`;
+	- `local`;
 - `enum class Type`
 The socket's type. Possible values:
 	- `stream`;

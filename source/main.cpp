@@ -15,8 +15,8 @@ static size_t	_get_cenvsize(char const* const*);
 
 int
 main(int argc, char** argv, char** envp) {
-	Environment::_cenv = envp;
-	Environment::_cenv_size = _get_cenvsize(envp);
+	Environment::_parent_env = envp;
+	Environment::_parent_env_size = _get_cenvsize(envp);
 
 	if (argc > 2)
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);

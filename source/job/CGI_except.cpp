@@ -5,6 +5,12 @@
 
 extern int	errno;
 
+CGI::WaitException::WaitException():
+	std::runtime_error(strerror(errno)) {}
+	
+CGI::WaitException::WaitException(char const* msg):
+	std::runtime_error(msg) {}
+
 CGI::PipeException::PipeException():
 	std::runtime_error(strerror(errno)) {}
 	

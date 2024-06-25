@@ -14,19 +14,15 @@
 class Environment {
 public:
 	using Container = std::vector<std::string>;
-	// DB: This effectively allows duplicate variables. We could switch to a map to prevent that.
 
-	Environment(std::initializer_list<std::string>);
-	Environment(Environment const&, route::Location const&, Client const&);
+	Environment(Server const&, Client const&, route::Location const&);
+	~Environment();
 
-	Container const&	ctr() const noexcept;
+	void	build();
 
-	void	append(Client const&);
-	void	append(http::Request const&);
-	void	append(http::Header const&);
-	void	append(std::string const&, std::string const&);
-
-	char**	make_cenv();
+	Container const&	vec() const noexcept;
+	char const* const*	cenv() const noexcept;
+	char**				cenv() noexcept;
 
 	static std::string	env_string(std::string const&, std::string const&);
 	static std::string	env_string(http::Header const&);
@@ -34,16 +30,29 @@ public:
 	static constexpr size_t			dfl_size = 17;
 	// DB: See RFC 3875, section 4.1 (CGI 1.1; Request Meta-Variables)
 	static constexpr size_t			static_size = 2;
-	using StaticContainer = std::array<std::string, static_size>;
-	static StaticContainer const	static_env;
+	using StaticArray = std::array<char const*, static_size>;
+	static constexpr StaticArray	static_env = {
+		"SERVER_SOFTWARE=Webserv/1.0",
+		"GATEWAY_INTERFACE=CGI/1.1"};
 
 private:
 	friend int main(int, char**, char**);
 
-	static char**	_cenv;
-	static size_t	_cenv_size;
+	void	append(Client const&);
+	void	append(http::Request const&);
+	void	append(http::Header const&);
+	void	append(std::string const&, std::string const&);
+	void	_build_cenv();
+
+	Server const&			_server;
+	Client const&			_client;
+	route::Location const&	_location;
 
 	Container	_ctr;
+	char**		_cenv;
+
+	static char**	_parent_env;
+	static size_t	_parent_env_size;
 }; // class Environment
 
 #endif // ENVIRONMENT_HPP

@@ -30,14 +30,14 @@ Client::response() const noexcept {
 	return (_impl._response);
 }
 
-CGI&
-Client::cgi() noexcept {
-	return (_impl._cgi);
-}
-
 Client::State
 Client::state() const noexcept {
 	return (_impl._state);
+}
+
+Worker const&
+Client::worker() const noexcept {
+	return (_impl._worker);
 }
 
 Client::Address const&

@@ -3,6 +3,7 @@
 
 # include "http.hpp"
 # include "http/Message.hpp"
+# include "http/Body.hpp"
 # include "URI.hpp"
 
 # include <iostream>
@@ -30,21 +31,18 @@ namespace http {
 		std::string const&	header(std::string const&) const;
 		HeaderMap const&	headers() const noexcept;
 		bool				has_header(std::string const&) const noexcept;
+		Body				has_body() const; // this is not particularly speedy
 		size_t				header_count() const noexcept;
-		std::string const&	body() const noexcept;
-		std::string&		body() noexcept;
-		bool				has_body() const noexcept;
 
 		void	clear() noexcept;
 
 	private:
 		void	_header_append(Header&&);
 
-		Method		_method;
-		Version		_version;
-		URI			_uri;
-		HeaderMap 	_headers;
-		std::string _body;
+		Method				_method;
+		Version				_version;
+		URI					_uri;
+		HeaderMap 			_headers;
 	}; // class Request
 
 	class Request::Parser {
@@ -63,7 +61,7 @@ namespace http {
 		static std::iostream&	getline(std::iostream&, std::string&);
 
 		void	clear() noexcept;
-		void	parse(std::iostream&, Request&);
+		State	parse(std::iostream&, Request&);
 
 		State	state() const noexcept;
 

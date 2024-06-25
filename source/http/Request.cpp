@@ -72,19 +72,43 @@ Request::header_count() const noexcept {
 	return (_headers.size());
 }
 
-bool
+static std::optional<size_t>	_get_body_length(Request const&);
+
+Body
 Request::has_body() const noexcept {
-	return (_body.size() > 0);
+	auto	body_length = _get_body_length(*this);
+
+	if (body_length) {
+		if (*body_length)
+			return ({Body::Type::by_length, *body_length});
+		return ({Body::Type::none}); // Content-Length == 0
+	}
+	try {
+		std::string const&	strval = req.header("Transfer-Encoding");
+
+		if (http::strcmp_nocase(strval, "chunked")) // comma-separated values!
+			return ({Body::Type::chunked});
+		return ({Body::Type::none});
+	} catch (std::out_of_range&) {	// Transfer-Encoding is not defined
+		return ({Body::Type::none});
+	}
 }
 
-std::string const&
-Request::body() const noexcept {
-	return (_body);
-}
+static std::optional<size_t>
+_get_body_length(Request const& req) {
+	try {
+		std::string const&	strval = req.header("Content-Length");
 
-std::string&
-Request::body() noexcept {
-	return (_body);
+		try {
+			return (std::stoul(strval));
+		} catch (std::out_of_range& e) {		// overflow
+			throw (Parser::HeaderException("bad header Content-Length"));
+		} catch (std::invalid_argument& e) {	// non-numeric value
+			throw (Parser::HeaderException("bad header Content-Length"));
+		}
+	} catch (std::out_of_range& e) {	// Content-Length is not defined
+		return (std::nullopt_t);
+	}
 }
 
 // Modifiers

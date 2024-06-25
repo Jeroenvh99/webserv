@@ -30,8 +30,7 @@ Location::Location(Route const& rt, PathIt begin, IsCGI is_cgi, PathIt end):
 	_from(_path_append(rt.from(), begin, end)),
 	_to(_path_append(rt.to(), begin, is_cgi.second)),
 	_is_cgi(is_cgi.first),
-	_path_info(_to_string(is_cgi.second, end)),
-	_root(&rt) {}
+	_path_info(_to_string(is_cgi.second, end)) {}
 
 // Public accessors
 
@@ -56,10 +55,8 @@ Location::path_info() const noexcept {
 }
 
 Location
-Location::translate() const {
-	if (!_root)
-		throw (std::logic_error("cannot translate underived location"));
-	return (_root->follow(_path_info));
+Location::translate(Route const& rt) const {
+	return (rt.follow(_path_info));
 }
 
 // Private methods

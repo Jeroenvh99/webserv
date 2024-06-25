@@ -24,6 +24,7 @@ namespace network {
 
 		bool	good() const noexcept;
 
+		Raw		release() noexcept;
 		void	close();
 
 	protected:
@@ -34,7 +35,6 @@ namespace network {
 
 	private:
 		friend class Poller;
-		Raw	release() noexcept;
 
 		Raw	_raw;
 	}; // class Handle

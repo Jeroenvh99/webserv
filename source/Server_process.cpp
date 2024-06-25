@@ -21,22 +21,22 @@ Server::process(int poller_timeout) { // DB: this could be made configurable
 
 void
 Server::_process_core(Poller::Event const& event, ClientIt it) {
-	Client	client(*it);
+	Client			client(*it);
 
 	switch (client.state()) {
 	case Client::State::idle:
 	case Client::State::parse:
-		if (event.happened(Poller::EventType::read) && _read(client) == false)
+		if (event.happened(Poller::EventType::read)
+			&& _parse(client) == IOStatus::failure)
 			_to_graveyard(it);
+
 		break;
-	case Client::State::fetch:
-		_fetch(client);
-		break;
-	case Client::State::wait:
-		_wait(client);
-		break;
-	case Client::State::send:
-		if (event.happened(Poller::EventType::write) && _send(client) == false)
+	case Client::State::work:
+		if (event.happened(Poller::EventType::read)
+			&& _deliver(client) == IOStatus::failure)
+			_to_graveyard(it);
+		if (event.happened(Poller::EventType::write)
+			&& _fetch(client) == IOStatus::failure)
 			_to_graveyard(it);
 		break;
 	}

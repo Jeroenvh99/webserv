@@ -119,7 +119,8 @@ namespace route {
 		stdfs::path const&	to() const noexcept;
 		bool				is_cgi() const noexcept;
 		std::string const&	path_info() const noexcept;
-		Location			translate() const;
+
+		Location	translate(Route const&);
 
 	private:
 		using IsCGI = std::pair<bool, stdfs::path::iterator>;
@@ -135,7 +136,6 @@ namespace route {
 		stdfs::path		_to;
 		bool			_is_cgi;
 		std::string		_path_info;
-		Route const*	_root; // :'(
 	}; // class Location
 
 	enum class BaseRoute::MethodOption {

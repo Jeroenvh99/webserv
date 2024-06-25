@@ -19,9 +19,6 @@ SRC_FILES	:= main.cpp \
 			Server_process.cpp \
 			Server_respond.cpp \
 			URI.cpp \
-			cgi/CGI_ctor.cpp \
-			cgi/CGI_method.cpp \
-			cgi/except.cpp \
 			http/Method.cpp \
 			http/Message.cpp \
 			http/Request.cpp \
@@ -36,6 +33,17 @@ SRC_FILES	:= main.cpp \
 			http/Response_io.cpp \
 			http/Status.cpp \
 			http/Version.cpp \
+			job/CGI_ctor.cpp \
+			job/CGI_except.cpp \
+			job/CGI_io.cpp \
+			job/CGI_spawn.cpp \
+			job/Job.cpp \
+			job/Resource_ctor.cpp \
+			job/Resource_delete.cpp \
+			job/Resource_get.cpp \
+			job/Resource_io.cpp \
+			job/Resource_method.cpp \
+			job/Resource_post.cpp \
 			logging/Logger.cpp \
 			logging/AccessLogger.cpp \
 			logging/ErrorLogger.cpp \

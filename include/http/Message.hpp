@@ -9,6 +9,7 @@
 
 namespace http {
 	using Header = std::pair<std::string, std::string>;
+
 	std::string	to_string(Header const&);
 
 	class Message {

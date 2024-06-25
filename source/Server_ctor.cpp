@@ -14,6 +14,8 @@ Server::Server(RouteConfig&& config):
 
 using namespace logging;
 
+stdfs::path const	Server::no_errpage = "";
+
 Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_name(name),
@@ -25,11 +27,7 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, ErrorLogger::Level::debug),
-	_env{
-		Environment::env_string("SERVER_NAME", name),
-		Environment::env_string("SERVER_PORT", std::to_string(port))
-	} {
+	_elog(elog, ErrorLogger::Level::debug) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
