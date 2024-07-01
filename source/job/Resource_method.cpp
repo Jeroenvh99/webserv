@@ -2,8 +2,7 @@
 
 using job::Resource;
 
-job::StatusOption
-
+job::Status
 Resource::status() const noexcept {
 	return (_status);
 }

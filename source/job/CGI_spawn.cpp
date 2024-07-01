@@ -15,25 +15,29 @@ static void	_dup2(int, int);
 // Public methods
 
 void
-CGI::kill() {
+CGI::kill() noexcept {
 	if (_pid == _no_child)
 		return;
 	::kill(_pid, SIGKILL);
 	_pid = _no_child;
 }
 
-job::ExitOption
+job::Status
 CGI::wait() {
-	int status;
+	int wstat;
 
-	switch (waitpid(_pid, &status, WNOHANG)) {
+	switch (waitpid(_pid, &wstat, WNOHANG)) {
 	case -1:
 		throw (WaitException());
 	case 0:
-		return (std::nullopt);
+		return (Status::pending);
 	default:
 		_pid = _no_child;
-		return (status);
+		if (WIFSIGNALED(wstat))
+			return (Status::aborted);
+		if (WEXITSTATUS(wstat) != EXIT_SUCCESS)
+			return (Status::failure);
+		return (Status::success);
 	}
 }
 

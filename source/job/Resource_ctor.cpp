@@ -1,17 +1,20 @@
 #include "job/Resource.hpp"
+#include "Server.hpp"
 #include "html.hpp"
 
 using job::Resource;
 
 Resource::Resource():
-	_type(Type::none) {}
+	_type(Type::none),
+	_status(Status::success) {}
 
 Resource::~Resource() {
 	close();
 }
 
 Resource::Resource(Resource&& that):
-	_type(that._type) {
+	_type(that._type),
+	_status(that._status) {
 	switch (_type) {
 	case Type::file:
 		new (&_file) std::fstream(std::move(that._file));
@@ -23,40 +26,13 @@ Resource::Resource(Resource&& that):
 	}
 }
 
-Resource::Resource(Job const& job):
-	_type(Type::none) {
-	switch (job.request.method()) {
-	case http::Method::GET:
-		_status = _get(job.location);
-		break;
-	case http::Method::POST:
-		_status = _post(job.location);
-		break;
-	case http::Method::DELETE:
-		_status = _delete(job.location);
-		break;
-	default:
-		_status = http::Status::not_implemented;
-	}
-}
-
-Resource::Resource(ErrorJob const& job):
-	_type(Type::none) {
-	job::StatusOption	status = _get_file(job.file);
-
-	if (status && *status == http::Status::not_found) { // nonexistent errpage
-		close();
-		_open_builtin(default_html(job.status));
-		_status = job.status; // just for good measure
-	}
-}
-
 Resource&
 Resource::operator=(Resource&& that) {
 	if (this == &that)
 		return (*this);
 	close();
 	_type = that._type;
+	_status = that._status;
 	switch (_type) {
 	case Type::file:
 		new (&_file) std::fstream(std::move(that._file));

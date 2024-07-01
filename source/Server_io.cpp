@@ -9,9 +9,9 @@ Server::_parse_request(Client& client) {
 		return (IOStatus::failure);
 	try {
 		if (client.parse_request(buf) == true) {
+			client.respond({client, *this});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished.");
-			client.respond({client, *this});
 		}
 	} catch (http::Parser::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
@@ -24,8 +24,6 @@ Server::_parse_request(Client& client) {
 		client.respond({http::Status::bad_request, *this});
 		return (IOStatus::failure);
 	}
-	_elog.log(LogLevel::debug, std::string(client.address()),
-		": Parsed ", std::to_string(buf.len()), " bytes.");
 	return (IOStatus::success);
 }
 
@@ -57,17 +55,18 @@ Server::_deliver(Client& client) {
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
 
-	job::StatusOption	status = client.deliver(buf);
-
-	if (status && http::is_error(*status)) {
+	switch (client.deliver(buf)) {
+	case job::Status::success:
+	case job::Status::pending:
+		_elog.log(LogLevel::debug, std::string(client.address()),
+			": Delivered ", buf.len(), " bytes.");
+		return (IOStatus::success);
+	default: // aborted, failure
 		_elog.log(LogLevel::error, std::string(client.address()),
-			": Error delivering resource: ", *status, ".");
-		client.respond({*status, *this});
+			": Error delivering resource.");
+		// todo: inject error message into body
 		return (IOStatus::failure);
 	}
-	_elog.log(LogLevel::debug, std::string(client.address()),
-		": Delivered ", buf.len(), " bytes.");
-	return (IOStatus::success);
 }
 
 Server::IOStatus
@@ -81,17 +80,19 @@ Server::_fetch_and_send(Client& client) {
 
 Server::IOStatus
 Server::_fetch(Client& client, webserv::Buffer& buf) {
-	job::StatusOption const	status = client.fetch(buf);
-
-	if (status && http::is_error(*status)) {
+	switch (client.fetch(buf)) {
+	case job::Status::success:
+	case job::Status::pending:
+		if (buf.len() > 0)
+		_elog.log(LogLevel::debug, std::string(client.address()),
+			": Fetched ", buf.len(), " bytes.");
+		return (Server::IOStatus::success);
+	default: // aborted, failure
 		_elog.log(LogLevel::error, std::string(client.address()),
-			": Error fetching resource:", *status, ".");
-		client.respond({*status, *this});
+			": Error fetching resource.");
+		// todo: inject error message into body
 		return (IOStatus::failure);
 	}
-	_elog.log(LogLevel::debug, std::string(client.address()),
-		": Fetched ", buf.len(), " bytes.");
-	return (IOStatus::success);
 }
 
 Server::IOStatus

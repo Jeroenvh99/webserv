@@ -6,6 +6,6 @@ ClientImpl::ClientImpl(Address const& address):
 
 void
 ClientImpl::_reset_buffer(std::string const& str) {
-	_buffer.clear();
 	_buffer.str(str);
+	_buffer.clear();
 }

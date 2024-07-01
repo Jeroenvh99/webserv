@@ -37,38 +37,47 @@ Client::parse_response(webserv::Buffer const& buf) {
 	return (false);
 }
 
-job::StatusOption
+job::Status
 Client::respond(job::Job const& job) {
-	job::StatusOption	status = _impl._worker.start(job);
+	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
-	_impl._state = _impl._worker.state() == Worker::State::cgi
-		? State::parse_response
-		: State::work;
-	return (status);
+	if (!jstat)						 // job is CGI; must be waited for first
+		_impl._state = State::parse_response;
+	else if (http::is_error(*jstat)) // job couldn't be started
+		return (respond({*jstat, job}));
+	_impl._response = http::Response(*jstat);
+	// todo: insert more headers based on file type
+	_impl._reset_buffer();
+	_impl._buffer << _impl._response;
+	_impl._state = State::work;
+	return (_impl._worker.wait());
 }
 
-void
+job::Status
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
+	// todo: insert more headers based on file type
 	_impl._reset_buffer();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._state = State::work;
+	return (_impl._worker.wait());
 }
 
-job::StatusOption
+job::Status
 Client::deliver(webserv::Buffer const& buf) {
 	if (_impl._request_body.type() == http::Body::Type::none)
-		return (http::Status::bad_request); // will not accept unexpected body
+		return (job::Status::failure); // will not accept unexpected body // move this check elsewhere?
+	// todo: dechunk if necessary
 	_impl._worker.write(buf);
 	return (_impl._worker.wait());
 }
 
-job::StatusOption
+job::Status
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
-		_impl._buffer >> buf;
-		return (std::nullopt);
+		buf.get(_impl._buffer);
+		return (job::Status::pending);
 	}
 	_impl._worker.read(buf);
 	return (_impl._worker.wait());
@@ -76,8 +85,5 @@ Client::fetch(webserv::Buffer& buf) {
 
 size_t
 Client::flush(webserv::Buffer& buf) {
-	size_t const	bytes = buf.get(_impl._buffer);
-
-	_impl._reset_buffer();
-	return (bytes);
+	return (buf.get(_impl._buffer));
 }

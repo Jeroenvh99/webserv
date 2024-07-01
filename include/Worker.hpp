@@ -22,10 +22,10 @@ public:
 	Worker&	operator=(Worker const&) = delete;
 	Worker&	operator=(Worker&&);
 
-	job::StatusOption	start(job::Job const&);
-	void				start(job::ErrorJob const&);
-	void				stop() noexcept;
-	job::StatusOption	wait();
+	std::optional<http::Status>	start(job::Job const&);
+	void						start(job::ErrorJob const&);
+	void						stop() noexcept;
+	job::Status					wait();
 
 	size_t	read(webserv::Buffer&);
 	size_t	write(webserv::Buffer const&);

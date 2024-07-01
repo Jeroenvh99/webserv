@@ -9,5 +9,6 @@ http::operator<<(std::ostream& os, Response const& resp) {
 		<< description(resp.status()) << "\r\n";
 	for (auto const& hdr: resp.headers())
 		os << to_string(hdr) << "\r\n";
+	os << "\r\n";
 	return (os);
 }

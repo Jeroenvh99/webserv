@@ -72,10 +72,10 @@ public:
 
 	bool				parse_request(webserv::Buffer&);
 	bool				parse_response(webserv::Buffer const&);
-	job::StatusOption	respond(job::Job const&);
-	void				respond(job::ErrorJob const&);
-	job::StatusOption	deliver(webserv::Buffer const&);
-	job::StatusOption	fetch(webserv::Buffer&);
+	job::Status			respond(job::Job const&);
+	job::Status			respond(job::ErrorJob const&);
+	job::Status			deliver(webserv::Buffer const&);
+	job::Status			fetch(webserv::Buffer&);
 	size_t				flush(webserv::Buffer&);
 
 	void	clear() noexcept;

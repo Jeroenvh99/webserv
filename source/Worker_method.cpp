@@ -1,8 +1,6 @@
 #include "Worker.hpp"
 
-static job::StatusOption	_to_status_option(int);
-
-job::StatusOption
+std::optional<http::Status>
 Worker::start(job::Job const& job) {
 	stop();
 	if (!job.location.allows_method(job.request.method()))
@@ -10,8 +8,8 @@ Worker::start(job::Job const& job) {
 	_state = job.is_cgi() ? State::cgi : State::resource;
 	switch (_state) {
 	case State::resource:
-		new (&_resource) job::Resource(job);
-		return (_resource.status());
+		new (&_resource) job::Resource();
+		return (_resource.open(job));
 	case State::cgi:
 		new (&_cgi) job::CGI(job);
 		return (std::nullopt);
@@ -24,7 +22,8 @@ void
 Worker::start(job::ErrorJob const& job) {
 	stop();
 	_state = State::resource;
-	new (&_resource) job::Resource(job);
+	new (&_resource) job::Resource();
+	_resource.open(job);
 }
 
 void
@@ -42,27 +41,15 @@ Worker::stop() noexcept {
 	}
 }
 
-job::StatusOption
+job::Status
 Worker::wait() {
 	switch (_state) {
-	case State::resource: {
-		job::StatusOption const	rstat = _resource.status();
-
-		if (rstat)
-			stop();
-		return (rstat);
-	}
-	case State::cgi: {
-		job::ExitOption const	estat = _cgi.wait();
-
-		if (estat) {
-			stop();
-			return (_to_status_option(*estat));
-		}
-		return (std::nullopt);
-	}
+	case State::resource:
+		return (_resource.status());
+	case State::cgi:
+		return (_cgi.wait());
 	default:
-		return (http::Status::ok); // or nullopt?
+		return (job::Status::pending);
 	}
 }
 
@@ -93,11 +80,4 @@ Worker::read(webserv::Buffer& buf) {
 	default:
 		return (0);
 	}
-}
-
-static job::StatusOption
-_to_status_option(int exit) {
-	if (WIFSIGNALED(exit) || WEXITSTATUS(exit) != EXIT_SUCCESS)
-		return (http::Status::internal_error);
-	return (http::Status::ok); // actual status must be derived from header
 }

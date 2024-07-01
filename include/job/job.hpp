@@ -9,8 +9,12 @@
 # include <optional>
 
 namespace job {
-	using StatusOption = std::optional<http::Status>;
-	using ExitOption = std::optional<int>;
+	enum class Status {
+		success,
+		failure,
+		aborted,
+		pending,
+	}; // enum class Status
 
 	struct Job {
 		Job(Client const&, Server const&);
@@ -18,12 +22,14 @@ namespace job {
 		bool	is_cgi() const noexcept;
 
 		http::Request const&	request;
+		Server const&			server;
 		route::Location const	location;
 		Environment				environment;
 	}; // struct Job
 
 	struct ErrorJob {
 		ErrorJob(http::Status, Server const&);
+		ErrorJob(http::Status, Job const&);
 
 		http::Status const	status;
 		stdfs::path const&	file;

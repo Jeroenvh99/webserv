@@ -14,31 +14,32 @@ namespace job {
 		~Resource();
 		Resource(Resource const&) = delete;
 		Resource(Resource&&);
-		Resource(Job const&);
-		Resource(ErrorJob const&);
 		Resource&	operator=(Resource const&) = delete;
 		Resource&	operator=(Resource&&);
 
+		http::Status	open(Job const&);
+		void			open(ErrorJob const&);
 		void			close() noexcept;
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
-		StatusOption	status() const noexcept;
+		Status			status() const noexcept;
 
 	private:
 		enum class Type;
 
-		StatusOption	_get(route::Location const&);
-		StatusOption	_get_file(stdfs::path const&);
-		StatusOption	_get_directory(route::Location const&);
-		StatusOption	_get_directory_list(stdfs::path const&);
-		StatusOption	_post(route::Location const&);
-		StatusOption	_delete(route::Location const&);
+		http::Status	_get(route::Location const&);
+		http::Status	_get_file(stdfs::path const&);
+		http::Status	_get_directory(route::Location const&);
+		http::Status	_get_directory_list(stdfs::path const&);
+		http::Status	_post(route::Location const&);
+		http::Status	_delete(route::Location const&);
 
 		void	_open_file(stdfs::path const&, std::ios::openmode);
 		void	_open_builtin(std::string const&);
+		void	_open_builtin(std::stringstream&&);
 
-		StatusOption			_status;
 		Type					_type;
+		Status					_status;
 		union {
 			std::fstream		_file;
 			std::stringstream	_builtin;
