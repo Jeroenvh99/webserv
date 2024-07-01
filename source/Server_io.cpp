@@ -12,7 +12,6 @@ Server::_parse_request(Client& client) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished.");
 			client.respond({client, *this});
-			return (IOStatus::success);
 		}
 	} catch (http::Parser::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
@@ -25,6 +24,8 @@ Server::_parse_request(Client& client) {
 		client.respond({http::Status::bad_request, *this});
 		return (IOStatus::failure);
 	}
+	_elog.log(LogLevel::debug, std::string(client.address()),
+		": Parsed ", std::to_string(buf.len()), " bytes.");
 	return (IOStatus::success);
 }
 

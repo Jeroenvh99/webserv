@@ -37,7 +37,7 @@ Parser::parse(std::iostream& ios, Request& req) {
 		while (!ios.eof()) {
 			switch (_state) {
 			case State::done:
-				break;
+				return (_state);
 			case State::start:
 				req = _parse_start(ios);
 				break;
