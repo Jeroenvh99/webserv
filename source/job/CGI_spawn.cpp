@@ -45,19 +45,20 @@ CGI::wait() {
 
 void
 CGI::_fork(Job const& job) {
-	using SocketPair = network::SocketPair<Socket>;
-
-	SocketPair	pair;
+	network::SocketPair<Socket>	pair;
 
 	_pid = ::fork();
-	if (_pid == -1)
+	switch (_pid) {
+	case -1:
 		throw (ForkException());
-	if (_pid == _no_child)
-		_socket = std::move(pair.first);
-	else {
+	case _no_child:
 		pair.first.close();
 		_redirect_io(pair.second);
 		_exec(job);
+		break;
+	default:
+		_socket = std::move(pair.first);
+		break;
 	}
 }
 

@@ -7,20 +7,28 @@ using job::CGI;
 
 extern int	errno;
 
+CGI::Exception::Exception(char const* msg):
+	_what(msg) {}
+
+char const*
+CGI::Exception::what() const noexcept {
+	return (_what);
+}
+
 CGI::WaitException::WaitException():
-	std::runtime_error(strerror(errno)) {}
+	CGI::Exception(strerror(errno)) {}
 	
 CGI::WaitException::WaitException(char const* msg):
-	std::runtime_error(msg) {}
+	CGI::Exception(msg) {}
 
 CGI::SocketException::SocketException():
-	std::runtime_error(strerror(errno)) {}
+	CGI::Exception(strerror(errno)) {}
 	
 CGI::SocketException::SocketException(char const* msg):
-	std::runtime_error(msg) {}
+	CGI::Exception(msg) {}
 
 CGI::ForkException::ForkException():
-	std::runtime_error(strerror(errno)) {}
+	CGI::Exception(strerror(errno)) {}
 
 CGI::ForkException::ForkException(char const* msg):
-	std::runtime_error(msg) {}
+	CGI::Exception(msg) {}

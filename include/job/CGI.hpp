@@ -37,21 +37,28 @@ namespace job {
 		Socket	_socket;
 	}; // class CGI
 
-	class CGI::Exception: public std::exception {};
+	class CGI::Exception: public std::exception {
+	public:
+		Exception(char const*);
 
-	class CGI::WaitException: public CGI::Exception, std::runtime_error {
+		char const*	what() const noexcept;
+	private:
+		char const*	_what;
+	};
+
+	class CGI::WaitException: public CGI::Exception {
 	public:
 		WaitException();
 		WaitException(char const*);
 	}; // class CGI::WaitException
 
-	class CGI::SocketException: public CGI::Exception, std::runtime_error {
+	class CGI::SocketException: public CGI::Exception {
 	public:
 		SocketException();
 		SocketException(char const*);
 	}; // class CGI::PipeException
 
-	class CGI::ForkException: public CGI::Exception, std::runtime_error {
+	class CGI::ForkException: public CGI::Exception {
 	public:
 		ForkException();
 		ForkException(char const*);
