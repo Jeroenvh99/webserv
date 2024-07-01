@@ -4,7 +4,14 @@
 class Server;
 class Client;
 class Environment;
-class CGI;
 class URI;
+
+namespace webserv {
+	enum class GenericStatus {
+		success,
+		failure,
+		pending,
+	}; // enum class GenericStatus
+}; // namespace webserv
 
 #endif // WEBSERV_HPP

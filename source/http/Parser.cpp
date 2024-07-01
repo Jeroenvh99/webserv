@@ -1,10 +1,11 @@
-#include "http/Request.hpp"
+#include "http.hpp"
+#include "http/parse.hpp"
 
 #include <iostream>
 
 using http::Request;
-using Parser = Request::Parser;
 using http::Method;
+using http::Parser;
 using http::Version;
 
 // Basic operations
@@ -19,7 +20,6 @@ Parser::clear() noexcept {
 	_state = State::start;
 	_tmp_hdr.first.clear();
 	_tmp_hdr.second.clear();
-	_body_length = 0;
 }
 
 // Accessors
@@ -37,25 +37,21 @@ Parser::parse(std::iostream& ios, Request& req) {
 		while (!ios.eof()) {
 			switch (_state) {
 			case State::done:
-				return (_state);
+				break;
 			case State::start:
 				req = _parse_start(ios);
 				break;
 			case State::header:
 				_parse_headers(ios, req);
 				break;
-			default:	// body
-				_parse_body(ios, req);
-				break;
 			}
 		}
-	} catch (IncompleteLineException&) {
-		return (_state);
-	}
+	} catch (IncompleteLineException&) {}
+	return (_state);
 }
 
 std::iostream&
-http::Request::Parser::getline(std::iostream& ios, std::string& line) {
+Parser::getline(std::iostream& ios, std::string& line) {
 	http::getline(ios, line);
 	if (!ios.eof())
 		return (ios);

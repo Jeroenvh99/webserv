@@ -1,6 +1,8 @@
 #include "job/Resource.hpp"
 #include "html.hpp"
 
+using job::Resource;
+
 Resource::Resource():
 	_type(Type::none) {}
 
@@ -25,13 +27,13 @@ Resource::Resource(Job const& job):
 	_type(Type::none) {
 	switch (job.request.method()) {
 	case http::Method::GET:
-		_status = _get(job.location.to());
+		_status = _get(job.location);
 		break;
 	case http::Method::POST:
-		_status = _post(job.location.to());
+		_status = _post(job.location);
 		break;
 	case http::Method::DELETE:
-		_status = _delete(job.location.to());
+		_status = _delete(job.location);
 		break;
 	default:
 		_status = http::Status::not_implemented;
@@ -40,7 +42,7 @@ Resource::Resource(Job const& job):
 
 Resource::Resource(ErrorJob const& job):
 	_type(Type::none) {
-	job::StatusOption	status = _get_file(job.file));
+	job::StatusOption	status = _get_file(job.file);
 
 	if (status && *status == http::Status::not_found) { // nonexistent errpage
 		close();

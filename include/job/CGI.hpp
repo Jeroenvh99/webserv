@@ -2,6 +2,7 @@
 # define JOB_CGI_HPP
 
 #include "job.hpp"
+#include "Buffer.hpp"
 #include "network/StreamSocket.hpp"
 
 #include <iostream>
@@ -27,6 +28,7 @@ namespace job {
 		using Socket = network::StreamSocket<network::Domain::local>;
 
 		void	_fork(Job const&);
+		void	_redirect_io(Socket&);
 		void	_exec(Job const&);
 
 		static constexpr pid_t	_no_child = 0;

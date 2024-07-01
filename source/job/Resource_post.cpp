@@ -2,10 +2,11 @@
 
 using job::Resource;
 
-StatusOption
-Resource::_post(stdfs::path const& pt) {
-	_open_file(pt, std::ios::out | std::ios::trunc);
+job::StatusOption
+Resource::_post(route::Location const& loc) {
+	stdfs::path const&	pt = loc.to();
 
+	_open_file(pt, std::ios::out | std::ios::trunc);
 	if (_file.bad())
 		return (http::Status::internal_error);
 	return (http::Status::created);

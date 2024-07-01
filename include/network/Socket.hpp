@@ -17,6 +17,10 @@ namespace network {
 	public:
 		using OptionList = std::initializer_list<SocketOption>;
 		using Address = network::Address<DOMAIN>;
+		using typename Handle::Raw;
+
+		static constexpr Domain	domain = DOMAIN;
+		static constexpr Type	type = TYPE;
 
 		Socket(OptionList = {}, char const* = "");
 		Socket(Address const&, OptionList = {}, char const* = "");
@@ -35,9 +39,8 @@ namespace network {
 		int		protocol() const noexcept; // would use forbidden function
 
 	protected:
-		template<Domain, Type>
+		template<typename Socket>
 		friend class SocketPair;
-		using typename Handle::Raw;
 
 		Socket(Raw);
 
@@ -46,11 +49,14 @@ namespace network {
 		static int	_get_protocol(char const*) noexcept;
 	}; // class template Socket
 
-	template<Domain DOMAIN, Type TYPE>
-	class SocketPair: public std::pair<Socket<DOMAIN, TYPE>, Socket<DOMAIN, TYPE>> {
+	template<typename SOCKET>
+	class SocketPair: public std::pair<SOCKET, SOCKET> {
 	public:
-		using SocketType = Socket<DOMAIN, TYPE>;
-		using OptionList = typename SocketType::OptionList;
+		using SocketClass = SOCKET;
+		using OptionList = typename SocketClass::OptionList;
+
+		static constexpr Domain	domain = SOCKET::domain;
+		static constexpr Type	type = SOCKET::type;
 
 		SocketPair(OptionList = {}, char const* = "");
 	}; // class template SocketPair

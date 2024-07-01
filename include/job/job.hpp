@@ -2,6 +2,7 @@
 # define JOB_HPP
 
 # include "webserv.hpp"
+# include "Environment.hpp"
 # include "http/Status.hpp"
 # include "route.hpp"
 
@@ -18,7 +19,7 @@ namespace job {
 
 		http::Request const&	request;
 		route::Location const	location;
-		Environment const&		environment;
+		Environment				environment;
 	}; // struct Job
 
 	struct ErrorJob {

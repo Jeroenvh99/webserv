@@ -1,11 +1,12 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ cgi/ http/ http/Request_Parser/ logging/ route/
+SRC_SUBDIRS	:= network/ cgi/ http/ job/ logging/ route/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
 SRC_FILES	:= main.cpp \
+			Environment_build.cpp \
 			Environment_ctor.cpp \
 			Environment_method.cpp \
 			Client.cpp \
@@ -17,21 +18,24 @@ SRC_FILES	:= main.cpp \
 			Server_io.cpp \
 			Server_method.cpp \
 			Server_process.cpp \
-			Server_respond.cpp \
 			URI.cpp \
-			http/Method.cpp \
+			Worker_ctor.cpp \
+			Worker_method.cpp \
+			http/Body.cpp \
+			http/Dechunker.cpp \
+			http/Header.cpp \
 			http/Message.cpp \
+			http/Method.cpp \
+			http/parse_cgi.cpp \
+			http/parse_except.cpp \
+			http/parse_headers.cpp \
+			http/parse_start.cpp \
+			http/Parser.cpp \
 			http/Request.cpp \
-			http/Request_Parser/except.cpp \
-			http/Request_Parser/Parser.cpp \
-			http/Request_Parser/parse_body.cpp \
-			http/Request_Parser/parse_chunks.cpp \
-			http/Request_Parser/parse_headers.cpp \
-			http/Request_Parser/parse_start.cpp \
-			http/Request_Parser/utils.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
 			http/Status.cpp \
+			http/utils.cpp \
 			http/Version.cpp \
 			job/CGI_ctor.cpp \
 			job/CGI_except.cpp \

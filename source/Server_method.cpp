@@ -12,11 +12,6 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
-Environment const&
-Server::environment() const noexcept {
-	return (_env);
-}
-
 std::string const&
 Server::name() const noexcept {
 	return (_name);
@@ -29,6 +24,11 @@ Server::port() const noexcept {
 	return (addr.port());
 }
 
+route::Route const&
+Server::route() const noexcept {
+	return (_route);
+}
+
 route::Location
 Server::locate(std::filesystem::path const& path) const {
 	return (_route.follow(path));
@@ -36,16 +36,16 @@ Server::locate(std::filesystem::path const& path) const {
 
 route::Location
 Server::locate(URI const& uri) const {
-	return (locate(uri.path()))
+	return (locate(uri.path()));
 }
 
 stdfs::path const&
-Server::locate_error_page(http::Status status) {
-	auto const	it = _error_pages.find(error);
+Server::locate_errpage(http::Status status) const noexcept {
+	auto const	it = _error_pages.find(status);
 
 	if (it == _error_pages.end())
-		return (no_error_page);
-	return (*it);
+		return (no_errpage);
+	return (it->second);
 }
 
 // Private methods

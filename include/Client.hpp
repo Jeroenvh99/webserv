@@ -5,8 +5,10 @@
 # include "Buffer.hpp"
 # include "Worker.hpp"
 # include "job/job.hpp"
+# include "http/Body.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
+# include "http/parse.hpp"
 # include "route.hpp"
 
 # include "network/StreamSocket.hpp"
@@ -28,20 +30,24 @@ public:
 private:
 	friend class Client;
 
-	State					_state;
-	std::stringstream		_buffer;
-	http::Request::Parser	_parser;
-	http::Request			_request;
-	http::Response			_response;
-	Address					_address;
-	Worker					_worker;
+	void	_reset_buffer(std::string const& = "");
+
+	State				_state;
+	std::stringstream	_buffer;
+	http::Parser		_parser;
+	http::Request		_request;
+	http::Body			_request_body;
+	http::Response		_response;
+	http::Body			_response_body;
+	Address				_address;
+	Worker				_worker;
 }; // class ClientImpl
 
 enum class ClientImpl::State {
 	idle,
-	parse,        // parsing request
-	work_message, // receiving request body and/or parsing response headers
-	work_body,    // receiving request body and/or sending response body
+	parse_request,  // receiving and parsing request line and headers
+	parse_response, // receiving request body and/or parsing response headers
+	work,          	// receiving request body and/or sending response
 }; // enum class ClientImpl::State
 
 using ClientMap = std::unordered_map<network::SharedHandle, ClientImpl>;
@@ -64,12 +70,12 @@ public:
 	State					state() const noexcept;
 	Worker const&			worker() const noexcept;
 
-	http::Request::Parser::State	parse(webserv::Buffer&);
-	// http::Response::Parser::State	fetch_headers(webserv::Buffer&);
+	bool				parse_request(webserv::Buffer&);
+	bool				parse_response(webserv::Buffer const&);
 	job::StatusOption	respond(job::Job const&);
 	void				respond(job::ErrorJob const&);
 	job::StatusOption	deliver(webserv::Buffer const&);
-	job::StatusOption	fetch_body(webserv::Buffer&);
+	job::StatusOption	fetch(webserv::Buffer&);
 	size_t				flush(webserv::Buffer&);
 
 	void	clear() noexcept;

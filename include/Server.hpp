@@ -37,9 +37,9 @@ public:
 
 	Acceptor&			acceptor() noexcept;
 	Acceptor const&		acceptor() const noexcept;
-	Environment const&	environment() const noexcept;
 	std::string const&	name() const noexcept;
 	in_port_t			port() const noexcept;
+	route::Route const&	route() const noexcept;
 
 	route::Location		locate(std::filesystem::path const&) const;
 	route::Location		locate(URI const&) const;
@@ -56,7 +56,8 @@ public:
 private:
 	using LogLevel = logging::ErrorLogger::Level;
 	using ClientIt = ClientMap::iterator;
-	enum class IOStatus;
+
+	using IOStatus = webserv::GenericStatus;
 
 	void	_accept();
 	void	_process_core(Poller::Event const&, ClientIt);
@@ -64,12 +65,14 @@ private:
 	void	_to_graveyard(ClientIt);
 	void	_drop(ClientIt);
 
-	IOStatus	_recv(Client&, webserv::Buffer&);
-	IOStatus	_parse(Client&);
-	IOStatus	_fetch_headers(Client&);
-	IOStatus	_fetch_body(Client&);
+	IOStatus	_parse_request(Client&);
+	IOStatus	_parse_response(Client&);
+	IOStatus	_fetch(Client&, webserv::Buffer&);
+	IOStatus	_fetch_and_send(Client&);
 	IOStatus	_deliver(Client&);
-	IOStatus	_send(Client&, webserv:: Buffer const&);
+	IOStatus	_recv(Client&, webserv::Buffer&);
+	IOStatus	_send(Client&);
+	IOStatus	_send(Client&, webserv::Buffer const&);
 
 	std::string				_name;
 	Poller					_poller;
@@ -81,10 +84,5 @@ private:
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server
-
-enum class Server::IOStatus {
-	success,
-	failure,
-}; // enum class Server::IOStatus
 
 #endif // SERVER_HPP

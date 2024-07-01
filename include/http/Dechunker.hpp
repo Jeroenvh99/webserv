@@ -1,6 +1,8 @@
 #ifndef HTTP_DECHUNKER_HPP
 # define HTTP_DECHUNKER_HPP
 
+# include "Buffer.hpp"
+
 # include <optional>
 # include <sstream>
 # include <stdexcept>
@@ -18,13 +20,13 @@ namespace http {
 	private:
 		using ChunkSize = std::optional<size_t>;
 
-		void	_get_size();
+		bool	_get_size();
 
 		ChunkSize			_size;
 		std::stringstream	_buffer;
 	}; // class Dechunker
 
-	class ChunkException: public std::exception {
+	class Dechunker::ChunkException: public std::exception {
 	public:
 		ChunkException(char const*);
 
@@ -32,7 +34,7 @@ namespace http {
 
 	private:
 		char const*	_msg;
-	}
+	}; // class Dechunker::ChunkException
 
 }; // namespace http
 

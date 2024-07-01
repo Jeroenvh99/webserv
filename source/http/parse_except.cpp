@@ -1,6 +1,6 @@
-#include "http/Request.hpp"
+#include "http/parse.hpp"
 
-using Parser = http::Request::Parser;
+using http::Parser;
 
 Parser::Exception::Exception(char const* msg):
 	std::logic_error(msg) {}

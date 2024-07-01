@@ -1,6 +1,6 @@
 #include "job/Resource.hpp"
 
-using job::Resource
+using job::Resource;
 
 job::StatusOption
 

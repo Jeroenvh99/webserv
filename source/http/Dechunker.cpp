@@ -1,4 +1,5 @@
 #include "http/Dechunker.hpp"
+#include "http/parse.hpp"
 
 #include <string>
 
@@ -6,24 +7,24 @@ using http::Dechunker;
 
 static bool	_check_end(std::istream&);
 
-Dechunker::Dechunker:
-	_remaining(std::nullopt_t) {}
+Dechunker::Dechunker():
+	_size(std::nullopt) {}
 
 Dechunker::Chunk
 Dechunker::dechunk(webserv::Buffer const& buf) { // DB: make more efficient?
-	buf.write(_buffer);
-	if (!size && _get_size == false)
-		return (std::nullopt_t);
-	if (_buffer.str().size < *_size + 2) // trailing CRLF must be processed
-		return (std::nullopt_t);
+	buf.put(_buffer);
+	if (!_size && _get_size() == false)
+		return (std::nullopt);
+	if (_buffer.str().size() < *_size + 2) // trailing CRLF must be processed
+		return (std::nullopt);
 
 	std::string	chunk;
 
 	for (size_t i = 0; i < *_size; ++i)
 		chunk.push_back(_buffer.get());
 	if (_check_end(_buffer) == false)
-		throw (ChunkError("bad chunk size"));
-	_size = std::nullopt_t;
+		throw (ChunkException("bad chunk size"));
+	_size = std::nullopt;
 	return (chunk);
 }
 
@@ -39,11 +40,11 @@ Dechunker::_get_size() {
 		} catch (std::out_of_range&) {
 			throw (ChunkException("bad chunk size format"));
 		}
-	} // put everything back and try again after next read
-	_buffer.clear();
+	}
+	_buffer.clear();  // put everything back
 	_buffer << line;
-	_remaining = std::nullopt_t;
-	return (false);
+	_size = std::nullopt;
+	return (false); // and try again after next read
 }
 
 static bool
@@ -59,6 +60,7 @@ _check_end(std::istream& is) {
 Dechunker::ChunkException::ChunkException(char const* msg):
 	_msg(msg) {}
 
+char const*
 Dechunker::ChunkException::what() const noexcept {
 	return (_msg);
 }

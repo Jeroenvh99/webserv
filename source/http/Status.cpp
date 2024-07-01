@@ -1,5 +1,7 @@
 #include "http/Status.hpp"
 
+#include <sstream>
+
 using http::Status;
 
 std::string
@@ -10,6 +12,15 @@ http::to_string(Status status) noexcept {
 unsigned int
 http::to_uint(Status status) noexcept {
 	return (static_cast<unsigned int>(status));
+}
+
+Status
+http::to_status(std::string const& desc) {
+	std::istringstream	iss(desc);
+	unsigned int		num;
+
+	iss >> num;
+	return (static_cast<Status>(num));
 }
 
 char const*

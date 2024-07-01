@@ -30,8 +30,8 @@ namespace network {
 		const_iterator	end() const noexcept;
 		const_iterator	cend() const noexcept;
 
-		size_t	read(std::istream&);
-		size_t	write(std::ostream&) const;
+		size_t	get(std::istream&);
+		size_t	put(std::ostream&) const;
 
 	private:
 		template<Domain DOMAIN, Type TYPE>

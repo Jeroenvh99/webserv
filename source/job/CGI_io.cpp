@@ -1,4 +1,6 @@
-#include "CGI.hpp"
+#include "job/CGI.hpp"
+
+using job::CGI;
 
 size_t
 CGI::read(webserv::Buffer& buf) const {

@@ -1,8 +1,12 @@
 #include "job/Resource.hpp"
 
+using job::Resource;
+
 job::StatusOption
-Resource::_delete(std::string&, stdfs::path const& pt) {
+Resource::_delete(route::Location const& loc) {
+	stdfs::path const&	pt = loc.to();
+
 	if (!std::filesystem::remove(pt))
-		return ({true, http::Status::internal_error});
-	return ({true, http::Status::no_content});
+		return (http::Status::internal_error);
+	return (http::Status::no_content);
 }

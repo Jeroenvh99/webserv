@@ -1,9 +1,9 @@
 #include "http.hpp"
-#include "http/Request.hpp"
+#include "http/parse.hpp"
 
 using http::Request;
-using Parser = Request::Parser;
 using http::Method;
+using http::Parser;
 using http::Version;
 
 static std::string	_get_start_line(std::iostream&);
@@ -20,9 +20,9 @@ Parser::_parse_start(std::iostream& ios) {
 	std::getline(iss, s, ' ');
 	URI				uri(s);
 	std::getline(iss, s, ' ');
+	Version const	version = _parse_version(s);
 	if (!iss.eof())
 		throw (StartLineException("excess elements in first line"));
-	Version const	version = _parse_version(s);
 	_state = State::header;
 	return (Request(method, version, std::move(uri)));
 }

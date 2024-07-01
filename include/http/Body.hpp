@@ -1,24 +1,28 @@
 #ifndef HTTP_BODY_HPP
 # define HTTP_BODY_HPP
 
-namespace http {
-    struct Body {
-        enum class Type;
+# include <cstddef>
 
-		Body(Type, size_t = 0);
+namespace http {
+    class Body {
+	public:
+        enum class Type {
+			none,
+			invalid,
+			by_length,
+			chunked,
+		}; // enum class Type
+
+		Body(Type = Type::none, size_t = 0);
 
 		operator bool() const noexcept;
 
-		Type 	type;
-		size_t 	length;
-    }; // struct Body
-
-	enum class Body::Type {
-		none,
-		invalid,
-		by_length,
-		chunked,
-	}; // enum class Body::Type
+		Type 	type() const noexcept;
+		size_t 	length() const noexcept;
+	private:
+		Type	_type;
+		size_t	_length;
+    }; // class Body
 }; // namespace http
 
 #endif // HTTP_BODY_HPP

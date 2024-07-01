@@ -1,4 +1,10 @@
-#include "Worker.hpp"
+#include "job/job.hpp"
+#include "Client.hpp"
+#include "Server.hpp"
+#include "route.hpp"
+
+using job::Job;
+using job::ErrorJob;
 
 /* Job */
 
@@ -7,13 +13,13 @@
 Job::Job(Client const& client, Server const& server):
 	request(client.request()),
 	location(server.locate(client.request().uri())),
-	environment(server.environment(location, client)) {}
+	environment(server, client, location) {}
 
 // Methods
 
 bool
 Job::is_cgi() const noexcept {
-	return (loc.is_cgi())
+	return (location.is_cgi());
 }
 
 /* ErrorJob */
@@ -21,4 +27,4 @@ Job::is_cgi() const noexcept {
 // Basic operations
 
 ErrorJob::ErrorJob(http::Status _status, Server const& server):
-	status(status), file(server.locate_error_page(_status)) {}
+	status(_status), file(server.locate_errpage(_status)) {}

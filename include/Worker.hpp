@@ -13,6 +13,8 @@
 
 class Worker {
 public:
+	enum class State;
+
 	Worker();
 	~Worker();
 	Worker(Worker&) = delete;
@@ -25,12 +27,12 @@ public:
 	void				stop() noexcept;
 	job::StatusOption	wait();
 
-	size_t	read(webserv::Buffer const&);
-	size_t	write(webserv::Buffer&);
+	size_t	read(webserv::Buffer&);
+	size_t	write(webserv::Buffer const&);
+
+	State	state() const noexcept;
 
 private:
-	enum class State;
-
 	State				_state;
 	union {
 		job::Resource	_resource;

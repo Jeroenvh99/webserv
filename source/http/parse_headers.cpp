@@ -1,10 +1,13 @@
-#include "http/Request.hpp"
+#include "http.hpp"
+#include "http/parse.hpp"
 
 #include <sstream>
 
 using http::Request;
+using http::Method;
+using http::Parser;
+using http::Version;
 using http::Header;
-using Parser = Request::Parser;
 
 enum class HeaderLineType {
 	first,
@@ -17,9 +20,6 @@ static std::string		_get_key(std::istream&);
 
 static void				_header_init(Header&, std::string&&);
 static void				_header_continue(Header&, std::string&&);
-
-static Parser::State	_parse_body_how(Request const& req, size_t&);
-static bool				_get_body_length(size_t&, Request const&);
 
 void
 Parser::_parse_headers(std::iostream& ios, Request& req) {
@@ -36,7 +36,7 @@ Parser::_parse_headers(std::iostream& ios, Request& req) {
 			break;
 		case HeaderLineType::end:
 			_header_add(req);
-			_state = _parse_body_how(req, _body_length);
+			_state = State::done;
 			return;
 		}
 	}
@@ -46,7 +46,7 @@ void
 Parser::_header_add(Request& req) {
 	if (_tmp_hdr.first.length() == 0)	// attempting to add an undefined header
 		return;
-	req._header_append(std::move(_tmp_hdr));
+	req.header_add(std::move(_tmp_hdr));
 	_tmp_hdr.first.clear();
 	_tmp_hdr.second.clear();
 }
@@ -84,41 +84,4 @@ _get_key(std::istream& is) {
 	if (is.eof())
 		throw (Parser::HeaderException("bad header format"));
 	return (s);
-}
-
-static Parser::State
-_parse_body_how(Request const& req, size_t& body_length) {
-	if (_get_body_length(body_length, req)) {
-		if (req.has_header("Transfer-Encoding"))
-			throw (Parser::HeaderException("duplicate body length specification"));
-		return (Parser::State::body_by_length);
-	}
-	try {
-		std::string const&	strval = req.header("Transfer-Encoding");
-
-		if (http::strcmp_nocase(strval, "chunked")) {
-			body_length = 0;
-			return (Parser::State::body_chunked);
-		}
-		return (Parser::State::body_until_eof);
-	} catch (std::out_of_range& e) {	// Transfer-Encoding is not defined
-		return (Parser::State::done);
-	}
-}
-static bool
-_get_body_length(size_t& len, Request const& req) {
-	try {
-		std::string const&	strval = req.header("Content-Length");
-
-		try {
-			len = std::stoul(strval);
-			return (true);
-		} catch (std::out_of_range& e) {		// overflow
-			throw (Parser::HeaderException("bad header Content-Length"));
-		} catch (std::invalid_argument& e) {	// non-numeric value
-			throw (Parser::HeaderException("bad header Content-Length"));
-		}
-	} catch (std::out_of_range& e) {	// Content-Length is not defined
-		return (false);
-	}
 }

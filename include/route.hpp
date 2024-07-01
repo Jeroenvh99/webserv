@@ -120,7 +120,7 @@ namespace route {
 		bool				is_cgi() const noexcept;
 		std::string const&	path_info() const noexcept;
 
-		Location	translate(Route const&);
+		Location	translate(Route const&) const;
 
 	private:
 		using IsCGI = std::pair<bool, stdfs::path::iterator>;

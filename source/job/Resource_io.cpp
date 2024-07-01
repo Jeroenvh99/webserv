@@ -6,11 +6,11 @@ void
 Resource::close() noexcept {
 	switch (_type) {
 	case Type::file:
-		_file.~std::fstream();
+		_file.std::fstream::~fstream();
 		_type = Type::none;
 		break;
 	case Type::builtin:
-		_builtin.~std::stringstream();
+		_builtin.std::stringstream::~stringstream();
 		_type = Type::none;
 		break;
 	case Type::none:
@@ -21,25 +21,27 @@ Resource::close() noexcept {
 size_t
 Resource::write(webserv::Buffer const& buf) {
 	switch (_type) {
-	case Type::file:
-		return (buf.write(_file));
-	case Type::builtin:
-		throw (std::runtime_error("cannot write to builtin resource"))
 	case Type::none:
-		throw (std::runtime_error("cannot write to unopened resource"))
+		throw (std::runtime_error("cannot write to unopened resource"));
+	case Type::file:
+		return (buf.put(_file));
+	case Type::builtin:
+		throw (std::runtime_error("cannot write to builtin resource"));
 	}
+	return (0); // unreachable
 }
 
 size_t
 Resource::read(webserv::Buffer& buf) {
 	switch (_type) {
-	case Type::file:
-		return (buf.read(_file));
-	case Type::builtin:
-		return (buf.read(_builtin));
 	case Type::none:
-		throw (std::runtime_error("cannot write to unopened resource"))
+		throw (std::runtime_error("cannot write to unopened resource"));
+	case Type::file:
+		return (buf.get(_file));
+	case Type::builtin:
+		return (buf.get(_builtin));
 	}
+	return (0); // unreachable
 }
 
 // Private modifiers
@@ -48,7 +50,7 @@ void
 Resource::_open_file(stdfs::path const& pt, std::ios::openmode mode) {
 	close();
 	_type = Type::file;
-	new (&_fs) std::fstream(pt, mode);
+	new (&_file) std::fstream(pt, mode);
 }
 
 void

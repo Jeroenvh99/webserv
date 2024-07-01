@@ -1,4 +1,4 @@
-#include "CGI.hpp"
+#include "job/CGI.hpp"
 #include "Environment.hpp"
 
 #include <cstdlib>
@@ -7,10 +7,10 @@
 #include <signal.h>
 #include <unistd.h>
 
+using job::CGI;
 using route::Location;
 
-static void	_redirect_io(Socket&);
-static int	_dup2(int, int);
+static void	_dup2(int, int);
 
 // Public methods
 
@@ -22,22 +22,18 @@ CGI::kill() {
 	_pid = _no_child;
 }
 
-CGI::ExitStatus
-CGG::wait() {
+job::ExitOption
+CGI::wait() {
 	int status;
 
 	switch (waitpid(_pid, &status, WNOHANG)) {
 	case -1:
 		throw (WaitException());
 	case 0:
-		return (ExitStatus::working);
+		return (std::nullopt);
 	default:
 		_pid = _no_child;
-		if (WIFEXITED(status))
-			return (WEXITSTATUS == 0
-				? ExitStatus::success
-				: ExitStatus::failure);
-		return ExitStatus::terminated;
+		return (status);
 	}
 }
 
@@ -45,9 +41,7 @@ CGG::wait() {
 
 void
 CGI::_fork(Job const& job) {
-	using SocketPair = network::SocketPair<
-		network::Domain::local,
-		network::Type::stream>;
+	using SocketPair = network::SocketPair<Socket>;
 
 	SocketPair	pair;
 
@@ -64,13 +58,24 @@ CGI::_fork(Job const& job) {
 }
 
 void
+CGI::_redirect_io(Socket& socket) {
+	auto const	fd = socket.release();
+
+	_dup2(fd, STDIN_FILENO);
+	_dup2(fd, STDOUT_FILENO);
+	_dup2(fd, STDERR_FILENO);
+	::close(fd);
+}
+
+void
 CGI::_exec(Job const& job) {
 	std::string		pathname(job.location.to());
+	Environment		env(job.environment);
 	char* const		cpathname = pathname.data();
 	char* const		cargv[2] = {cpathname, nullptr};
 
-	job.environment.build();
-	if (::execve(cpathname, cargv, job.environment.cenv()) == -1) {
+	env.build();
+	if (::execve(cpathname, cargv, env.cenv()) == -1) {
 		::perror("execve");
 		::exit(EXIT_FAILURE);
 	}
@@ -79,18 +84,8 @@ CGI::_exec(Job const& job) {
 // Helpers
 
 static void
-_redirect_io(Socket& socket) {
-	Socket::Raw const	fd = socket.release();
-
-	_dup2(fd, STDIN_FILENO);
-	_dup2(fd, STDOUT_FILENO);
-	_dup2(fd, STDERR_FILENO);
-	::close(fd);
-}
-
-static int
 _dup2(int from, int to) {
-	if (::_dup2(from, to) == -1) {
+	if (::dup2(from, to) == -1) {
 		::perror("dup2");
 		::exit(EXIT_FAILURE);
 	}

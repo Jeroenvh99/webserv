@@ -13,25 +13,22 @@
 namespace http {
 	class Response: public Message {
 	public:
-		Response(std::string const& = "", Status = Status::ok);
-		Response(std::string&&, Status = Status::ok);
-		Response(Status);
+		Response(Status = Status::ok);
 
 		operator std::string() const;
 
-		std::string const&	body() const noexcept;
-		Status				status() const noexcept;
-		Version				version() const noexcept;
-		HeaderMap const&	headers() const noexcept; // DB: see below
+		Status	status() const noexcept;
+		Version	version() const noexcept;
 
+		void	init_from_headers();
 		void	clear() noexcept;
 
 	private:
+		friend class Parser;
+
 		static constexpr Version	_version = one_one;
 
-		Status		_status;
-		HeaderMap	_headers; // DB: is this necessary?
-		std::string	_body;
+		Status	_status;
 	}; // class Response
 
 	std::ostream&	operator<<(std::ostream&, Response const&);

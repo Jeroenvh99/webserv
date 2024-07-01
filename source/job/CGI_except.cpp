@@ -1,7 +1,9 @@
-#include "CGI.hpp"
+#include "job/CGI.hpp"
 
 #include <cerrno>
 #include <cstring>
+
+using job::CGI;
 
 extern int	errno;
 
@@ -11,10 +13,10 @@ CGI::WaitException::WaitException():
 CGI::WaitException::WaitException(char const* msg):
 	std::runtime_error(msg) {}
 
-CGI::PipeException::PipeException():
+CGI::SocketException::SocketException():
 	std::runtime_error(strerror(errno)) {}
 	
-CGI::PipeException::PipeException(char const* msg):
+CGI::SocketException::SocketException(char const* msg):
 	std::runtime_error(msg) {}
 
 CGI::ForkException::ForkException():

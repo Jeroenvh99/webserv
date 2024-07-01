@@ -65,7 +65,7 @@ namespace network {
 
 	template<size_t SIZE>
 	size_t
-	Buffer<SIZE>::read(std::istream& is) {
+	Buffer<SIZE>::get(std::istream& is) {
 		is.read(this->data(), SIZE); // signedness mismatch!
 		_len = is.gcount();
 		return (_len);
@@ -73,7 +73,7 @@ namespace network {
 
 	template<size_t SIZE>
 	size_t
-	Buffer<SIZE>::write(std::ostream& os) const {
+	Buffer<SIZE>::put(std::ostream& os) const {
 		os.write(this->data(), _len); // signedness mismatch!
 		return (os.good() ? _len : 0);
 	}

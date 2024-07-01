@@ -3,21 +3,21 @@
 using job::Resource;
 
 job::StatusOption
-Resource::_get(stdfs::path pt) {
-	if (!std::filesystem::exists(pt))
+Resource::_get(route::Location const& loc) {
+	if (!std::filesystem::exists(loc.to()))
 		return (http::Status::not_found);
-	if (std::filesystem::is_directory(pt))
-		return (_get_directory(pt));
-	return (_get_file(pt));
+	if (std::filesystem::is_directory(loc.to()))
+		return (_get_directory(loc));
+	return (_get_file(loc.to()));
 }
 
 job::StatusOption
 Resource::_get_file(stdfs::path const& pt) {
-	_open_file(pt);
+	_open_file(pt, std::ios::in);
 
 	if (!_file.is_open())
 		return (http::Status::not_found);
-	return (std::nullopt_t);
+	return (std::nullopt);
 }
 
 job::StatusOption

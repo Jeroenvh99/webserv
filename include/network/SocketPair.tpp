@@ -8,14 +8,14 @@
 # include "network/utils.tpp"
 
 namespace network {
-	template<Domain DOMAIN, Type TYPE>
-	SocketPair<DOMAIN, TYPE>::SocketPair(OptionList opts, char const* prot) {
-		typename SocketType::Raw	fds[2];
+	template<typename SOCKET>
+	SocketPair<SOCKET>::SocketPair(OptionList opts, char const* prot) {
+		typename SocketClass::Raw	fds[2];
 
 		if (::socketpair(
-			static_cast<int>(DOMAIN),
-			static_cast<int>(TYPE) | _get_bitmask(opts),
-			SocketType::_get_protocol(prot),
+			static_cast<int>(domain),
+			static_cast<int>(type) | _get_bitmask(opts),
+			SocketClass::_get_protocol(prot),
 			fds) == -1)
 			throw (SocketException("pair"));
 		this->first = fds[0];
