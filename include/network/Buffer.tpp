@@ -30,6 +30,33 @@ namespace network {
 	}
 	
 	template<size_t SIZE>
+	constexpr size_t
+	Buffer<SIZE>::capacity() {
+		return (SIZE);
+	}
+
+	template<size_t SIZE>
+	size_t
+	Buffer<SIZE>::push_back(std::string const& str) noexcept {
+		if (str.size() > capacity() - len())
+			return (0);
+		for (auto const& c: str)
+			this->data()[_len++] = c;
+		return (str.size());
+	}
+
+	template<size_t SIZE>
+	template<size_t TSIZE>
+	size_t
+	Buffer<SIZE>::push_back(Buffer<TSIZE> const& that) noexcept {
+		if (that.len() > capacity() - len())
+			return (0);
+		for (auto const& c: that)
+			this->data()[_len++] = c;
+		return (that.len());
+	}
+
+	template<size_t SIZE>
 	typename Buffer<SIZE>::iterator
 	Buffer<SIZE>::begin() noexcept {
 		return (super::begin());

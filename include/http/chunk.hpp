@@ -1,5 +1,5 @@
-#ifndef HTTP_DECHUNKER_HPP
-# define HTTP_DECHUNKER_HPP
+#ifndef HTTP_CHUNK_HPP
+# define HTTP_CHUNK_HPP
 
 # include "Buffer.hpp"
 
@@ -8,6 +8,8 @@
 # include <stdexcept>
 
 namespace http {
+	webserv::Buffer	enchunk(webserv::ChunkBuffer const&);
+
 	class Dechunker {
 	public:
 		using Chunk = std::optional<std::string>;
@@ -38,4 +40,4 @@ namespace http {
 
 }; // namespace http
 
-#endif // HTTP_DECHUNKER_HPP
+#endif // HTTP_CHUNK_HPP

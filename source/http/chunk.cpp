@@ -1,11 +1,31 @@
-#include "http/Dechunker.hpp"
+#include "http/chunk.hpp"
 #include "http/parse.hpp"
 
 #include <string>
 
 using http::Dechunker;
 
-static bool	_check_end(std::istream&);
+static std::string	_to_string_hex(size_t);
+static bool			_check_end(std::istream&);
+
+webserv::Buffer
+http::enchunk(webserv::ChunkBuffer const& chbuf) {
+	webserv::Buffer	buf;
+
+	buf.push_back(_to_string_hex(chbuf.len()));
+	buf.push_back("\r\n");
+	buf.push_back(chbuf);
+	buf.push_back("\r\n");
+	return (buf);
+}
+
+static std::string
+_to_string_hex(size_t num) {
+	std::ostringstream	oss;
+
+	oss << std::hex << num;
+	return (oss.str());
+}
 
 Dechunker::Dechunker():
 	_size(std::nullopt) {}

@@ -22,7 +22,7 @@ SRC_FILES	:= main.cpp \
 			Worker_ctor.cpp \
 			Worker_method.cpp \
 			http/Body.cpp \
-			http/Dechunker.cpp \
+			http/chunk.cpp \
 			http/Header.cpp \
 			http/Message.cpp \
 			http/Method.cpp \
