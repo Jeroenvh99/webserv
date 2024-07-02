@@ -175,9 +175,9 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 	if (word.find("allow_") != std::string::npos) {
 		allow = 1;
 	}
-	while (1) {
+	do {
 		std::getline(linestream, word, ' ');
-		for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+		for (size_t i = 0; i < http::methods.size(); i++) {
 			if (word.find(http::methods[i].second) != std::string::npos) {
 				if (!allow) {
 					allowed[i] = http::Method::NONE;
@@ -186,10 +186,7 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 				allowed[i] = http::Method::NONE;
 			}
 		}
-		if (word.find(';') != std::string::npos) {
-			return;
-		}
-	}
+	} while (word.find(';') == std::string::npos);
 }
 
 void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server) {
@@ -227,15 +224,12 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringst
 			loc.index = temp;
 		} else {
 			std::string name = temp;
-			while (1) {
+			do {
 				std::getline(linestream, temp, ' ');
 				std::string value = temp;
 				value.erase(value.find_last_not_of(';') + 1);
 				loc.parameters.insert({name, value});
-				if (temp.back() == ';') {
-					break;
-				}
-			}
+			} while (temp.back() != ';');
 		}
 	}
 }

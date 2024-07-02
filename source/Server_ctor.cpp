@@ -37,6 +37,8 @@ Server::Server(Config::Server config, int backlog_size,
 	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
 		if (config.allowedmethods[i] != http::Method::NONE) {
 			_route.allow_method(config.allowedmethods[i]);
+		} else {
+			_route.disallow_method(config.allowedmethods[i]);
 		}
 	}
 	for (Config::Location loc : config.locations) {
@@ -47,10 +49,12 @@ Server::Server(Config::Server config, int backlog_size,
 			if (!loc.index.empty()) {
 				_route.set_directory_file(loc.index);
 			}
-		}
-		for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
-			if (loc.allowedmethods[i] != http::Method::NONE) {
-				_route.allow_method(loc.allowedmethods[i]);
+			for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
+				if (loc.allowedmethods[i] != http::Method::NONE) {
+					_route.allow_method(loc.allowedmethods[i]);
+				} else {
+					_route.disallow_method(config.allowedmethods[i]);
+				}
 			}
 		}
 	}
