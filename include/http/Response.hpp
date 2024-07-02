@@ -19,6 +19,7 @@ namespace http {
 
 		Status	status() const noexcept;
 		Version	version() const noexcept;
+		// Body	expects_body() const noexcept;
 
 		void	init_from_headers();
 		void	clear() noexcept;

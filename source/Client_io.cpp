@@ -7,7 +7,7 @@ Client::parse_request(webserv::Buffer& buf) {
 		_impl._request_body = _impl._request.expects_body();
 		if (_impl._request_body.type() == http::Body::Type::invalid)
 			throw (http::Parser::Exception("bad body description"));
-		flush(buf);
+		_impl._buffer_flush(buf);
 		return (true);
 	}
 	return (false);
@@ -23,11 +23,15 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (header) {
 		if (header->first == "") { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
-			_impl._response_body = _impl._response.expects_body();
+			_impl._response_body = _impl._response.expects_body(); // replace by:
+			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
+			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
+			// else, the server enchunks the response data itself
 
-			std::string	trail(_impl._buffer.str()); // extract leftovers
+			std::string	trail; // extract leftovers
 
-			_impl._reset_buffer();
+			_impl._buffer_flush(trail);
+			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
 			_impl._state = State::work;
 			return (true);
@@ -49,7 +53,8 @@ Client::respond(job::Job const& job) {
 	else {
 		_impl._response = http::Response(*jstat);
 		// todo: insert more headers based on file type
-		_impl._reset_buffer();
+		_impl._buffer_empty();
+		_impl._buffer.clear();
 		_impl._buffer << _impl._response;
 		_impl._state = State::work;
 	}
@@ -60,7 +65,7 @@ job::Status
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
 	// todo: insert more headers based on file type
-	_impl._reset_buffer();
+	_impl._buffer_empty();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._state = State::work;
@@ -88,9 +93,4 @@ Client::fetch(webserv::Buffer& buf) {
 	if (jstat != job::Status::pending)
 		_impl._state = State::idle;
 	return (jstat);
-}
-
-size_t
-Client::flush(webserv::Buffer& buf) {
-	return (buf.get(_impl._buffer));
 }

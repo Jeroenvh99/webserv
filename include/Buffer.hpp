@@ -4,7 +4,7 @@
 # include "network/Buffer.hpp"
 
 namespace webserv {
-	constexpr size_t	buffer_size = 1024;
+	constexpr size_t	buffer_size = 128;
 	constexpr size_t	chunk_margin = 7; // 4 for two CRLF + 3 for hex length indicator (maximum value = 3F9)
 
 	using Buffer = network::Buffer<buffer_size>;

@@ -10,7 +10,8 @@ namespace http {
 			none,
 			invalid,
 			by_length,
-			chunked,
+			to_dechunk,
+			to_enchunk,		
 		}; // enum class Type
 
 		Body(Type = Type::none, size_t = 0);

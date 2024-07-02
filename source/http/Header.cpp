@@ -13,7 +13,9 @@ Header
 http::to_header(std::string const& str) {
 	std::istringstream	iss(str);
 	std::string			name;
+	std::string			value;
 	
 	std::getline(iss, name, ':');
-	return {name, iss.str()};
+	std::getline(iss, value);
+	return {name, value};
 }

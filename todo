@@ -1,10 +1,10 @@
 dechunker losmaken van de request parser
 werker leest uit webserv::Buffer of uit dechunker
-body-informatie opslaan op werker (?)
-verandering in staat van parser / werker moet direct ook de staat van de client bijwerken
 
 maak onderscheid tussen job-output die headers moet worden (i.e. eerste regels uit CGI) en output die onveranderd moet blijven (i.e. al het andere)
 
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders gewoon afbreken :shrug:
 
 algemenere headers (komma's separeren)
+
+hoe moet foutinjectie werken?

@@ -30,7 +30,10 @@ public:
 private:
 	friend class Client;
 
-	void	_reset_buffer(std::string const& = "");
+	void	_buffer_fill(std::string const&);
+	size_t	_buffer_flush(std::string&);
+	size_t	_buffer_flush(webserv::Buffer&);
+	void	_buffer_empty() noexcept;
 
 	State				_state;
 	std::stringstream	_buffer;
@@ -70,13 +73,12 @@ public:
 	State					state() const noexcept;
 	Worker const&			worker() const noexcept;
 
-	bool				parse_request(webserv::Buffer&);
-	bool				parse_response(webserv::Buffer const&);
-	job::Status			respond(job::Job const&);
-	job::Status			respond(job::ErrorJob const&);
-	job::Status			deliver(webserv::Buffer const&);
-	job::Status			fetch(webserv::Buffer&);
-	size_t				flush(webserv::Buffer&);
+	bool		parse_request(webserv::Buffer&);
+	bool		parse_response(webserv::Buffer const&);
+	job::Status	respond(job::Job const&);
+	job::Status	respond(job::ErrorJob const&);
+	job::Status	deliver(webserv::Buffer const&);
+	job::Status	fetch(webserv::Buffer&);
 
 	void	clear() noexcept;
 

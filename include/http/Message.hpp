@@ -31,7 +31,7 @@ namespace http {
 		std::string const&	header(std::string const&) const;
 		bool				has_header(std::string const&) const noexcept;
 		size_t				header_count() const noexcept;
-		Body				expects_body() const noexcept; // this is not very speedy
+		Body		expects_body() const noexcept; // this is not very speedy
 
 		void			header_add(Header&&);
 		virtual void	clear() noexcept;

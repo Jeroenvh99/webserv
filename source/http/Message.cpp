@@ -63,7 +63,7 @@ Message::expects_body() const noexcept {
 		std::string const&	strval = header("Transfer-Encoding");
 
 		if (http::strcmp_nocase(strval, "chunked")) // doesn't handle comma-separated values yet!
-			return {Body::Type::chunked};
+			return {Body::Type::to_dechunk};
 		return {Body::Type::none};
 	} catch (std::out_of_range&) {
 		return {Body::Type::none};
