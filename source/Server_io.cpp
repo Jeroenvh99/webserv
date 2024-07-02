@@ -41,7 +41,7 @@ Server::_parse_response(Client& client) {
 		}
 	} catch (http::Parser::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
-			"CGI parsing error: ", e.what());
+			" CGI parsing error: ", e.what());
 		client.respond({http::Status::internal_error, *this});
 		return (IOStatus::failure);
 	}

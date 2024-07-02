@@ -15,7 +15,8 @@ Client::parse_request(webserv::Buffer& buf) {
 
 bool
 Client::parse_response(webserv::Buffer const& buf) {
-	_impl._buffer << buf;
+	_impl._buffer.clear();
+	buf.put(_impl._buffer);
 
 	auto	header = http::parse_header_cgi(_impl._buffer);
 
@@ -45,11 +46,13 @@ Client::respond(job::Job const& job) {
 		_impl._state = State::parse_response;
 	else if (http::is_error(*jstat)) // job couldn't be started
 		return (respond({*jstat, job}));
-	_impl._response = http::Response(*jstat);
-	// todo: insert more headers based on file type
-	_impl._reset_buffer();
-	_impl._buffer << _impl._response;
-	_impl._state = State::work;
+	else {
+		_impl._response = http::Response(*jstat);
+		// todo: insert more headers based on file type
+		_impl._reset_buffer();
+		_impl._buffer << _impl._response;
+		_impl._state = State::work;
+	}
 	return (_impl._worker.wait());
 }
 
@@ -79,8 +82,12 @@ Client::fetch(webserv::Buffer& buf) {
 		buf.get(_impl._buffer);
 		return (job::Status::pending);
 	}
-	_impl._worker.read(buf);
-	return (_impl._worker.wait());
+	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed
+	job::Status	jstat = _impl._worker.wait();
+
+	if (jstat != job::Status::pending)
+		_impl._state = State::idle;
+	return (jstat);
 }
 
 size_t

@@ -34,6 +34,7 @@ Response::init_from_headers() {
 	try {
 		_status = http::to_status(header("Status"));
 	} catch (std::out_of_range&) {
-		throw (http::Parser::Exception("CGI did not indicate response status"));
+		_status = http::Status::ok;
+		// throw (http::Parser::Exception("CGI did not indicate response status"));
 	}
 }
