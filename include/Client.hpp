@@ -79,6 +79,7 @@ public:
 	job::Status	respond(job::ErrorJob const&);
 	job::Status	deliver(webserv::Buffer const&);
 	job::Status	fetch(webserv::Buffer&);
+	job::Status	wait();
 
 	void	clear() noexcept;
 

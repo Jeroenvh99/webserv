@@ -63,7 +63,9 @@ Server::_accept() {
 
 void
 Server::_drop(ClientMap::iterator it) {
-	_elog.log(LogLevel::notice, "Terminated connection with peer at ", std::string(Client(*it).address()), ".");
+	_elog.log(LogLevel::notice,
+		"Terminated connection with peer at ",
+		std::string(Client(*it).address()), ".");
 	_poller.remove(it->first);
 	_graveyard.erase(it);
 }

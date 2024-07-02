@@ -58,7 +58,7 @@ Client::respond(job::Job const& job) {
 		_impl._buffer << _impl._response;
 		_impl._state = State::work;
 	}
-	return (_impl._worker.wait());
+	return (wait());
 }
 
 job::Status
@@ -69,7 +69,7 @@ Client::respond(job::ErrorJob const& job) {
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._state = State::work;
-	return (_impl._worker.wait());
+	return (wait());
 }
 
 job::Status
@@ -78,7 +78,8 @@ Client::deliver(webserv::Buffer const& buf) {
 		return (job::Status::failure); // will not accept unexpected body // move this check elsewhere?
 	// todo: dechunk if necessary
 	_impl._worker.write(buf);
-	return (_impl._worker.wait());
+
+	return (wait());
 }
 
 job::Status
@@ -88,9 +89,14 @@ Client::fetch(webserv::Buffer& buf) {
 		return (job::Status::pending);
 	}
 	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed
-	job::Status	jstat = _impl._worker.wait();
+	return (wait());
+}
 
-	if (jstat != job::Status::pending)
+job::Status
+Client::wait() {
+	job::Status const	stat = _impl._worker.wait();
+
+	if (stat != job::Status::pending)
 		_impl._state = State::idle;
-	return (jstat);
+	return (stat);
 }
