@@ -115,10 +115,10 @@ Test(parseconfig, config9) {
 		std::string file = "test5.conf";
 		Config conf(file);
 		Config::Server server = conf.getServers()[0];
-		std::vector<http::RequestMethod> allowedmethods = server.allowedmethods;
-		cr_assert(allowedmethods[http::RequestMethod::POST] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::DELETE] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::OPTIONS] == http::RequestMethod::NONE);
+		std::vector<http::Method> allowedmethods = server.allowedmethods;
+		cr_assert(allowedmethods[http::Method::POST] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::DELETE] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::OPTIONS] == http::Method::NONE);
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		cr_assert(0);
@@ -130,15 +130,35 @@ Test(parseconfig, config10) {
 		std::string file = "test6.conf";
 		Config conf(file);
 		Config::Server server = conf.getServers()[0];
-		std::vector<http::RequestMethod> allowedmethods = server.allowedmethods;
-		cr_assert(allowedmethods[http::RequestMethod::HEAD] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::PUT] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::DELETE] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::CONNECT] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::OPTIONS] == http::RequestMethod::NONE);
-		cr_assert(allowedmethods[http::RequestMethod::TRACE] == http::RequestMethod::NONE);
+		std::vector<http::Method> allowedmethods = server.allowedmethods;
+		cr_assert(allowedmethods[http::Method::HEAD] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::PUT] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::DELETE] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::CONNECT] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::OPTIONS] == http::Method::NONE);
+		cr_assert(allowedmethods[http::Method::TRACE] == http::Method::NONE);
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		cr_assert(0);
+	}
+}
+
+Test(parseconfig, config11) {
+	try {
+		std::string file = "test7.conf";
+		Config conf(file);
+		cr_assert(0);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
+}
+
+Test(parseconfig, config12) {
+	try {
+		std::string file = "configtest.cpp";
+		Config conf(file);
+		cr_assert(0);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
 }

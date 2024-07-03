@@ -1,7 +1,6 @@
 NAME		:= webserv
-
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/ route/
+SRC_SUBDIRS	:= network/ http/ http/Request_Parser/ logging/ route/ config/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -9,6 +8,7 @@ SRC_FILES	:= main.cpp \
 			Client.cpp \
 			Client_io.cpp \
 			Client_method.cpp \
+			config/Config.cpp \
 			html.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
@@ -48,7 +48,7 @@ SRC_FILES	:= main.cpp \
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
-CXX			:= c++
+CXX			:= g++
 CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++17 -g
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))

@@ -57,7 +57,7 @@ namespace logging {
 		AccessLogger(std::ostream&, Format const&);
 		AccessLogger(std::ostream&, Format&&);
 		AccessLogger(AccessLogger const&) = delete;
-		AccessLogger(AccessLogger&&) = delete;
+		AccessLogger(AccessLogger&&) = default;
 		AccessLogger&	operator=(AccessLogger const&) = delete;
 		AccessLogger&	operator=(AccessLogger&&) = delete;
 
@@ -74,7 +74,7 @@ namespace logging {
 		~ErrorLogger() = default;
 		ErrorLogger(std::ostream&, Level);
 		ErrorLogger(ErrorLogger const&) = delete;
-		ErrorLogger(ErrorLogger&&) = delete;
+		ErrorLogger(ErrorLogger&&) = default;
 		ErrorLogger&	operator=(ErrorLogger const&) = delete;
 		ErrorLogger&	operator=(ErrorLogger&&) = delete;
 
@@ -83,8 +83,7 @@ namespace logging {
 	
 		static char const*			level_to_string(ErrorLogger::Level);
 		static ErrorLogger::Level	level_from_string(std::string const&);
-	
-	private:
+
 		using LevelStringMap = std::array<std::pair<Level, char const*>, 8>;
 	
 		static const LevelStringMap	_levels;

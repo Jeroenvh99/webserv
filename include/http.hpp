@@ -23,6 +23,7 @@ namespace http {
 		CONNECT = 0x1 << 5,
 		OPTIONS = 0x1 << 6,
 		TRACE = 0x1 << 7,
+		NONE = 0x1 << 8,
 	}; // enum class Method
 
 	using MethodMap = std::array<std::pair<Method, char const*>, 8>;
