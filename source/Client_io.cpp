@@ -97,6 +97,6 @@ Client::wait() {
 	job::Status const	stat = _impl._worker.wait();
 
 	if (stat != job::Status::pending)
-		_impl._state = State::idle;
+		_impl._clear();
 	return (stat);
 }

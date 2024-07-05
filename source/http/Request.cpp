@@ -52,7 +52,7 @@ Request::uri() const noexcept {
 
 void
 Request::clear() noexcept {
-	static_cast<Message*>(this)->clear();
+	Message::clear();
 	_method = Method::GET;
 	_version = Version(0, 0);
 	_uri = URI();

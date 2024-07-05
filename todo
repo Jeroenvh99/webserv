@@ -1,7 +1,21 @@
 dechunker losmaken van de request parser
 werker leest uit webserv::Buffer of uit dechunker
 
-maak onderscheid tussen job-output die headers moet worden (i.e. eerste regels uit CGI) en output die onveranderd moet blijven (i.e. al het andere)
+werker-output bestaat altijd uit headers en evt. body
+bij CGI: headers en body komen uit socket
+bij bestand: headers komen uit stringstream, body uit bestand
+bij ingebouwd: headers en body komen uit stringstream
+
+dus: bij werker uitlezen
+CGI: lees CGI
+Resource (bestand/ingebouwd): eerst stringstream, dan bestand
+
+headers worden:
+bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecificatie)
+bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
+bij ingebouwd door de server geproduceerd
+
+
 
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders gewoon afbreken :shrug:
 

@@ -25,7 +25,7 @@ Response::version() const noexcept {
 
 void
 Response::clear() noexcept {
-	static_cast<Message*>(this)->clear();
+	Message::clear();
 	_status = http::Status::ok;
 }
 
@@ -35,6 +35,5 @@ Response::init_from_headers() {
 		_status = http::to_status(header("Status"));
 	} catch (std::out_of_range&) {
 		_status = http::Status::ok;
-		// throw (http::Parser::Exception("CGI did not indicate response status"));
 	}
 }

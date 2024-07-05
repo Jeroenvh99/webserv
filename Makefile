@@ -10,7 +10,6 @@ SRC_FILES	:= Environment_build.cpp \
 			Environment_method.cpp \
 			Client.cpp \
 			Client_io.cpp \
-			Client_method.cpp \
 			ClientImpl.cpp \
 			html.cpp \
 			Server_ctor.cpp \

@@ -30,6 +30,8 @@ public:
 private:
 	friend class Client;
 
+	void	_clear() noexcept;
+
 	void	_buffer_fill(std::string const&);
 	size_t	_buffer_flush(std::string&);
 	size_t	_buffer_flush(webserv::Buffer&);
@@ -80,8 +82,6 @@ public:
 	job::Status	deliver(webserv::Buffer const&);
 	job::Status	fetch(webserv::Buffer&);
 	job::Status	wait();
-
-	void	clear() noexcept;
 
 private:
 	SocketBox	_socket;
