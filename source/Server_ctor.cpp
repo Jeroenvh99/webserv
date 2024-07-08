@@ -53,7 +53,7 @@ Server::Server(Config::Server config, int backlog_size,
 				if (loc.allowedmethods[i] != http::Method::NONE) {
 					_route.allow_method(loc.allowedmethods[i]);
 				} else {
-					_route.disallow_method(config.allowedmethods[i]);
+					_route.disallow_method(loc.allowedmethods[i]);
 				}
 			}
 		}
