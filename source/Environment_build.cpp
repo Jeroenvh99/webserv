@@ -20,7 +20,7 @@ using Container = Environment::Container;
 void
 Environment::build() {
 	_ctr.clear();
-	_ctr.reserve(dfl_size + _client.request().header_count());
+	_ctr.reserve(dfl_size + _client.request().headers().size());
 
 	append("SERVER_NAME", _server.name()),
 	append("SERVER_PORT", std::to_string(_server.port()));
@@ -45,13 +45,15 @@ Environment::build() {
 	append("REMOTE_USER", ""); // implement
 	append("AUTH_TYPE", ""); // implement
 
-	if (req.has_header("Content-Type"))
-		append("CONTENT_TYPE", req.header("Content-Type"));
-	if (req.has_header("Content-Length"))
-		append("CONTENT_LENGTH", req.header("Content-Length"));
+	if (req.headers().contains("Content-Type"))
+		append("CONTENT_TYPE", "<placeholder>");
+	if (req.headers().contains("Content-Length"))
+		append("CONTENT_LENGTH", "<placeholder>");
 
-	for (auto const& hdr: req.headers())
+	for (auto const& kv: req.headers()) {
+		http::Header const	hdr(kv);
 		append(hdr);
+	}
 
 	_build_cenv();
 }

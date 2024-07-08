@@ -11,15 +11,14 @@ using http::Version;
 // Basic operations
 
 Parser::Parser():
-	_state(State::start) {}
+	_state(State::start), _current_header(std::nullopt) {}
 
 // Modifiers
 
 void
 Parser::clear() noexcept {
 	_state = State::start;
-	_tmp_hdr.first.clear();
-	_tmp_hdr.second.clear();
+	_current_header = std::nullopt;
 }
 
 // Accessors

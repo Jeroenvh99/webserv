@@ -15,13 +15,9 @@ Environment::env_string(http::Header const& hdr) {
 	std::ostringstream	oss;
 
 	oss << "HTTP_";
-	for (auto const& c: hdr.first) {
-		if (c == '-')
-			oss << '_';
-		else
-			oss << std::toupper(c);
-	}
-	oss << '=' << hdr.second;
+	for (auto const& c: hdr.name())
+		oss << ((c == '-') ? '_' : std::toupper(c));
+	oss << '=' << std::string(hdr.csvalue());
 	return (oss.str());
 }
 

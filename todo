@@ -15,10 +15,6 @@ bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecifi
 bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
 bij ingebouwd door de server geproduceerd
 
-
-
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders gewoon afbreken :shrug:
-
-algemenere headers (komma's separeren)
 
 hoe moet foutinjectie werken?

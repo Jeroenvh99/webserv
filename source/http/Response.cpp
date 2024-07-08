@@ -32,7 +32,7 @@ Response::clear() noexcept {
 void
 Response::init_from_headers() {
 	try {
-		_status = http::to_status(header("Status"));
+		_status = http::to_status(*(headers().at("Status").value().begin()));
 	} catch (std::out_of_range&) {
 		_status = http::Status::ok;
 	}

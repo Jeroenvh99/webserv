@@ -24,7 +24,6 @@ SRC_FILES	:= Environment_build.cpp \
 			http/Header.cpp \
 			http/Message.cpp \
 			http/Method.cpp \
-			http/parse_cgi.cpp \
 			http/parse_except.cpp \
 			http/parse_headers.cpp \
 			http/parse_start.cpp \

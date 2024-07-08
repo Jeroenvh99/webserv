@@ -8,7 +8,7 @@
 # include <optional>
 
 namespace http {
-	std::optional<Header>	parse_header_cgi(std::iostream&);
+	std::optional<Headers::value_type>	parse_header_cgi(std::iostream&);
 
 	class Parser {
 	public:
@@ -33,10 +33,9 @@ namespace http {
 	private:
 		Request	_parse_start(std::iostream&);
 		void	_parse_headers(std::iostream&, Request&);
-		void	_header_add(Request&);
 
-		State	_state;
-		Header	_tmp_hdr;
+		State								_state;
+		std::optional<Headers::iterator>	_current_header;
 	}; // class Parser
 
 	enum class Parser::State {

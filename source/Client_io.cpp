@@ -18,10 +18,11 @@ Client::parse_response(webserv::Buffer const& buf) {
 	_impl._buffer.clear();
 	buf.put(_impl._buffer);
 
-	auto	header = http::parse_header_cgi(_impl._buffer);
+	std::string	line;
 
-	while (header) {
-		if (header->first == "") { // blank line was processed; end of headers
+	std::getline(_impl._buffer, line);
+	while (!_impl._buffer.eof()) {
+		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
 			_impl._response_body = _impl._response.expects_body(); // replace by:
 			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
@@ -36,9 +37,10 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._state = State::work;
 			return (true);
 		}
-		_impl._response.header_add(std::move(*header));
-		header = http::parse_header_cgi(_impl._buffer);
+		_impl._response.headers().insert(line);
+		std::getline(_impl._buffer, line);
 	}
+	_impl._buffer << line; // eof was reached
 	return (false);
 }
 

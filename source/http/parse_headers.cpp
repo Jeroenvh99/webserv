@@ -16,10 +16,7 @@ enum class HeaderLineType {
 }; // enum class HeaderLineType
 
 static HeaderLineType	_get_header_line(std::iostream&, std::string&);
-static std::string		_get_key(std::istream&);
-
-static void				_header_init(Header&, std::string&&);
-static void				_header_continue(Header&, std::string&&);
+static void				_amend_header(Header::Value&, std::string const&);
 
 void
 Parser::_parse_headers(std::iostream& ios, Request& req) {
@@ -28,33 +25,28 @@ Parser::_parse_headers(std::iostream& ios, Request& req) {
 	while (true) {
 		switch (_get_header_line(ios, line)) {
 		case HeaderLineType::first:
-			_header_add(req);
-			_header_init(_tmp_hdr, std::move(line));
+			try {
+				_current_header = req.headers().insert(line);
+			} catch (std::invalid_argument&) {
+				_current_header = std::nullopt;
+				throw (Parser::HeaderException("bad header format"));
+			}
 			break;
 		case HeaderLineType::continuation:
-			_header_continue(_tmp_hdr, std::move(line));
+			_amend_header(_current_header.value()->second, line);
 			break;
 		case HeaderLineType::end:
-			_header_add(req);
+			_current_header = std::nullopt;
 			_state = State::done;
 			return;
 		}
 	}
 }
 
-void
-Parser::_header_add(Request& req) {
-	if (_tmp_hdr.first.length() == 0)	// attempting to add an undefined header
-		return;
-	req.header_add(std::move(_tmp_hdr));
-	_tmp_hdr.first.clear();
-	_tmp_hdr.second.clear();
-}
-
 static HeaderLineType
 _get_header_line(std::iostream& ios, std::string& line) {
 	Parser::getline(ios, line);
-	if (line.size() == 0)	// bare CRLF
+	if (line.size() == 0)		// bare CRLF
 		return (HeaderLineType::end);
 	if (http::is_ws(line[0]))	// leading whitespace
 		return (HeaderLineType::continuation);
@@ -62,26 +54,10 @@ _get_header_line(std::iostream& ios, std::string& line) {
 }
 
 static void
-_header_init(Header& tmp, std::string&& line) {
-	std::istringstream	iss(line);
+_amend_header(Header::Value& values, std::string const& str) {
+	std::istringstream	iss(str);
+	std::string			sval;
 
-	tmp.first = _get_key(iss);
-	iss >> tmp.second;
-	http::trim_ws(tmp.second);
-}
-
-static void
-_header_continue(Header& tmp, std::string&& line) {
-	tmp.second += ' ';
-	tmp.second += http::trim_ws(line);
-}
-
-static std::string
-_get_key(std::istream& is) {
-	std::string	s;
-
-	std::getline(is, s, ':');
-	if (is.eof())
-		throw (Parser::HeaderException("bad header format"));
-	return (s);
+	while (std::getline(iss, sval, ','))
+		values.insert(std::move(sval));
 }

@@ -25,8 +25,8 @@ Request::operator std::string() const {
 	oss << to_string(_method) << ' '
 		<< std::string(_uri) << ' '
 		<< to_string(_version) << '\n';
-	for (auto const& hdr: headers())
-		oss << to_string(hdr) << '\n';
+	for (auto const& himpl: headers())
+		oss << std::string(Header{himpl}) << '\n';
 
 	return (oss.str());
 }

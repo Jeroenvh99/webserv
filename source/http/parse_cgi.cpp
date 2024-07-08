@@ -1,6 +1,6 @@
 #include "http/parse.hpp"
 
-std::optional<http::Header>
+std::optional<http::Headers::value_type>
 http::parse_header_cgi(std::iostream& ios) {
 	std::string	line;
 
@@ -10,5 +10,5 @@ http::parse_header_cgi(std::iostream& ios) {
 		ios << line;
 		return (std::nullopt);
 	}
-	return (http::to_header(line));
+	return (http::Headers::parse(line));
 }
