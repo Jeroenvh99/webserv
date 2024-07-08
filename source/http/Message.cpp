@@ -31,16 +31,17 @@ Message::headers() noexcept {
 	return (_headers);
 }
 
-http::Body // should be done differently: only Content-Length + Transfer-Encoding: chunked are incompatible 
-Message::expects_body() const noexcept {
+http::Body
+Message::expects_body() const {
 	auto	body_length = _get_body_length(*this);
 
 	if (body_length) {
-		if (*body_length)
+		if (_headers.contains("Transfer-Encoding", "chunked"))
+			throw (parse::Exception("bad body description"));
+		if (*body_length > 0)
 			return {Body::Type::by_length, *body_length};
-		return {Body::Type::none}; // Content-Length == 0
 	}
-	else if (_headers.contains("Transfer-Encoding", "chunked"))
+	if (_headers.contains("Transfer-Encoding", "chunked"))
 		return (Body::Type::to_dechunk);
 	return (Body::Type::none);
 }
@@ -56,19 +57,21 @@ Message::clear() noexcept {
 
 static std::optional<size_t>
 _get_body_length(Message const& msg) {
+	using http::parse::HeaderException;
+
 	try {
 		http::Header const	hdr(msg.headers().at("Content-Length"));
 
 		if (hdr.value().size() != 1)
-			throw (http::Parser::HeaderException("bad header Content-Length"));
+			throw (HeaderException("Content-Length: can have only one value"));
 		try {
 			return (std::stoul(*(hdr.value().begin())));
-		} catch (std::out_of_range& e) {		// overflow
-			throw (http::Parser::HeaderException("bad header Content-Length"));
-		} catch (std::invalid_argument& e) {	// non-numeric value
-			throw (http::Parser::HeaderException("bad header Content-Length"));
+		} catch (std::out_of_range&) {		// overflow
+			throw (HeaderException("Content-Length: out of bounds"));
+		} catch (std::invalid_argument&) {	// non-numeric value
+			throw (HeaderException("Content-Length: bad number"));
 		}
-	} catch (std::out_of_range& e) {	// Content-Length is not defined
+	} catch (std::out_of_range& e) {
 		return (std::nullopt);
 	}
 }

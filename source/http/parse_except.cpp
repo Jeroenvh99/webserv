@@ -1,18 +1,23 @@
 #include "http/parse.hpp"
 
-using http::Parser;
+using http::parse::Exception;
+using http::parse::MethodException;
+using http::parse::VersionException;
+using http::parse::HeaderException;
 
-Parser::Exception::Exception(char const* msg):
-	std::logic_error(msg) {}
+Exception::Exception(char const* msg):
+	_msg(msg) {}
 
-Parser::StartLineException::StartLineException(char const* msg):
+char const*
+Exception::what() const noexcept {
+	return (_msg);
+}
+
+MethodException::MethodException(char const* msg):
 	Exception(msg) {}
 
-Parser::MethodException::MethodException(char const* msg):
-	StartLineException(msg) {}
+VersionException::VersionException(char const* msg):
+	Exception(msg) {}
 
-Parser::VersionException::VersionException(char const* msg):
-	StartLineException(msg) {}
-
-Parser::HeaderException::HeaderException(char const* msg):
+HeaderException::HeaderException(char const* msg):
 	Exception(msg) {}

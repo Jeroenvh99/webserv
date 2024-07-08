@@ -13,12 +13,12 @@ Server::_parse_request(Client& client) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished.");
 		}
-	} catch (http::Parser::VersionException& e) {
+	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
 		client.respond({http::Status::version_not_supported, *this});
 		return (IOStatus::failure);
-	} catch (http::Parser::Exception& e) {
+	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
 		client.respond({http::Status::bad_request, *this});
@@ -39,7 +39,7 @@ Server::_parse_response(Client& client) {
 				": Response parsing from CGI finished.");
 			return (IOStatus::success);
 		}
-	} catch (http::Parser::Exception& e) {
+	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": CGI parsing error: ", e.what());
 		client.respond({http::Status::internal_error, *this});

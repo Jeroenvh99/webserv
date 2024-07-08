@@ -3,11 +3,11 @@
 
 #include <sstream>
 
-using http::Request;
-using http::Method;
-using http::Parser;
-using http::Version;
 using http::Header;
+using http::Method;
+using http::Request;
+using http::Version;
+using http::parse::Parser;
 
 enum class HeaderLineType {
 	first,
@@ -16,7 +16,6 @@ enum class HeaderLineType {
 }; // enum class HeaderLineType
 
 static HeaderLineType	_get_header_line(std::iostream&, std::string&);
-static void				_amend_header(Header::Value&, std::string const&);
 
 void
 Parser::_parse_headers(std::iostream& ios, Request& req) {
@@ -26,17 +25,18 @@ Parser::_parse_headers(std::iostream& ios, Request& req) {
 		switch (_get_header_line(ios, line)) {
 		case HeaderLineType::first:
 			try {
-				_current_header = req.headers().insert(line);
+				if (_header_buffer.length() > 0)
+					req.headers().update(_header_buffer);
+				_header_buffer = line;
 			} catch (std::invalid_argument&) {
-				_current_header = std::nullopt;
-				throw (Parser::HeaderException("bad header format"));
+				throw (HeaderException("bad header format"));
 			}
 			break;
 		case HeaderLineType::continuation:
-			_amend_header(_current_header.value()->second, line);
+			_header_buffer += line;
 			break;
 		case HeaderLineType::end:
-			_current_header = std::nullopt;
+			_header_buffer.clear();
 			_state = State::done;
 			return;
 		}
@@ -51,13 +51,4 @@ _get_header_line(std::iostream& ios, std::string& line) {
 	if (http::is_ws(line[0]))	// leading whitespace
 		return (HeaderLineType::continuation);
 	return (HeaderLineType::first);
-}
-
-static void
-_amend_header(Header::Value& values, std::string const& str) {
-	std::istringstream	iss(str);
-	std::string			sval;
-
-	while (std::getline(iss, sval, ','))
-		values.insert(std::move(sval));
 }

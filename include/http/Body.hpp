@@ -8,7 +8,6 @@ namespace http {
 	public:
         enum class Type {
 			none,
-			invalid,
 			by_length,
 			to_dechunk,
 			to_enchunk,		

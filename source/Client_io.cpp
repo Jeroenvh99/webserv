@@ -3,10 +3,8 @@
 bool
 Client::parse_request(webserv::Buffer& buf) {
 	buf.put(_impl._buffer); // catch error?
-	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::Parser::State::done) {
+	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::Parser::State::done) {
 		_impl._request_body = _impl._request.expects_body();
-		if (_impl._request_body.type() == http::Body::Type::invalid)
-			throw (http::Parser::Exception("bad body description"));
 		_impl._buffer_flush(buf);
 		return (true);
 	}

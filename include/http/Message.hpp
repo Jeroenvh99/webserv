@@ -15,7 +15,7 @@ namespace http {
 		Headers const&	headers() const noexcept;
 		Headers&		headers() noexcept;
 
-		Body	expects_body() const noexcept; // this is not very speedy
+		Body	expects_body() const; // this is not very speedy
 
 		virtual void	clear() noexcept;
 

@@ -7,19 +7,10 @@
 # include <iostream>
 # include <optional>
 
-namespace http {
-	std::optional<Headers::value_type>	parse_header_cgi(std::iostream&);
-
+namespace http::parse {
 	class Parser {
 	public:
 		enum class State;
-		
-		class Exception;
-		class IncompleteLineException; // DB: replace with std::optional
-		class HeaderException;
-		class StartLineException;
-		class MethodException;
-		class VersionException;
 
 		Parser();
 		
@@ -34,8 +25,8 @@ namespace http {
 		Request	_parse_start(std::iostream&);
 		void	_parse_headers(std::iostream&, Request&);
 
-		State								_state;
-		std::optional<Headers::iterator>	_current_header;
+		State		_state;
+		std::string	_header_buffer;
 	}; // class Parser
 
 	enum class Parser::State {
@@ -44,38 +35,31 @@ namespace http {
 		done,
 	}; // enum class Parser::State
 
-	class Parser::Exception: public std::logic_error {
+	class Exception: public std::exception {
 	public:
 		Exception(char const* = "");
-	}; // class Parser::Exception
 
-	class Parser::IncompleteLineException:
-			public Parser::Exception {
-	}; // class Parser::IncompleteLineException
+		char const*	what() const noexcept;
+	private:
+		char const*	_msg;
+	}; // class Exception
 
-	class Parser::StartLineException:
-			public Parser::Exception {
-	public:
-		StartLineException(char const*);
-	}; // class Parser::StartLineException
+	class IncompleteLineException: public std::exception {};
 
-	class Parser::MethodException:
-			public Parser::StartLineException {
+	class MethodException: public Exception {
 	public:
 		MethodException(char const*);
-	}; // class Parser::MethodException
+	}; // class MethodException
 
-	class Parser::VersionException:
-			public Parser::StartLineException {
+	class VersionException: public Exception {
 	public:
 		VersionException(char const*);
-	}; // class Parser::VersionException
+	}; // class VersionException
 
-	class Parser::HeaderException:
-			public Parser::Exception {
+	class HeaderException: public Exception {
 	public:
 		HeaderException(char const*);
-	}; // class Parser::HeaderException
-}; // namespace http
+	}; // class HeaderException
+}; // namespace http::parse
 
-#endif // HTTP_PARSER_HPP
+#endif // HTTP_PARSE_HPP

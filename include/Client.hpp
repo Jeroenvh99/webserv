@@ -39,7 +39,7 @@ private:
 
 	State				_state;
 	std::stringstream	_buffer;
-	http::Parser		_parser;
+	http::parse::Parser	_parser;
 	http::Request		_request;
 	http::Body			_request_body;
 	http::Response		_response;

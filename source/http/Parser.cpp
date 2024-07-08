@@ -3,22 +3,19 @@
 
 #include <iostream>
 
-using http::Request;
-using http::Method;
-using http::Parser;
-using http::Version;
+using http::parse::Parser;
 
 // Basic operations
 
 Parser::Parser():
-	_state(State::start), _current_header(std::nullopt) {}
+	_state(State::start) {}
 
 // Modifiers
 
 void
 Parser::clear() noexcept {
 	_state = State::start;
-	_current_header = std::nullopt;
+	_header_buffer.clear();
 }
 
 // Accessors
