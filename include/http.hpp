@@ -54,7 +54,6 @@ namespace http {
 	Version		to_version(std::string const&);
 	std::string	to_string(Version const&);
 
-	std::istream&	getline(std::istream&, std::string&);
 	bool			strcmp_nocase(std::string const&, std::string const&) noexcept;
 	bool			is_ws(char c);
 	std::string		trim_ws(std::string const&) noexcept;

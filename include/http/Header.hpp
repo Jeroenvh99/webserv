@@ -43,7 +43,7 @@ namespace http {
 		using Base = std::unordered_map<
 			Header::Key, Header::Value, std::hash<Header::Key>, cmp>;
 
-		static Header::Impl	parse(std::string const&);
+		static Header::Impl	to_header(std::string const&);
 
 		using Base::insert;
 		iterator	insert(std::string const&);

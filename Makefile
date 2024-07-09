@@ -1,7 +1,7 @@
 NAME		:= webserv
 
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ cgi/ http/ job/ logging/ route/
+SRC_SUBDIRS	:= network/ cgi/ http/ http/parse job/ logging/ route/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -24,16 +24,15 @@ SRC_FILES	:= Environment_build.cpp \
 			http/Header.cpp \
 			http/Message.cpp \
 			http/Method.cpp \
-			http/parse_except.cpp \
-			http/parse_headers.cpp \
-			http/parse_start.cpp \
-			http/Parser.cpp \
 			http/Request.cpp \
 			http/Response.cpp \
 			http/Response_io.cpp \
 			http/Status.cpp \
 			http/utils.cpp \
 			http/Version.cpp \
+			http/parse/except.cpp \
+			http/parse/HeaderParser.cpp \
+			http/parse/RequestParser.cpp \
 			job/CGI_ctor.cpp \
 			job/CGI_except.cpp \
 			job/CGI_io.cpp \

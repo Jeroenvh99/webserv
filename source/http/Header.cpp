@@ -1,4 +1,5 @@
 #include "http/Header.hpp"
+#include "http/parse.hpp"
 
 #include <sstream>
 
@@ -85,14 +86,14 @@ Headers::contains(Header::Key const& name, Header::Value::value_type const& val)
 
 Headers::iterator
 Headers::insert(std::string const& str) {
-	value_type	h(parse(str));
+	value_type	h(to_header(str));
 
 	return (insert_or_assign(std::move(h.first), std::move(h.second)).first);
 }
 
 Headers::iterator
 Headers::update(std::string const& str) {
-	return (update(parse(str)));
+	return (update(to_header(str)));
 }
 
 Headers::iterator
@@ -118,14 +119,14 @@ Headers::update(Headers::value_type&& hdr) {
 }
 
 Header::Impl
-Headers::parse(std::string const& str) {
+Headers::to_header(std::string const& str) {
 	std::istringstream	iss(str);
 	Header::Key			name;
 	Header::Value		value;
 	
 	std::getline(iss, name, ':');
 	if (name.length() == 0)
-		throw (std::invalid_argument("nameless header is invalid"));
+		throw (parse::HeaderException("nameless header is invalid"));
 	while (iss) {
 		std::string	sval;
 

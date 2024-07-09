@@ -43,7 +43,7 @@ Dechunker::dechunk(webserv::Buffer const& buf) { // DB: make more efficient?
 	for (size_t i = 0; i < *_size; ++i)
 		chunk.push_back(_buffer.get());
 	if (_check_end(_buffer) == false)
-		throw (ChunkException("bad chunk size"));
+		throw (ChunkException("chunk size mismatch"));
 	_size = std::nullopt;
 	return (chunk);
 }
@@ -52,26 +52,25 @@ bool
 Dechunker::_get_size() {
 	std::string	line;
 
-	http::getline(_buffer, line);
-	if (!_buffer.eof()) { // a CRLF-delimited line was read
+	try {
+		utils::getline<"\r\n">(_buffer, line);
 		try {
 			_size = std::stoul(line);
 			return (true);
 		} catch (std::out_of_range&) {
 			throw (ChunkException("bad chunk size format"));
 		}
+	} catch (utils::IncompleteLineException&) {
+		_size = std::nullopt;
+		return (false); // and try again after next read
 	}
-	_buffer.clear();  // put everything back
-	_buffer << line;
-	_size = std::nullopt;
-	return (false); // and try again after next read
 }
 
 static bool
 _check_end(std::istream& is) {
 	std::string	str;
 
-	http::getline(is, str);
+	utils::getline<"\r\n">(is, str);
 	return (!is.eof() && str.size() == 0);
 }
 

@@ -1,39 +1,53 @@
 #ifndef HTTP_PARSE_HPP
 # define HTTP_PARSE_HPP
 
-# include "http/Message.hpp"
+# include "http.hpp"
+# include "http/Header.hpp"
 # include "http/Request.hpp"
+# include "http/Response.hpp"
+
+# include "utils.hpp"
 
 # include <iostream>
 # include <optional>
 
 namespace http::parse {
-	class Parser {
+	class HeaderParser {
+	public:
+		enum class Status {busy, done};
+
+		void	clear() noexcept;
+
+		Status	parse(std::iostream&, Headers&);
+		Status	parse_cgi(std::iostream&, Headers&);
+
+	private:
+		std::string	_buf;
+	}; // class HeaderParser
+
+	class RequestParser {
 	public:
 		enum class State;
 
-		Parser();
-		
-		static std::iostream&	getline(std::iostream&, std::string&);
+		RequestParser();
+
+		State	state() const noexcept;
 
 		void	clear() noexcept;
 		State	parse(std::iostream&, Request&);
 
-		State	state() const noexcept;
-
 	private:
-		Request	_parse_start(std::iostream&);
-		void	_parse_headers(std::iostream&, Request&);
+		Request	_parse_request_line(std::iostream&);
 
-		State		_state;
-		std::string	_header_buffer;
+		State			_state;
+		HeaderParser	_header_parser;
 	}; // class Parser
 
-	enum class Parser::State {
+	enum class RequestParser::State {
 		start,
 		header,
 		done,
-	}; // enum class Parser::State
+	}; // enum class RequestParser::State
 
 	class Exception: public std::exception {
 	public:
@@ -43,8 +57,6 @@ namespace http::parse {
 	private:
 		char const*	_msg;
 	}; // class Exception
-
-	class IncompleteLineException: public std::exception {};
 
 	class MethodException: public Exception {
 	public:

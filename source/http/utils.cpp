@@ -4,23 +4,6 @@
 # include <algorithm>
 # include <cstring>
 
-std::istream&
-http::getline(std::istream& is, std::string& str) {
-	char	c;
-
-	str.clear();
-	while (is.get(c)) {
-		str.push_back(c);
-		if (str.size() >= 2
-			&& str[str.size() - 1] == '\n'
-			&& str[str.size() - 2] == '\r') { // C++20 has ends_with()
-			str.erase(str.size() - 2);
-			break;
-		}
-	}
-	return (is);
-}
-
 std::string
 http::trim_ws(std::string const& str) noexcept {
 	std::string	res(str);

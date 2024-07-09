@@ -37,15 +37,16 @@ private:
 	size_t	_buffer_flush(webserv::Buffer&);
 	void	_buffer_empty() noexcept;
 
-	State				_state;
-	std::stringstream	_buffer;
-	http::parse::Parser	_parser;
-	http::Request		_request;
-	http::Body			_request_body;
-	http::Response		_response;
-	http::Body			_response_body;
-	Address				_address;
-	Worker				_worker;
+	State						_state;
+	std::stringstream			_buffer;
+	http::parse::RequestParser	_parser;		// union
+	http::parse::HeaderParser	_header_parser; // union
+	http::Request				_request;
+	http::Body					_request_body;
+	http::Response				_response;
+	http::Body					_response_body;
+	Address						_address;
+	Worker						_worker;
 }; // class ClientImpl
 
 enum class ClientImpl::State {
