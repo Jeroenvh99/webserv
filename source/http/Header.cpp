@@ -130,8 +130,10 @@ Headers::to_header(std::string const& str) {
 	while (iss) {
 		std::string	sval;
 
+		std::ws(iss);
 		std::getline(iss, sval, ',');
-		value.insert(std::move(sval));
+		if (sval.length() > 0)
+			value.insert(std::move(sval));
 	}
 	return {name, value};
 }

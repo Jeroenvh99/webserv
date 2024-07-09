@@ -2,14 +2,12 @@
 
 using job::Resource;
 
-static void	_add_header
+std::string
+Resource::_make_headers(stdfs::path const& pt) {
+	std::ostringstream	oss;
 
-void
-Resource::_make_headers(job::Job const& job) {
-
-}
-
-void
-Resource::_make_headers(job::ErrorJob const& job) {
-
+	oss << "Content-Type: " << "text/html" << "\r\n"
+		<< "Content-Length: " << std::filesystem::file_size(pt) << "\r\n";
+	oss << "\r\n";
+	return (oss.str());
 }

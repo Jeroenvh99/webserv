@@ -13,10 +13,14 @@ Resource::_get(route::Location const& loc) {
 
 http::Status
 Resource::_get_file(stdfs::path const& pt) {
-	_open_file(pt, std::ios::in);
+	_ifs.open(pt);
 
-	if (!_file.is_open())
+	if (!_ifs.is_open()) {
+		_status = Status::failure;
 		return (http::Status::not_found);
+	}
+	_iss.clear();
+	_iss.str(_make_headers(pt));
 	return (http::Status::ok);
 }
 
@@ -25,16 +29,6 @@ Resource::_get_directory(route::Location const& loc) {
 	if (loc.forbids_directory())
 		return (http::Status::forbidden);
 	if (loc.lists_directory())
-		return (_get_directory_list(loc.to()));
+		return (_open_builtin(_make_directory_list(loc.to())), http::Status::ok);
 	return (_get_file(loc.to() / loc.directory_file()));
-}
-
-http::Status
-Resource::_get_directory_list(stdfs::path const& path) {
-	std::stringstream	ss;
-
-	for (auto const& entry: std::filesystem::directory_iterator(path))
-		ss << entry.path() << ' ';
-	_open_builtin(std::move(ss));
-	return (http::Status::ok);
 }

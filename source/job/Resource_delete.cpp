@@ -10,6 +10,5 @@ Resource::_delete(route::Location const& loc) {
 		_status = Status::failure;
 		return (http::Status::internal_error);
 	}
-	_status = Status::success;
 	return (http::Status::no_content);
 }

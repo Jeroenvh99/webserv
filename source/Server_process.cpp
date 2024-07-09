@@ -42,9 +42,9 @@ Server::_process_core(Poller::Event const& event, ClientIt it) {
 		if (event.happened(Poller::EventType::read)
 			&& _deliver(client) == IOStatus::failure)
 			_to_graveyard(it);
-		if (event.happened(Poller::EventType::write)
-			&& _fetch_and_send(client) == IOStatus::failure)
-			_to_graveyard(it);
+		if (event.happened(Poller::EventType::write)){
+			_fetch_and_send(client);
+			_to_graveyard(it);}
 		break;
 	}
 }
