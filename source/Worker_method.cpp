@@ -14,7 +14,7 @@ Worker::start(job::Job const& job) {
 		new (&_cgi) job::CGI(job);
 		return (std::nullopt);
 	default:
-		return (http::Status::ok); // unreachable
+		return (std::nullopt); // unreachable
 	}
 }
 
@@ -31,11 +31,11 @@ Worker::stop() noexcept {
 	switch (_state) {
 	case State::resource:
 		_resource.~Resource();
-		_state = State::done;
+		_state = State::none;
 		break;
 	case State::cgi:
 		_cgi.~CGI();
-		_state = State::done;
+		_state = State::none;
 		break;
 	default: break;
 	}
@@ -49,7 +49,7 @@ Worker::wait() {
 	case State::cgi:
 		return (_cgi.wait());
 	default:
-		return (job::Status::pending);
+		throw (std::runtime_error("cannot get status from uninitialized resource"));
 	}
 }
 

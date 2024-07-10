@@ -30,7 +30,7 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 	_elog(elog, ErrorLogger::Level::debug) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
 							{Poller::EventType::read},
-							{Poller::Mode::edge_triggered});
+							{});
 	// if this can be moved to the initializer list, it'd be great
 	_route.allow_method(http::Method::GET)
 		.redirect("./www")

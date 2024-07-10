@@ -23,6 +23,11 @@ void
 Server::_process_core(Poller::Event const& event, ClientIt it) {
 	Client	client(*it);
 
+	if (event.happened(Poller::EventType::hangup)) {
+		_elog.log(LogLevel::notice, std::string(client.address()),
+			"Connection closed by peer.");
+		_to_graveyard(it);
+	}
 	switch (client.state()) {
 	case Client::State::idle:
 	case Client::State::parse_request:
@@ -42,9 +47,9 @@ Server::_process_core(Poller::Event const& event, ClientIt it) {
 		if (event.happened(Poller::EventType::read)
 			&& _deliver(client) == IOStatus::failure)
 			_to_graveyard(it);
-		if (event.happened(Poller::EventType::write)){
-			_fetch_and_send(client);
-			_to_graveyard(it);}
+		if (event.happened(Poller::EventType::write)
+			&& _fetch_and_send(client) == IOStatus::failure)
+			_to_graveyard(it);
 		break;
 	}
 }
@@ -53,11 +58,10 @@ void
 Server::_process_graveyard(Poller::Event const& event, ClientIt it) {
 	Client	client(*it);
 
-	if (client.state() == Client::State::work
-		&& event.happened(Poller::EventType::write)
-		&& _fetch_and_send(client) == IOStatus::success)
-		return;
-	_drop(it);
+	if (client.state() != Client::State::work
+		|| !event.happened(Poller::EventType::write)
+		|| _fetch_and_send(client) == IOStatus::failure)
+		_drop(it);
 }
 
 void

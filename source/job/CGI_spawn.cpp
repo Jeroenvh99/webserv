@@ -24,6 +24,9 @@ CGI::kill() noexcept {
 
 job::Status
 CGI::wait() {
+	if (_pid == _no_child)
+		return (Status::success);
+
 	int wstat;
 
 	switch (waitpid(_pid, &wstat, WNOHANG)) {

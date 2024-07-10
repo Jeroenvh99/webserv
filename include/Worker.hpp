@@ -41,7 +41,7 @@ private:
 }; // class Worker
 
 enum class Worker::State {
-	done,
+	none,
 	resource,
 	cgi,
 }; // enum class Worker::State

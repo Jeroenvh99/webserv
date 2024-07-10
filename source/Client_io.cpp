@@ -86,6 +86,8 @@ job::Status
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
 		buf.get(_impl._buffer);
+		if (_impl._buffer.eof())
+			return (wait());
 		return (job::Status::pending);
 	}
 	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed

@@ -1,4 +1,3 @@
-dechunker losmaken van de request parser
 werker leest uit webserv::Buffer of uit dechunker
 
 werker-output bestaat altijd uit headers en evt. body
@@ -14,6 +13,16 @@ headers worden:
 bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecificatie)
 bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
 bij ingebouwd door de server geproduceerd
+
+momenteel wil de browser niet de pagina laten zien als alles al binnen is
+behalve bij cgi, maar die sluit de verbinding als dat niet nodig is
+
+lezen:
+als er nog iets in de client stringstream zit: lees dat eerst uit
+status:
+	als de client stringstream niet leeg is: pending
+	anders: vul buffer aan uit resource en wait()
+	
 
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders gewoon afbreken :shrug:
 

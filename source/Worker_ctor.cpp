@@ -1,7 +1,7 @@
 #include "Worker.hpp"
 
 Worker::Worker():
-	_state(State::done) {}
+	_state(State::none) {}
 
 Worker::~Worker() {
 	stop();
@@ -16,7 +16,7 @@ Worker::Worker(Worker&& that):
 	case State::cgi:
 		new (&_cgi) job::CGI(std::move(that._cgi));
 		break;
-	case State::done: break;
+	case State::none: break;
 	}
 }
 
@@ -33,7 +33,7 @@ Worker::operator=(Worker&& that) {
 	case State::cgi:
 		new (&_cgi) job::CGI(std::move(that._cgi));
 		break;
-	case State::done: break;
+	case State::none: break;
 	}
 	return (*this);
 }
