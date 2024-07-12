@@ -124,7 +124,7 @@ Server::_send(Client& client, webserv::Buffer const& buf) {
 	try {
 		size_t const	bytes = client.socket().write(buf);
 
-		if (bytes == 0)
+		if (bytes != buf.len())
 			return (IOStatus::failure);
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Sent ", bytes, " bytes.");
