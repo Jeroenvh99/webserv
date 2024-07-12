@@ -94,7 +94,7 @@ Client::deliver(webserv::Buffer const& buf) {
 }
 
 job::Status
-Client::dechunk(webserv::Buffer const& buf) {
+Client::dechunk(webserv::Buffer const&) {
 	return (job::Status::failure); // placeholder
 }
 

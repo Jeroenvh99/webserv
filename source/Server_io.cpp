@@ -54,7 +54,7 @@ Server::_parse_response(Client& client) {
 }
 
 Server::IOStatus
-Server::_dechunk(Client& client) {
+Server::_dechunk(Client&) {
 	return (IOStatus::failure); // placeholder
 }
 
