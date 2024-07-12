@@ -9,8 +9,7 @@ namespace http {
         enum class Type {
 			none,
 			by_length,
-			to_dechunk,
-			to_enchunk,		
+			chunked,
 		}; // enum class Type
 
 		Body(Type = Type::none, size_t = 0);

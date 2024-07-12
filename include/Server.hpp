@@ -70,8 +70,10 @@ private:
 	IOStatus	_parse_request(Client&);
 	IOStatus	_parse_response(Client&);
 	IOStatus	_fetch(Client&, webserv::Buffer&);
+	IOStatus	_enchunk_and_send(Client&);
 	IOStatus	_fetch_and_send(Client&);
 	IOStatus	_deliver(Client&);
+	IOStatus	_dechunk(Client&);
 	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);

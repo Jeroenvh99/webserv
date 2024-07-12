@@ -6,6 +6,7 @@
 # include "Worker.hpp"
 # include "job/job.hpp"
 # include "http/Body.hpp"
+# include "http/chunk.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
 # include "http/parse.hpp"
@@ -45,8 +46,8 @@ private:
 	std::stringstream			_buffer;
 	http::parse::RequestParser	_parser;		// union
 	http::parse::HeaderParser	_header_parser; // union
+	http::Dechunker				_dechunker;
 	http::Request				_request;
-	http::Body					_request_body; // delete this: istate will determine what should be done with input
 	http::Response				_response;
 	http::Body					_response_body; // delete this: ostate will determine what should be done with worker output
 	Address						_address;
@@ -62,7 +63,7 @@ private:
 
 enum class ClientImpl::InputState {
 	parse_request,	// directing input to request parser
-	//dechunk,		// directing input to dechunker
+	dechunk,		// directing input to dechunker
 	deliver,		// directing input to request worker
 	closed,			// not accepting further input
 }; // enum class ClientImpl::InputState
@@ -70,8 +71,8 @@ enum class ClientImpl::InputState {
 enum class ClientImpl::OutputState {
 	parse_response,	// directing worker output to response parser
 	fetch,			// directing worker output to socket
-	// enchunk	// enchunk worker output and direct it to socket
-	closed,			// not expecting further output (might not need this)
+	enchunk,		// enchunk worker output and direct it to socket
+	closed,			// not expecting further output (might need this to keep faulty CGI in check)
 }; // enum class ClientImpl::OutputState
 
 using ClientMap = std::unordered_map<network::SharedHandle, ClientImpl>;
@@ -101,7 +102,9 @@ public:
 	job::Status	respond(job::Job const&);
 	job::Status	respond(job::ErrorJob const&);
 	job::Status	deliver(webserv::Buffer const&);
+	job::Status	dechunk(webserv::Buffer const&);
 	job::Status	fetch(webserv::Buffer&);
+	job::Status	fetch(webserv::ChunkBuffer&);
 	job::Status	wait();
 
 private:

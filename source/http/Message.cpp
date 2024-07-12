@@ -42,7 +42,7 @@ Message::expects_body() const {
 			return {Body::Type::by_length, *body_length};
 	}
 	if (_headers.contains("Transfer-Encoding", "chunked"))
-		return (Body::Type::to_dechunk);
+		return (Body::Type::chunked);
 	return (Body::Type::none);
 }
 

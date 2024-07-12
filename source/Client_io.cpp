@@ -4,8 +4,19 @@ bool
 Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
-		_impl._request_body = _impl._request.expects_body();
-		_impl._istate = InputState::deliver; // adjust this based on the expected body; this can all be done within this function
+		http::Body const	body = _impl._request.expects_body();
+
+		switch (body.type()) {
+		case http::Body::Type::none:
+			_impl._istate = InputState::closed;
+			break;
+		case http::Body::Type::by_length:
+			_impl._istate = InputState::deliver; // and set length indicator
+			break;
+		case http::Body::Type::chunked:
+			_impl._istate = InputState::dechunk;
+			break;
+		}
 		_impl._buffer_flush(buf);
 		return (true);
 	}
@@ -23,6 +34,8 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (!_impl._buffer.eof()) {
 		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
+
+			// http::Body const	body = _impl._response.expects_body();
 			_impl._response_body = _impl._response.expects_body(); // replace by:
 			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
 			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
@@ -33,7 +46,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._buffer_flush(trail);
 			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
-			_impl._ostate = OutputState::fetch;
+			_impl._ostate = OutputState::fetch; // replace
 			return (true);
 		}
 		_impl._response.headers().insert(line);
@@ -75,17 +88,15 @@ Client::respond(job::ErrorJob const& job) {
 
 job::Status
 Client::deliver(webserv::Buffer const& buf) {
-	if (_impl._request_body.type() == http::Body::Type::none) // remove this later
-		return (job::Status::failure);
 	_impl._worker.write(buf);
 
-	return (wait()); // job status should not depend on the same mechanism that determines end of worker output
+	return (wait()); // replace: job status should not depend on the same mechanism that determines end of worker output
 }
 
-// job::Status
-// Client::dechunk(webserv::Buffer const& buf) {
-
-// }
+job::Status
+Client::dechunk(webserv::Buffer const& buf) {
+	return (job::Status::failure); // placeholder
+}
 
 job::Status
 Client::fetch(webserv::Buffer& buf) {

@@ -38,13 +38,12 @@ SRC_FILES	:= Environment_build.cpp \
 			job/CGI_io.cpp \
 			job/CGI_spawn.cpp \
 			job/Job.cpp \
+			job/Resource.cpp \
 			job/Resource_builtin.cpp \
-			job/Resource_ctor.cpp \
 			job/Resource_delete.cpp \
 			job/Resource_get.cpp \
 			job/Resource_headers.cpp \
 			job/Resource_io.cpp \
-			job/Resource_method.cpp \
 			job/Resource_post.cpp \
 			logging/Logger.cpp \
 			logging/AccessLogger.cpp \

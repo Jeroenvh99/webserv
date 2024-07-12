@@ -54,6 +54,11 @@ Server::_parse_response(Client& client) {
 }
 
 Server::IOStatus
+Server::_dechunk(Client& client) {
+	return (IOStatus::failure); // placeholder
+}
+
+Server::IOStatus
 Server::_deliver(Client& client) {
 	webserv::Buffer	buf;
 
@@ -81,6 +86,11 @@ Server::_fetch_and_send(Client& client) {
 	if (_fetch(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
 	return (_send(client, buf));
+}
+
+Server::IOStatus
+Server::_enchunk_and_send(Client& client) {
+	return (_fetch_and_send(client)); // placeholder
 }
 
 Server::IOStatus

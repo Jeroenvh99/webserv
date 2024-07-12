@@ -14,7 +14,6 @@ ClientImpl::_clear() noexcept {
 	_buffer_empty();
 	_parser.clear();
 	_request.clear();
-	_request_body = {http::Body::Type::none};
 	_response.clear();
 	_response_body = {http::Body::Type::none};
 	_ostate = OutputState::closed;
