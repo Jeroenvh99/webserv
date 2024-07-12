@@ -5,6 +5,7 @@ Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		_impl._request_body = _impl._request.expects_body();
+		_impl._istate = InputState::deliver; // adjust this based on the expected body; this can all be done within this function
 		_impl._buffer_flush(buf);
 		return (true);
 	}
@@ -32,7 +33,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._buffer_flush(trail);
 			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
-			_impl._state = State::work;
+			_impl._ostate = OutputState::fetch;
 			return (true);
 		}
 		_impl._response.headers().insert(line);
@@ -47,7 +48,7 @@ Client::respond(job::Job const& job) {
 	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
 	if (!jstat)						 // job is CGI; must be waited for first
-		_impl._state = State::parse_response;
+		_impl._ostate = OutputState::parse_response;
 	else if (http::is_error(*jstat)) // job couldn't be started
 		return (respond({*jstat, job}));
 	else {
@@ -56,7 +57,7 @@ Client::respond(job::Job const& job) {
 		_impl._buffer_empty();
 		_impl._buffer.clear();
 		_impl._buffer << _impl._response;
-		_impl._state = State::work;
+		_impl._ostate = OutputState::fetch;
 	}
 	return (wait());
 }
@@ -68,19 +69,23 @@ Client::respond(job::ErrorJob const& job) {
 	_impl._buffer_empty();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
-	_impl._state = State::work;
+	_impl._ostate = OutputState::fetch;
 	return (wait());
 }
 
 job::Status
 Client::deliver(webserv::Buffer const& buf) {
-	if (_impl._request_body.type() == http::Body::Type::none)
-		return (job::Status::failure); // will not accept unexpected body // move this check elsewhere?
-	// todo: dechunk if necessary
+	if (_impl._request_body.type() == http::Body::Type::none) // remove this later
+		return (job::Status::failure);
 	_impl._worker.write(buf);
 
-	return (wait());
+	return (wait()); // job status should not depend on the same mechanism that determines end of worker output
 }
+
+// job::Status
+// Client::dechunk(webserv::Buffer const& buf) {
+
+// }
 
 job::Status
 Client::fetch(webserv::Buffer& buf) {
@@ -97,6 +102,6 @@ Client::wait() {
 	job::Status const	stat = _impl._worker.wait();
 
 	if (stat != job::Status::pending)
-		_impl._clear();
+		_impl._clear(); // this should only clear output-related variables
 	return (stat);
 }

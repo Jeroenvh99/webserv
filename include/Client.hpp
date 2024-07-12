@@ -20,7 +20,9 @@
 
 class ClientImpl {
 public:
-	enum class State;
+	enum class InputState;
+	enum class OutputState;
+
 	using Socket = network::StreamSocket<network::Domain::ipv4>;
 	using Address = Socket::Address;
 
@@ -38,24 +40,39 @@ private:
 	size_t	_buffer_flush(webserv::Buffer&);
 	void	_buffer_empty() noexcept;
 
-	State						_state;
+	InputState					_istate;
+	OutputState					_ostate;
 	std::stringstream			_buffer;
 	http::parse::RequestParser	_parser;		// union
 	http::parse::HeaderParser	_header_parser; // union
 	http::Request				_request;
-	http::Body					_request_body;
+	http::Body					_request_body; // delete this: istate will determine what should be done with input
 	http::Response				_response;
-	http::Body					_response_body;
+	http::Body					_response_body; // delete this: ostate will determine what should be done with worker output
 	Address						_address;
 	Worker						_worker;
 }; // class ClientImpl
 
-enum class ClientImpl::State {
-	idle,
-	parse_request,  // receiving and parsing request line and headers
-	parse_response, // receiving request body and/or parsing response headers
-	work,          	// receiving request body and/or sending response
-}; // enum class ClientImpl::State
+// enum class ClientImpl::State {
+// 	idle,
+// 	parse_request,  // receiving and parsing request line and headers
+// 	parse_response, // receiving request body and/or parsing response headers
+// 	work,          	// receiving request body and/or sending response
+// }; // enum class ClientImpl::State
+
+enum class ClientImpl::InputState {
+	parse_request,	// directing input to request parser
+	//dechunk,		// directing input to dechunker
+	deliver,		// directing input to request worker
+	closed,			// not accepting further input
+}; // enum class ClientImpl::InputState
+
+enum class ClientImpl::OutputState {
+	parse_response,	// directing worker output to response parser
+	fetch,			// directing worker output to socket
+	// enchunk	// enchunk worker output and direct it to socket
+	closed,			// not expecting further output (might not need this)
+}; // enum class ClientImpl::OutputState
 
 using ClientMap = std::unordered_map<network::SharedHandle, ClientImpl>;
 
@@ -64,7 +81,8 @@ public:
 	using Address = ClientImpl::Address;
 	using Socket = ClientImpl::Socket;
 	using SocketBox = network::SharedHandle;
-	using State = ClientImpl::State;
+	using InputState = ClientImpl::InputState;
+	using OutputState = ClientImpl::OutputState;
 
 	Client(ClientMap::value_type&);
 	Client(SocketBox const&, ClientImpl&);
@@ -74,7 +92,8 @@ public:
 	SocketBox const&		socket_box() const noexcept;
 	http::Request const&	request() const noexcept;
 	http::Response const&	response() const noexcept;
-	State					state() const noexcept;
+	InputState				istate() const noexcept;
+	OutputState				ostate() const noexcept;
 	Worker const&			worker() const noexcept;
 
 	bool		parse_request(webserv::Buffer&);

@@ -59,11 +59,13 @@ private:
 
 	using IOStatus = webserv::GenericStatus;
 
-	void	_accept();
-	void	_process_core(Poller::Event const&, ClientIt);
-	void	_process_graveyard(Poller::Event const&, ClientIt);
-	void	_to_graveyard(ClientIt);
-	void	_drop(ClientIt);
+	void		_accept();
+	void		_process_core(Poller::Event const&, ClientIt);
+	IOStatus	_process_read(Client&);
+	IOStatus	_process_write(Client&);
+	void		_process_graveyard(Poller::Event const&, ClientIt);
+	void		_to_graveyard(ClientIt);
+	void		_drop(ClientIt);
 
 	IOStatus	_parse_request(Client&);
 	IOStatus	_parse_response(Client&);

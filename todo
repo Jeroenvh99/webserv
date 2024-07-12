@@ -22,4 +22,6 @@ status:
 
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders foutinjectie
 
+post request veroorzaakt oneindige lus
+
 hoe moet foutinjectie werken?

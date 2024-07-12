@@ -30,9 +30,14 @@ Client::response() const noexcept {
 	return (_impl._response);
 }
 
-Client::State
-Client::state() const noexcept {
-	return (_impl._state);
+Client::InputState
+Client::istate() const noexcept {
+	return (_impl._istate);
+}
+
+Client::OutputState
+Client::ostate() const noexcept {
+	return (_impl._ostate);
 }
 
 Worker const&
