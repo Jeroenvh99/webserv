@@ -8,16 +8,26 @@
 # include <stdexcept>
 
 namespace http {
-	webserv::Buffer	enchunk(webserv::ChunkBuffer const&);
+	constexpr size_t	chunk_margin = 8;
+	// 4 for two CRLF + 4 for hex length indicator
+	// As long as webserv::buffer_size does not exceed 65536 (0xFFFF), this
+	// value won't need to be adjusted.
+
+	using ChunkBuffer = network::Buffer<buffer_size - chunk_margin>;
+
+	void	enchunk(ChunkBuffer const&, webserv::Buffer&);
 
 	class Dechunker {
 	public:
-		using Chunk = std::optional<std::string>;
+		enum class Status {
+			pending, done,
+		}; // enum class Status
+
 		class ChunkException;
 
 		Dechunker();
 
-		Chunk	dechunk(webserv::Buffer const&);
+		Status	dechunk(webserv::Buffer&);
 
 	private:
 		using ChunkSize = std::optional<size_t>;
@@ -25,7 +35,7 @@ namespace http {
 		bool	_get_size();
 
 		ChunkSize			_size;
-		std::stringstream	_buffer;
+		std::stringstream	_buf;
 	}; // class Dechunker
 
 	class Dechunker::ChunkException: public std::exception {
