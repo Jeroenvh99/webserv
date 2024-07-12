@@ -7,11 +7,13 @@ Server::_parse_request(Client& client) {
 
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	_elog.log(LogLevel::debug, std::string(client.address()),
+		": Directing ", buf.len(), " bytes to request parser.");
 	try {
 		if (client.parse_request(buf) == true) {
 			client.respond({client, *this});
 			_elog.log(LogLevel::debug, std::string(client.address()),
-				": Request parsing finished.");
+				": Request parsing finished; ", buf.len(), " trailing bytes.");
 		}
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
@@ -33,10 +35,13 @@ Server::_parse_response(Client& client) {
 
 	if (_fetch(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	_elog.log(LogLevel::debug, std::string(client.address()),
+		": Directing ", buf.len(), " bytes to response parser.");
 	try {
 		if (client.parse_response(buf)) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Response parsing from CGI finished.");
+			
 			return (IOStatus::success);
 		}
 	} catch (http::parse::Exception& e) {
@@ -82,8 +87,10 @@ Server::IOStatus
 Server::_fetch(Client& client, webserv::Buffer& buf) {
 	switch (client.fetch(buf)) {
 	case job::Status::success:
+		_elog.log(LogLevel::debug, std::string(client.address()),
+			": Fetched ", buf.len(), " bytes. Resource fetched successfully.");
+		return (Server::IOStatus::success);
 	case job::Status::pending:
-		if (buf.len() > 0)
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Fetched ", buf.len(), " bytes.");
 		return (Server::IOStatus::success);

@@ -2,7 +2,7 @@
 
 bool
 Client::parse_request(webserv::Buffer& buf) {
-	buf.put(_impl._buffer); // catch error?
+	_impl._buffer_fill(buf);
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		_impl._request_body = _impl._request.expects_body();
 		_impl._buffer_flush(buf);
@@ -86,8 +86,6 @@ job::Status
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
 		buf.get(_impl._buffer);
-		if (_impl._buffer.eof())
-			return (wait());
 		return (job::Status::pending);
 	}
 	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed

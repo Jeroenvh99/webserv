@@ -33,6 +33,7 @@ private:
 	void	_clear() noexcept;
 
 	void	_buffer_fill(std::string const&);
+	void	_buffer_fill(webserv::Buffer const&);
 	size_t	_buffer_flush(std::string&);
 	size_t	_buffer_flush(webserv::Buffer&);
 	void	_buffer_empty() noexcept;

@@ -23,7 +23,13 @@ ClientImpl::_clear() noexcept {
 void
 ClientImpl::_buffer_fill(std::string const& str) {
 	_buffer.clear();
-	_buffer.str(str);
+	_buffer << str;
+}
+
+void
+ClientImpl::_buffer_fill(webserv::Buffer const& wsbuf) {
+	_buffer.clear();
+	wsbuf.put(_buffer);
 }
 
 size_t

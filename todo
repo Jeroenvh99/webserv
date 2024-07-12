@@ -12,18 +12,14 @@ Resource (bestand/ingebouwd): eerst stringstream, dan bestand
 headers worden:
 bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecificatie)
 bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
-bij ingebouwd door de server geproduceerd
-
-momenteel wil de browser niet de pagina laten zien als alles al binnen is
-behalve bij cgi, maar die sluit de verbinding als dat niet nodig is
+bij ingebouwd door de server geproduceerd (ligt vast)
 
 lezen:
 als er nog iets in de client stringstream zit: lees dat eerst uit
 status:
 	als de client stringstream niet leeg is: pending
-	anders: vul buffer aan uit resource en wait()
-	
+	anders wait()
 
-implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders gewoon afbreken :shrug:
+implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders foutinjectie
 
 hoe moet foutinjectie werken?
