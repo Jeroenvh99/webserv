@@ -104,7 +104,7 @@ public:
 	job::Status	deliver(webserv::Buffer const&);
 	job::Status	dechunk(webserv::Buffer const&);
 	job::Status	fetch(webserv::Buffer&);
-	job::Status	fetch(webserv::ChunkBuffer&);
+	job::Status	fetch(http::ChunkBuffer&);
 	job::Status	wait();
 
 private:

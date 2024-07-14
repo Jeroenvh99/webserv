@@ -13,9 +13,10 @@ namespace http {
 	// As long as webserv::buffer_size does not exceed 65536 (0xFFFF), this
 	// value won't need to be adjusted.
 
-	using ChunkBuffer = network::Buffer<buffer_size - chunk_margin>;
+	using ChunkBuffer = network::Buffer<webserv::buffer_size - chunk_margin>;
 
 	void	enchunk(ChunkBuffer const&, webserv::Buffer&);
+	void	enchunk(std::ostream&, webserv::Buffer&);
 
 	class Dechunker {
 	public:
