@@ -85,6 +85,8 @@ void Config::PreParse(std::ifstream &in) {
 void Config::Parse() {
 	std::stringstream s(_config);
 	std::string line;
+	_errorlog = {"", logging::ErrorLogger::Level::error};
+	_accesslog = {"", logging::ErrorLogger::Level::error};
 	while (!s.eof()) {
 		std::getline(s, line);
 		std::string temp;
@@ -111,7 +113,7 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 		word.erase(word.find_last_not_of(";") + 1);
 		for (int i = 0; i <= 8; i++) {
 			if (word == logging::ErrorLogger::_levels[i].second) {
-				log.level = static_cast<logging::ErrorLogger::Level>(i);
+				log.level = logging::ErrorLogger::_levels[i].first;
 				break;
 			}
 		}

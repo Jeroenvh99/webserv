@@ -28,7 +28,7 @@ Server::Server(Config::Server config, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, ErrorLogger::Level::debug) {
+	_elog(elog, config.errorlog.level) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(static_cast<in_port_t>(config.port), INADDR_ANY)),
 							{Poller::EventType::read},
 							{Poller::Mode::edge_triggered});
@@ -55,6 +55,9 @@ Server::Server(Config::Server config, int backlog_size,
 				} else {
 					_route.disallow_method(loc.allowedmethods[i]);
 				}
+			}
+			if (loc.paths[0].find("cgi") != std::string::npos) {
+				_route.allow_cgi("py");
 			}
 		}
 	}

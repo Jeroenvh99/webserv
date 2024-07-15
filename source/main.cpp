@@ -23,8 +23,14 @@ main(int argc, char** argv) {
 		std::vector<Server> servers;
 
 		for (size_t i = 0; i < serverconfigs.size(); i++) {
-			std::ofstream access(serverconfigs[i].accesslog.filename);
-			std::ofstream error(serverconfigs[i].errorlog.filename);
+			std::ofstream accessFile;
+			if(serverconfigs[i].accesslog.filename != "")
+				accessFile.open(serverconfigs[i].accesslog.filename, std::ios::out);
+			std::ostream& access = (serverconfigs[i].accesslog.filename != ""? accessFile : std::cout);
+			std::ofstream errorFile;
+			if(serverconfigs[i].errorlog.filename != "")
+				errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
+			std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
 			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
