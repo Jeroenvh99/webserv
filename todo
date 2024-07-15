@@ -9,6 +9,8 @@ dus: bij werker uitlezen
 CGI: lees CGI
 Resource (bestand/ingebouwd): eerst stringstream, dan bestand
 
+cwd voor cgi-proces moet aangepast
+
 headers worden:
 bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecificatie)
 bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
@@ -21,6 +23,12 @@ status:
 	anders wait()
 
 implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); als timeout plaatsvindt tijdens headers: stuur timeout-response, anders foutinjectie
+> als het CGI-proces afloopt voor de server alle data gelezen heeft, gaat alle achtergebleven data verloren
+> dus wait() is niet per se de indicatie voor EOF
+> read() = 0 ook niet, want het kan ook zijn dat er halverwege CGI even geen data beschikbaar is, maar dat die later nog wel komt
+> het best zou zijn om ook de CGI-socket te pollen, bij hoge voorkeur op een andere poller dan die waar ook de client-sockets in zitten
+> alternatief zonder poll kan zijn dat CGI::wait pas waitpid() doet als de laatste CGI::read() 0 teruggaf; deze waarde moet dan gecached worden <= is lelijk en stom en hacky, maar werkt wsch gewoon
+> laatste optie biedt daarentegen wel de mogelijkheid de timeout in CGI::wait() te integreren
 
 post request veroorzaakt oneindige lus
 
