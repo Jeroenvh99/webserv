@@ -9,6 +9,7 @@ namespace network {
 	class StreamSocket: public Socket<DOMAIN, Type::stream> {
 	public:
 		using super = Socket<DOMAIN, Type::stream>;
+		using typename super::Raw;
 		using typename super::Address;
 		using typename super::OptionList;
 
@@ -17,7 +18,7 @@ namespace network {
 
 	protected:
 		friend class Acceptor<DOMAIN>;
-		using typename super::Raw;
+		friend class SocketPair<StreamSocket>;
 
 		StreamSocket(Raw);
 	}; // class template StreamSocket<Domain>

@@ -13,6 +13,7 @@ namespace network {
 	enum class Domain {
 		ipv4 = AF_INET,
 		ipv6 = AF_INET6,
+		local = AF_LOCAL,
 	}; // enum class Domain
 
 	enum class Type {

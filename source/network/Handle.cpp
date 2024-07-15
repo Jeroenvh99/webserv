@@ -65,6 +65,14 @@ Handle::good() const noexcept {
 	return (_raw != _invalid_handle);
 }
 
+Handle::Raw
+Handle::release() noexcept {
+	Raw const	to_release = _raw;
+
+	_raw = _invalid_handle;
+	return (to_release);
+}
+
 void
 Handle::close() {
 	if (good() && ::close(release()) == -1) {
@@ -87,14 +95,4 @@ Handle::operator!=(Raw const& that) const noexcept {
 Handle::Raw
 Handle::raw() const noexcept {
 	return (_raw);
-}
-
-// Private methods
-
-Handle::Raw
-Handle::release() noexcept {
-	Raw const	to_release = _raw;
-
-	_raw = _invalid_handle;
-	return (to_release);
 }

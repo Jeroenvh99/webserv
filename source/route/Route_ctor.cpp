@@ -1,25 +1,44 @@
 #include "route.hpp"
 
 using route::Route;
-using route::Path;
+using PathIt = stdfs::path::iterator;
 
-Route::Route(Path const& path):
-	Config(*(path.begin())),
-	_subroutes() {
-	auto const	next = ++path.begin();
-	auto const	end = path.end();
+// Static variable declarations
 
-	if (next != end && next->string().size() > 0)
-		_subroutes.push_front(Route(*this, next, path.end()));
+stdfs::path const	Route::no_redirection = "";
+
+// Public constructors
+
+Route::Route(stdfs::path const& path):
+	BaseRoute(),
+	_super(nullptr),
+	_subroutes(),
+	_fname(*(path.begin())) {
+	extend(path);
 }
 
-Route::Route(Route const& super, std::string const& fname):
-	Config(super, fname),
-	_subroutes() {}
+// Private constructors
 
-Route::Route(Route const& super, PathSegment seg, PathSegment end):
-	Config(super, *seg),
-	_subroutes() {
+Route::Route(Route const& super, PathIt seg, PathIt end):
+	BaseRoute(true),
+	_super(&super),
+	_subroutes(),
+	_fname(*seg),
+	_redirection(no_redirection) {
 	if (++seg != end)
 		_subroutes.push_front(Route(*this, seg, end));
 }
+
+Route::Route(Route const& super, std::string const& fname):
+	BaseRoute(true),
+	_super(&super),
+	_subroutes(),
+	_fname(fname),
+	_redirection(no_redirection) {}
+
+Route::Route(Route const& super, std::string&& fname):
+	BaseRoute(true),
+	_super(&super),
+	_subroutes(),
+	_fname(fname),
+	_redirection(no_redirection) {}

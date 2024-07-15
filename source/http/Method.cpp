@@ -1,6 +1,5 @@
 #include "http.hpp"
-
-#include <stdexcept>
+#include "http/parse.hpp"
 
 namespace http {
 	Method
@@ -8,7 +7,7 @@ namespace http {
 		for (auto const& [method, string]: http::methods)
 			if (that == string)
 				return (method);
-		throw (std::invalid_argument("unrecognized method"));
+		throw (parse::MethodException("unrecognized method"));
 	}
 	
 	char const*
@@ -16,7 +15,6 @@ namespace http {
 		for (auto const& [method, string]: http::methods)
 			if (that == method)
 				return (string);
-		throw (std::invalid_argument("unrecognized method")); // unreachable
+		throw (parse::MethodException("unrecognized method")); // unreachable
 	}
 }; // namespace http
-	

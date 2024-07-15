@@ -1,6 +1,8 @@
 #ifndef URI_HPP
 # define URI_HPP
 
+# include "webserv.hpp"
+
 # include <filesystem>
 # include <string>
 
@@ -8,11 +10,6 @@ class URI {
 public:
 	URI() = default;
 	URI(std::string const&);
-	URI(std::string::const_iterator,
-		std::string::const_iterator,
-		std::string::const_iterator,
-		std::string::const_iterator);
-
 	operator std::string() const;
 
 	std::filesystem::path const&	path() const noexcept;
@@ -23,9 +20,15 @@ public:
 	static constexpr char	fragment_sign = '#';
 
 private:
-	std::filesystem::path		_path;
-	std::string					_query;
-	std::string					_fragment;
+	URI(std::string::const_iterator,
+		std::string::const_iterator,
+		std::string::const_iterator,
+		std::string::const_iterator);
+	URI(std::filesystem::path const&, std::string&&, std::string&&);
+
+	std::filesystem::path	_path;
+	std::string				_query;
+	std::string				_fragment;
 }; // class URI
 
 #endif // URI_HPP

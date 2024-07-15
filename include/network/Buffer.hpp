@@ -20,8 +20,9 @@ namespace network {
 
 		operator std::string() const;
 
-		void	empty() noexcept;
-		size_t	len() const noexcept;
+		void					empty() noexcept;
+		size_t					len() const noexcept;
+		static constexpr size_t	capacity();
 
 		iterator		begin() noexcept;
 		const_iterator	begin() const noexcept;
@@ -29,6 +30,14 @@ namespace network {
 		iterator		end() noexcept;
 		const_iterator	end() const noexcept;
 		const_iterator	cend() const noexcept;
+
+		size_t	get(std::istream&);
+		size_t	put(std::ostream&) const;
+
+		size_t	push_back(std::string const&) noexcept;
+		template<size_t TSIZE>
+		size_t	push_back(Buffer<TSIZE> const&) noexcept;
+
 	private:
 		template<Domain DOMAIN, Type TYPE>
 		friend class Socket;
@@ -43,7 +52,7 @@ namespace network {
 	template<size_t SIZE>
 	std::ostream&	operator<<(std::ostream&, Buffer<SIZE> const&);
 
-	// add dynamic buffer
+	// add dynamic buffer?
 
 }; // namespace network
 

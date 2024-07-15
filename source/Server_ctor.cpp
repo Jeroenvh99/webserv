@@ -31,7 +31,7 @@ Server::Server(Config::Server config, int backlog_size,
 	_elog(elog, config.errorlog.level) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(static_cast<in_port_t>(config.port), INADDR_ANY)),
 							{Poller::EventType::read},
-							{Poller::Mode::edge_triggered});
+							{});
 	// if this can be moved to the initializer list, it'd be great
 	_route.redirect("./");
 	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {

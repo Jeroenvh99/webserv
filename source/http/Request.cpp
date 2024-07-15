@@ -10,24 +10,24 @@ using http::Version;
 // Basic operations
 
 Request::Request(Method method, Version version, std::string const& uri):
-	_method(method), _version(version), _uri(uri),
-	_headers(), _body() {}
+	Message(),
+	_method(method), _version(version), _uri(uri) {}
 
 Request::Request(Method method, Version version, std::string&& uri):
-	_method(method), _version(version), _uri(uri),
-	_headers(), _body() {}
+	Message(),
+	_method(method), _version(version), _uri(uri) {}
 
 // Conversions
 
-Request::operator std::string() const noexcept {
+Request::operator std::string() const {
 	std::ostringstream	oss;
 
 	oss << to_string(_method) << ' '
 		<< std::string(_uri) << ' '
 		<< to_string(_version) << '\n';
-	for (auto const& hdr: _headers)
-		oss << to_string(hdr) << '\n';
-	oss << "< body of size " << std::to_string(_body.size()) << " >";
+	for (auto const& himpl: headers())
+		oss << std::string(Header{himpl}) << '\n';
+
 	return (oss.str());
 }
 
@@ -48,52 +48,12 @@ Request::uri() const noexcept {
 	return (_uri);
 }
 
-std::string const&
-Request::header(std::string const& name) const {
-	auto const	it = _headers.find(name);
- 
-	if (it == _headers.end())
-		throw (std::out_of_range("undefined header"));
-	return (it->second);
-}
-
-bool
-Request::has_header(std::string const& name) const noexcept {
-	return (_headers.find(name) != _headers.end()); // C++20 has .contains()
-}
-
-std::string const&
-Request::body() const noexcept {
-	return (_body);
-}
-
-std::string&
-Request::body() noexcept {
-	return (_body);
-}
-
 // Modifiers
 
 void
 Request::clear() noexcept {
+	Message::clear();
 	_method = Method::GET;
 	_version = Version(0, 0);
 	_uri = URI();
-	_headers.clear();
-	_body.clear();
-}
-
-// Private methods
-// Modifiers
-
-void
-Request::_header_append(Header&& hdr) {
-	auto it = _headers.find(hdr.first);
-
-	if (it != _headers.end()) {
-		it->second.reserve(it->second.length() + 1 + hdr.second.length());
-		it->second += ",";
-		it->second += hdr.second;
-	} else
-		_headers.insert(hdr);	// DB: should I check the return value? The key is logically guaranteed to be unique.
 }

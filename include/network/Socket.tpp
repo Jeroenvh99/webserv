@@ -59,7 +59,7 @@ namespace network {
 
 	template<Domain DOMAIN, Type TYPE>
 	template<size_t BSIZE>
-	void
+	size_t
 	Socket<DOMAIN, TYPE>::read(Buffer<BSIZE>& buf, int flags) const {
 		ssize_t const	len = recv(raw(), buf.data(), BSIZE, flags);
 
@@ -67,6 +67,7 @@ namespace network {
 			throw (SocketException("recv"));
 		}
 		buf._len = len;
+		return (buf._len);
 	}
 
 	// Private and protected methods

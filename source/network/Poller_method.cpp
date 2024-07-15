@@ -8,6 +8,8 @@ using network::Handle;
 using network::SharedHandle;
 using network::Poller;
 
+#include <iostream>
+
 extern int	errno;
 
 // maybe more detailed exception handling, encapsulating errno

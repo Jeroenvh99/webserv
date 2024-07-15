@@ -31,6 +31,7 @@ namespace http {
 
 	std::string		to_string(Status) noexcept;
 	unsigned int	to_uint(Status) noexcept;
+	Status			to_status(std::string const&);
 	char const*		description(Status) noexcept;
 	bool			is_client_error(Status) noexcept;
 	bool			is_server_error(Status) noexcept;
