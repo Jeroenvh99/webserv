@@ -78,7 +78,6 @@ Client::respond(job::Job const& job) {
 job::Status
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
-	// todo: insert more headers based on file type
 	_impl._buffer_empty();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
@@ -104,7 +103,7 @@ Client::fetch(webserv::Buffer& buf) {
 		buf.get(_impl._buffer);
 		return (job::Status::pending);
 	}
-	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed
+	_impl._worker.read(buf);
 	return (wait());
 }
 
