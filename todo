@@ -9,8 +9,6 @@ dus: bij werker uitlezen
 CGI: lees CGI
 Resource (bestand/ingebouwd): eerst stringstream, dan bestand
 
-cwd voor cgi-proces moet aangepast
-
 headers worden:
 bij CGI door het script geproduceerd, evt. aangevuld (bijv. zonder lengtespecificatie)
 bij bestand door de server geproduceerd (bestandsextensie, omvangmeting, ...)
@@ -33,3 +31,5 @@ implementeer timeout voor CGI (x aantal seconden na laatste successvolle read); 
 post request veroorzaakt oneindige lus
 
 hoe moet foutinjectie werken?
+
+controleer of alle omgevingsvariabelen goed doorgegeven worden

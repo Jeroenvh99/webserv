@@ -10,7 +10,8 @@
 using job::CGI;
 using route::Location;
 
-static void	_dup2(int, int);
+static std::string	_filename_and_chdir(stdfs::path const&);
+static void			_dup2(int, int);
 
 // Public methods
 
@@ -77,14 +78,14 @@ CGI::_redirect_io(Socket& socket) {
 
 void
 CGI::_exec(Job const& job) {
-	std::string		pathname(job.location.to());
+	std::string		filename(_filename_and_chdir(job.location.to()));
 	Environment		env(job.environment);
-	char* const		cpathname = pathname.data();
-	char* const		cargv[2] = {cpathname, nullptr};
+	char* const		cfilename = filename.data();
+	char* const		cargv[2] = {cfilename, nullptr};
 
 	env.build();
-	if (::execve(cpathname, cargv, env.cenv()) == -1) {
-		::perror("execve");
+	if (::execve(cfilename, cargv, env.cenv()) == -1) {
+		::perror("execve"); // print
 		::exit(EXIT_FAILURE);
 	}
 }
@@ -97,4 +98,17 @@ _dup2(int from, int to) {
 		::perror("dup2");
 		::exit(EXIT_FAILURE);
 	}
+}
+
+static std::string
+_filename_and_chdir(stdfs::path const& pathname) {
+	stdfs::path const	dir = pathname.parent_path();
+
+	try {
+		stdfs::current_path(dir);
+	} catch (stdfs::filesystem_error& e) {
+		std::cerr << e.code() << "; " << e.what() << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return (pathname.filename());
 }
