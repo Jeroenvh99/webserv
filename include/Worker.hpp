@@ -30,8 +30,6 @@ public:
 	size_t	read(webserv::Buffer&);
 	size_t	write(webserv::Buffer const&);
 
-	State	state() const noexcept; // remove
-
 private:
 	State				_state;
 	union {

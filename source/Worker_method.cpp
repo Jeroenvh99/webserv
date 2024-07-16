@@ -53,11 +53,6 @@ Worker::wait() {
 	}
 }
 
-Worker::State
-Worker::state() const noexcept {
-	return (_state);
-}
-
 size_t
 Worker::write(webserv::Buffer const& buf) {
 	switch (_state) {

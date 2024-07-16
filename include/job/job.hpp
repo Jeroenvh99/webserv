@@ -14,6 +14,7 @@ namespace job {
 		failure,
 		aborted,
 		pending,
+		timeout,
 	}; // enum class Status
 
 	struct Job {
