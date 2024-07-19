@@ -17,6 +17,8 @@ using logging::ErrorLogger;
 using logging::Format;
 using logging::Variable;
 
+stdfs::path const	Server::no_errpage = "";
+
 Server::Server(Config::Server config, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_name(config.servername),
@@ -28,10 +30,13 @@ Server::Server(Config::Server config, int backlog_size,
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
-	_elog(elog, ErrorLogger::Level::debug) {
+	_elog(elog, config.errorlog.level) {
 	_acceptor = _poller.add(Acceptor(Acceptor::Address(static_cast<in_port_t>(config.port), INADDR_ANY)),
 							{Poller::EventType::read},
-							{Poller::Mode::edge_triggered});
+							{});
+	for (size_t i = 0; i < config.redirections.size(); i++) {
+		add_httpredirect(config.redirections[i].from, config.redirections[i].to, config.redirections[i].permanent);
+	}
 	// if this can be moved to the initializer list, it'd be great
 	_route.redirect("./");
 	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
@@ -47,14 +52,17 @@ Server::Server(Config::Server config, int backlog_size,
 				.redirect(loc.root)
 				.list_directory();
 			if (!loc.index.empty()) {
-				_route.set_directory_file(loc.index);
+				_route.seek(loc.paths[0]).set_directory_file(loc.index);
 			}
 			for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
 				if (loc.allowedmethods[i] != http::Method::NONE) {
-					_route.allow_method(loc.allowedmethods[i]);
+					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[i]);
 				} else {
-					_route.disallow_method(config.allowedmethods[i]);
+					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[i]);
 				}
+			}
+			for (std::string cgitype : loc.allowedcgi) {
+				_route.seek(loc.paths[j]).allow_cgi(cgitype);
 			}
 		}
 	}

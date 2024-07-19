@@ -23,10 +23,17 @@ public:
 	struct Location
 	{
 		std::vector<std::string> paths;
+		std::vector<std::string> allowedcgi;
 		std::string root;
 		std::string index;
 		std::unordered_map<std::string, std::string> parameters;
 		std::vector<http::Method> allowedmethods;
+	};
+
+	struct Redirection {
+		std::string from;
+		std::string to;
+		bool permanent;
 	};
 
 	struct Server
@@ -34,9 +41,11 @@ public:
 		struct ServerLog errorlog;
 		struct ServerLog accesslog;
 		int port;
+		int maxbodysize;
 		std::string servername;
 		std::unordered_map<int, std::string> errorpages;
 		std::vector<Location> locations;
+		std::vector<Redirection> redirections;
 		std::vector<http::Method> allowedmethods;
 	};
 

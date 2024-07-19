@@ -2,25 +2,27 @@
 # define HTTP_MESSAGE_HPP
 
 # include "http.hpp"
+# include "http/Body.hpp"
+# include "http/Header.hpp"
 
 # include <string>
-# include <unordered_map>
-# include <utility>
 
 namespace http {
-	using Header = std::pair<std::string, std::string>;
-	std::string	to_string(Header const&);
-
 	class Message {
 	public:
-		struct cmp {
-			bool	operator()(std::string const&, std::string const&) const noexcept;
-		}; // struct Request::cmp
-		using HeaderMap = std::unordered_map<
-			std::string,
-			std::string,
-			std::hash<std::string>,
-			cmp>;
+		operator std::string() const;
+
+		Headers const&	headers() const noexcept;
+		Headers&		headers() noexcept;
+
+		Body	expects_body() const; // this is not very speedy
+
+		virtual void	clear() noexcept;
+
+	private:
+		friend class Parser;
+
+		Headers	_headers;
 	}; // class Message
 }; // namespace http
 

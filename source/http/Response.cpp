@@ -1,23 +1,13 @@
 #include "http/Response.hpp"
-#include "html.hpp"
+#include "http/parse.hpp"
 
 using http::Response;
-using http::Request;
 using http::Status;
 
 // Basic operations
 
 Response::Response(Status status):
-	_status(status),
-	_body(default_html(status)) {}
-
-Response::Response(std::string const& body, Status status):
-	_status(status),
-	_body(body) {}
-
-Response::Response(std::string&& body, Status status):
-	_status(status),
-	_body(body) {}
+	_status(status) {}
 
 // Accessors
 
@@ -26,26 +16,24 @@ Response::status() const noexcept {
 	return (_status);
 }
 
-std::string const&
-Response::body() const noexcept {
-	return (_body);
-}
-
 http::Version
 Response::version() const noexcept {
 	return (_version);
-}
-
-Response::HeaderMap const&
-Response::headers() const noexcept {
-	return (_headers);
 }
 
 // Modifiers
 
 void
 Response::clear() noexcept {
+	Message::clear();
 	_status = http::Status::ok;
-	_headers.clear();
-	_body.clear();
+}
+
+void
+Response::init_from_headers() {
+	try {
+		_status = http::to_status(*(headers().at("Status").value().begin()));
+	} catch (std::out_of_range&) {
+		_status = http::Status::ok;
+	}
 }

@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+# include "webserv.hpp"
 # include "network/Acceptor.hpp"
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
@@ -10,6 +11,7 @@
 # include "http.hpp"
 # include "http/Status.hpp"
 # include "http/Request.hpp"
+# include "Environment.hpp"
 # include "Client.hpp"
 # include "route.hpp"
 # include "Config.hpp"
@@ -26,56 +28,76 @@ public:
 	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 
+	struct Redirection {
+		URI		from;
+		URI		to;
+		bool	permanent;
+	};
+
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&) = default;
-	Server(Config::Server, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(Config::Server, int, std::ostream&, std::ostream&);
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&			acceptor() noexcept;
-	Acceptor const&		acceptor() const noexcept;
-	void				process(int);
-	std::string const&	name() const noexcept;
+	Acceptor&							acceptor() noexcept;
+	Acceptor const&						acceptor() const noexcept;
+	std::string const&					name() const noexcept;
+	in_port_t							port() const noexcept;
+	route::Route const&					route() const noexcept;
 
-	route::Config	locate(std::filesystem::path const&) const;
-	http::Response	respond(http::Request const&);
-	http::Response	respond_error(http::Status);
-	http::Status	get(std::string&, http::Request const&);
-	http::Status	post(std::string&, http::Request const&);
-	http::Status	delete_(std::string&, http::Request const&);
+	route::Location						locate(std::filesystem::path const&) const;
+	route::Location						locate(URI const&) const;
+	stdfs::path const&					locate_errpage(http::Status) const noexcept;
+	void								add_httpredirect(std::string from, std::string to, bool permanent);
+	std::vector<Server::Redirection>	getRedirections() const;
+
+	void	process(int);
 
 	static constexpr Poller::EventTypes	poller_events = {
 		Poller::EventType::read, Poller::EventType::write
 	};
 	static constexpr Poller::Modes		poller_mode = {};
+	static stdfs::path const			no_errpage;
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
 	using ClientIt = ClientMap::iterator;
 
-	void	_accept();
-	void	_process_core(Poller::Event const&, ClientIt);
-	void	_process_graveyard(Poller::Event const&, ClientIt);
-	void	_to_graveyard(ClientIt);
-	void	_drop(ClientIt);
+	using IOStatus = webserv::GenericStatus;
 
-	bool	_fetch(Client&);
-	bool	_read(Client&);
-	bool	_wait(Client&);
-	bool	_send(Client&);
+	void		_accept();
+	void		_process_core(Poller::Event const&, ClientIt);
+	IOStatus	_process_read(Client&);
+	IOStatus	_process_write(Client&);
+	void		_process_graveyard(Poller::Event const&, ClientIt);
+	void		_to_graveyard(ClientIt);
+	void		_drop(ClientIt);
 
-	std::string				_name;
-	Poller					_poller;
-	SharedHandle			_acceptor;
-	ClientMap				_clients;
-	ClientMap				_graveyard;
-	route::Route			_route;
-	ErrorPageMap			_error_pages;
-	logging::AccessLogger	_alog;
-	logging::ErrorLogger	_elog;
+	IOStatus	_parse_request(Client&);
+	IOStatus	_parse_response(Client&);
+	IOStatus	_fetch(Client&, webserv::Buffer&);
+	IOStatus	_enchunk_and_send(Client&);
+	IOStatus	_fetch_and_send(Client&);
+	IOStatus	_deliver(Client&);
+	IOStatus	_dechunk(Client&);
+	IOStatus	_recv(Client&, webserv::Buffer&);
+	IOStatus	_send(Client&);
+	IOStatus	_send(Client&, webserv::Buffer const&);
+
+	std::string					_name;
+	Poller						_poller;
+	SharedHandle				_acceptor;
+	ClientMap					_clients;
+	ClientMap					_graveyard;
+	route::Route				_route;
+	ErrorPageMap				_error_pages;
+	logging::AccessLogger		_alog;
+	logging::ErrorLogger		_elog;
+	std::vector<Redirection>	_redirections;
 }; // class Server
 
 #endif // SERVER_HPP

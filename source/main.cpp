@@ -1,14 +1,23 @@
 #include "Server.hpp"
 #include "Config.hpp"
+#include "Environment.hpp"
+#include "route.hpp"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 static constexpr int		dfl_backlog_size = 5192;
 static constexpr int		dfl_poller_timeout = 1000;
 
+static size_t	_get_cenvsize(char const* const*);
+
 int
-main(int argc, char** argv) {
+main(int argc, char** argv, char** envp) {
+	Environment::_parent_env = envp;
+	Environment::_parent_env_size = _get_cenvsize(envp);
+
 	if (argc > 2)
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
 	try {
@@ -23,8 +32,14 @@ main(int argc, char** argv) {
 		std::vector<Server> servers;
 
 		for (size_t i = 0; i < serverconfigs.size(); i++) {
-			std::ofstream access(serverconfigs[i].accesslog.filename);
-			std::ofstream error(serverconfigs[i].errorlog.filename);
+			std::ofstream accessFile;
+			if(serverconfigs[i].accesslog.filename != "")
+				accessFile.open(serverconfigs[i].accesslog.filename, std::ios::out);
+			std::ostream& access = (serverconfigs[i].accesslog.filename != ""? accessFile : std::cout);
+			std::ofstream errorFile;
+			if(serverconfigs[i].errorlog.filename != "")
+				errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
+			std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
 			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
@@ -38,4 +53,12 @@ main(int argc, char** argv) {
 		return (std::cerr << "webserv: " << e.what() << '\n', 1);
 	}
 	return (0);
+}
+
+static size_t	_get_cenvsize(char const* const* envp) {
+	size_t	size = 0;
+
+	while (envp[size] != nullptr)
+		++size;
+	return (size);
 }
