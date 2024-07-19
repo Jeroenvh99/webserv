@@ -12,6 +12,9 @@ namespace http {
 		accepted = 202,
 		no_content = 204,
 
+		moved_permanently = 301,
+		found = 302, // ?
+
 		bad_request = 400,
 		unauthorized = 401,
 		forbidden = 403,
@@ -37,12 +40,14 @@ namespace http {
 	bool			is_server_error(Status) noexcept;
 	bool			is_error(Status) noexcept;
 
-	using StatusDescriptionMap = std::array<std::pair<Status, char const*>, 18>;
+	using StatusDescriptionMap = std::array<std::pair<Status, char const*>, 20>;
 	constexpr StatusDescriptionMap	_descriptions = {{
 		{Status::ok, "OK"},
 		{Status::created, "Created"},
 		{Status::accepted, "Accepted"},
 		{Status::no_content, "No Content"},
+		{Status::moved_permanently, "Resource has been moved, tough luck"},
+		{Status::found, "Resource has been found, whatever that means"},
 		{Status::bad_request, "Bad Request"},
 		{Status::unauthorized, "Unauthorized"},
 		{Status::forbidden, "Forbidden"},

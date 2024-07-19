@@ -25,6 +25,11 @@ Resource::open(job::ErrorJob const& job) {
 		_open_builtin(_make_error_page(job.status));
 }
 
+void
+Resource::open(job::RedirectionJob const& job) {
+	_open_builtin(_make_redirection(URI(job.destination)));
+}
+
 size_t
 Resource::write(webserv::Buffer const& buf) {
 	if (_ofs.bad())

@@ -85,7 +85,7 @@ void Config::PreParse(std::ifstream &in) {
 void Config::Parse() {
 	std::stringstream s(_config);
 	std::string line;
-	_errorlog = {"", logging::ErrorLogger::Level::error};
+	_errorlog = {"", logging::ErrorLogger::Level::debug};
 	_accesslog = {"", logging::ErrorLogger::Level::error};
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -122,7 +122,7 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	Server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
+	Server server = {_errorlog, _accesslog, -1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -158,6 +158,19 @@ void Config::ParseServer(std::stringstream &s) {
 		} else if (temp == "location") {
 			std::vector<std::string> locs{""};
 			ParseLocation(locs, linestream, s, server);
+		} else if (temp == "rewrite") {
+			std::getline(linestream, temp, ' ');
+			Config::Redirection redirect {"", "", false};
+			redirect.from = temp;
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			redirect.to = temp;
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			if (temp == "permanent") {
+				redirect.permanent = true;
+			};
+			server.redirections.emplace_back(redirect);
 		} else if (temp == "allow_methods" || temp == "deny_methods"){
 			ParseMethods(temp, linestream, server.allowedmethods);
 		} else if (temp == "listen") {
@@ -192,7 +205,7 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 }
 
 void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server) {
-	Location loc {{}, "", "", {}, server.allowedmethods};
+	Location loc {{}, {}, "", "", {}, server.allowedmethods};
 	std::string word;
 	std::getline(startstream, word, ' ');
 	while (word != "{") {
@@ -224,6 +237,14 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringst
 			std::getline(linestream, temp, ' ');
 			temp.erase(temp.find_last_not_of(';') + 1);
 			loc.index = temp;
+		} else if (temp == "allow_cgi") {
+			do {
+				std::getline(linestream, temp, ' ');
+				temp.erase(0, 1);
+				std::string value = temp;
+				value.erase(value.find_last_not_of(';') + 1);
+				loc.allowedcgi.push_back(value);
+			} while (temp.back() != ';');
 		} else {
 			std::string name = temp;
 			do {

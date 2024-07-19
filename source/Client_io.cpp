@@ -58,6 +58,10 @@ Client::parse_response(webserv::Buffer const& buf) {
 
 job::Status
 Client::respond(job::Job const& job) {
+	int httpredirindex = job::is_httpredirect(job);
+	if (httpredirindex > -1){
+		return (respond({job, httpredirindex}));
+	}
 	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
 	if (!jstat)						 // job is CGI; must be waited for first
@@ -76,10 +80,25 @@ Client::respond(job::Job const& job) {
 }
 
 job::Status
+Client::respond(job::RedirectionJob const& job) {
+	if (job.permanent)
+		_impl._response = http::Response(http::Status::moved_permanently);
+	else
+		_impl._response = http::Response(http::Status::found);
+	_impl._buffer_empty();
+	_impl._buffer.clear();
+	_impl._buffer << _impl._response; // response line and headers
+	_impl._worker.start(job);
+	_impl._ostate = OutputState::fetch;
+	return (wait());
+}
+
+job::Status
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
 	// todo: insert more headers based on file type
 	_impl._buffer_empty();
+	_impl._buffer.clear();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._ostate = OutputState::fetch;

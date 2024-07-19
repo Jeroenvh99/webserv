@@ -100,6 +100,7 @@ public:
 	bool		parse_request(webserv::Buffer&);
 	bool		parse_response(webserv::Buffer const&);
 	job::Status	respond(job::Job const&);
+	job::Status	respond(job::RedirectionJob const& job);
 	job::Status	respond(job::ErrorJob const&);
 	job::Status	deliver(webserv::Buffer const&);
 	job::Status	dechunk(webserv::Buffer const&);

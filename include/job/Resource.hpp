@@ -13,6 +13,7 @@ namespace job {
 		Resource();
 
 		http::Status	open(Job const&);
+		void			open(job::RedirectionJob const& job);
 		void			open(ErrorJob const&);
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
@@ -32,6 +33,7 @@ namespace job {
 
 		std::string	_make_headers(stdfs::path const&);
 		std::string	_make_directory_list(stdfs::path const&);
+		std::string	_make_redirection(URI const& to);
 		std::string	_make_error_page(http::Status);
 
 		Status				_status;

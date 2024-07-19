@@ -28,6 +28,12 @@ public:
 	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 
+	struct Redirection {
+		URI		from;
+		URI		to;
+		bool	permanent;
+	};
+
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
@@ -37,15 +43,17 @@ public:
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&			acceptor() noexcept;
-	Acceptor const&		acceptor() const noexcept;
-	std::string const&	name() const noexcept;
-	in_port_t			port() const noexcept;
-	route::Route const&	route() const noexcept;
+	Acceptor&							acceptor() noexcept;
+	Acceptor const&						acceptor() const noexcept;
+	std::string const&					name() const noexcept;
+	in_port_t							port() const noexcept;
+	route::Route const&					route() const noexcept;
 
-	route::Location		locate(std::filesystem::path const&) const;
-	route::Location		locate(URI const&) const;
-	stdfs::path const&	locate_errpage(http::Status) const noexcept;
+	route::Location						locate(std::filesystem::path const&) const;
+	route::Location						locate(URI const&) const;
+	stdfs::path const&					locate_errpage(http::Status) const noexcept;
+	void								add_httpredirect(std::string from, std::string to, bool permanent);
+	std::vector<Server::Redirection>	getRedirections() const;
 
 	void	process(int);
 
@@ -80,15 +88,16 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string				_name;
-	Poller					_poller;
-	SharedHandle			_acceptor;
-	ClientMap				_clients;
-	ClientMap				_graveyard;
-	route::Route			_route;
-	ErrorPageMap			_error_pages;
-	logging::AccessLogger	_alog;
-	logging::ErrorLogger	_elog;
+	std::string					_name;
+	Poller						_poller;
+	SharedHandle				_acceptor;
+	ClientMap					_clients;
+	ClientMap					_graveyard;
+	route::Route				_route;
+	ErrorPageMap				_error_pages;
+	logging::AccessLogger		_alog;
+	logging::ErrorLogger		_elog;
+	std::vector<Redirection>	_redirections;
 }; // class Server
 
 #endif // SERVER_HPP
