@@ -28,17 +28,15 @@ namespace network {
 
 		if (n == -1)
 			throw (Exception("epoll_wait"));
-		evs.reserve(n);
 		for (int i = 0; i < n; ++i) {
 			auto	is_match = [fd = revs[i].data.fd](SharedHandle const& shandle) {
 				return (*shandle == fd);
 			};
-			auto	shandle = std::find_if(_handles.begin(), _handles.end(), is_match);
+			auto	it = std::find_if(_handles.begin(), _handles.end(), is_match);
 
-			if (shandle == _handles.end()) {
+			if (it == _handles.end())
 				throw (std::runtime_error("polled handle not found in list"));
-			}
-			evs.push_back(Event(*shandle, revs[i]));
+			evs.insert({*it, revs[i]});
 		}
 		return (evs);
 	}

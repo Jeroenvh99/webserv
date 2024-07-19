@@ -2,16 +2,14 @@
 
 void
 Server::process(int poller_timeout) { // DB: this could be made configurable
-	for (auto const& event: _poller.wait<128>(poller_timeout)) {
-		SharedHandle	box = event.handle();
-
-		if (box == _acceptor)
+	for (auto const& [handle, event]: _poller.wait<128>(poller_timeout)) {
+		if (handle == _acceptor)
 			_accept();
 		else {
-			ClientIt	it = _clients.find(box);
+			ClientIt	it = _clients.find(handle);
 
 			if (it == _clients.end()) {
-				it = _graveyard.find(box); // either contained in core or graveyard
+				it = _graveyard.find(handle); // either contained in core or graveyard
 				_process_graveyard(event, it);
 			} else
 				_process_core(event, it);
@@ -21,7 +19,7 @@ Server::process(int poller_timeout) { // DB: this could be made configurable
 
 void
 Server::_process_core(Poller::Event const& event, ClientIt it) {
-	Client		client(*it);
+	Client	client(*it);
 
 	if (event.happened(Poller::EventType::hangup)) {
 		_elog.log(LogLevel::notice, std::string(client.address()),
