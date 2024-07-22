@@ -28,4 +28,6 @@ B alternatief zonder poll kan zijn dat CGI::wait pas waitpid() doet als de laats
 
 post request veroorzaakt oneindige lus -> Worker::wait() controleert of gekoppeld bestand aan EOF zit, voor infile is dat nooit -> dit moet helemaal anders -_-
 
-hoe moet foutinjectie werken? (dat is dus niet hetzelfde als een foutrespons: dit gaat om de situatie dat nadat de response line al verzonden is een fout optreedt)
+hoe moet foutinjectie werken? (dat is dus niet hetzelfde als een foutrespons: dit gaat om de situatie dat nadat de response line al verzonden is een fout optreedt) <== gewoon de verbinding yeeten
+
+segfault in Server::_to_graveyard

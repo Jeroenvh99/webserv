@@ -1,12 +1,27 @@
 #include "Poller.hpp"
 
-using webserv::EventList;
+using webserv::Poller;
+
+// Accessors
+
+Poller::Events::iterator
+Poller::begin() noexcept {
+	return (_events.begin());
+}
+
+Poller::Events::iterator
+Poller::end() noexcept {
+	return (_events.end())
+}
 
 // Modifiers
 
 void
-Poller::clean() noexcept {
-	for (auto it = this->begin(), it != this->end(), ++it)
-		if (it->first.use_count() == 1)
-			erase(it);
+Poller::clear_events() noexcept {
+	_events.clear();
+}
+
+void
+Poller::wait() {
+	_events = network::Poller::wait<max_events>(timeout);
 }

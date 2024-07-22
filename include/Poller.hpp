@@ -4,21 +4,22 @@
 # include "network/Poller.hpp"
 
 namespace webserv {
-	class Poller {
-		
-	}
-
-	class EventList: public std::unordered_map<network::SharedHandle, network::Poller::Event> {
+	class Poller: public network::Poller {
 	public:
-		using super = std::unordered_map<network::SharedHandle, network::Poller::Event>;
-		
-		using super::insert;
-		void	insert(network::SharedHandle const&);
-		size_t	clean() noexcept;
-	};
+		static constexpr size_t			max_events = 1024;
+		static constexpr unsigned int	timeout = 1000;
+
+		Events::iterator	begin() noexcept;
+		Events::iterator	end() noexcept;
+
+		void	clear_events() noexcept;
+		void	wait();
+
+	private:
+		Events	_events;
+	}; // class Poller
 }; // namespace webserv
 
-extern Poller		g_io;
-extern EventList	g_events;
+extern webserv::Poller	g_poller;
 
 #endif // POLLER_HPP

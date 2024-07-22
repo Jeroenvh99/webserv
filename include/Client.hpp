@@ -49,17 +49,10 @@ private:
 	http::Dechunker				_dechunker;
 	http::Request				_request;
 	http::Response				_response;
-	http::Body					_response_body; // delete this: ostate will determine what should be done with worker output
+	http::Body					_response_body;
 	Address						_address;
 	Worker						_worker;
 }; // class ClientImpl
-
-// enum class ClientImpl::State {
-// 	idle,
-// 	parse_request,  // receiving and parsing request line and headers
-// 	parse_response, // receiving request body and/or parsing response headers
-// 	work,          	// receiving request body and/or sending response
-// }; // enum class ClientImpl::State
 
 enum class ClientImpl::InputState {
 	parse_request,	// directing input to request parser
