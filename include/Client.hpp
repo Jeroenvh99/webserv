@@ -16,6 +16,7 @@
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
 
+# include <exception>
 # include <unordered_map>
 # include <utility>
 
@@ -107,6 +108,22 @@ public:
 	job::Status	fetch(webserv::Buffer&);
 	job::Status	fetch(webserv::ChunkBuffer&);
 	job::Status	wait();
+
+	class RedirectionException : std::exception{
+		private:
+			std::string		_message;
+		public:
+			RedirectionException(const http::Status status);
+			const char *what() const throw();
+	};
+
+	class ErrorException : std::exception {
+		private:
+			std::string		_message;
+		public:
+			ErrorException(const http::Status status);
+			const char *what() const throw();
+	};
 
 private:
 	SocketBox	_socket;

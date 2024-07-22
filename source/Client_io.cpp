@@ -60,15 +60,21 @@ job::Status
 Client::respond(job::Job const& job) {
 	int httpredirindex = job::is_httpredirect(job);
 	if (httpredirindex > -1){
-		return (respond({job, httpredirindex}));
+		job::RedirectionJob redirjob(job, httpredirindex);
+		respond(redirjob);
+		if (redirjob.permanent)
+			throw (Client::RedirectionException(http::Status::moved_permanently));
+		else
+			throw (Client::RedirectionException(http::Status::found));
 	}
 	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
 	if (!jstat)						 // job is CGI; must be waited for first
 		_impl._ostate = OutputState::parse_response;
-	else if (http::is_error(*jstat)) // job couldn't be started
-		return (respond({*jstat, job}));
-	else {
+	else if (http::is_error(*jstat)) { // job couldn't be started
+		respond({*jstat, job});
+		throw (Client::ErrorException(*jstat));
+	} else {
 		_impl._response = http::Response(*jstat);
 		// todo: insert more headers based on file type
 		_impl._buffer_empty();
