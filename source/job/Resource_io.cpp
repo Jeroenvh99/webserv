@@ -27,7 +27,7 @@ Resource::open(job::ErrorJob const& job) {
 
 void
 Resource::open(job::RedirectionJob const& job) {
-	_open_builtin(_make_redirection(URI(job.destination)));
+	_open_builtin(_make_redirection(job.destination));
 }
 
 size_t
