@@ -34,7 +34,7 @@ namespace network {
 		Poller&	operator=(Poller&&);
 
 		template<typename T>
-		SharedHandle	add(T&&, EventTypes, Modes);
+		SharedHandle	add(T&&, EventTypes, Modes = {});
 		void			add_shared(SharedHandle const&, EventTypes, Modes);
 		template<size_t MAX_EVENTS>
 		Events			wait(unsigned int) const;

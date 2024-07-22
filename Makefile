@@ -12,6 +12,7 @@ SRC_FILES	:= Environment_build.cpp \
 			Client_io.cpp \
 			ClientImpl.cpp \
 			html.cpp \
+			Poller.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
 			Server_method.cpp \

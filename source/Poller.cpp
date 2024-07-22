@@ -2,6 +2,8 @@
 
 using webserv::Poller;
 
+Poller	g_poller;
+
 // Accessors
 
 Poller::Events::iterator
@@ -11,7 +13,7 @@ Poller::begin() noexcept {
 
 Poller::Events::iterator
 Poller::end() noexcept {
-	return (_events.end())
+	return (_events.end());
 }
 
 // Modifiers

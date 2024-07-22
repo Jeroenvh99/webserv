@@ -1,5 +1,5 @@
 #include "Server.hpp"
-
+#include "Poller.hpp"
 /*
 Server::Server(RouteConfig&& config):
 	_poller(),
@@ -19,8 +19,8 @@ stdfs::path const	Server::no_errpage = "";
 Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_name(name),
-	_poller(),
-	_acceptor(),
+	_acceptor(g_poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
+							{webserv::Poller::EventType::read})),
 	_clients(),
 	_route("/"),
 	_error_pages(),
@@ -28,9 +28,6 @@ Server::Server(std::string const& name, in_port_t port, int backlog_size,
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
 	_elog(elog, ErrorLogger::Level::debug) {
-	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
-							{Poller::EventType::read},
-							{});
 	// if this can be moved to the initializer list, it'd be great
 	_route.allow_method(http::Method::GET)
 		.redirect("./www")

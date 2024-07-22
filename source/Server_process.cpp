@@ -1,15 +1,18 @@
 #include "Server.hpp"
+#include "Poller.hpp"
+
+using webserv::Poller;
 
 void
-Server::process(int poller_timeout) { // DB: this could be made configurable
-	for (auto const& [handle, event]: _poller.wait<128>(poller_timeout)) {
+Server::process() {
+	for (auto const& [handle, event]: g_poller) {
 		if (handle == _acceptor)
 			_accept();
 		else {
 			ClientIt	it = _clients.find(handle);
 
 			if (it == _clients.end()) {
-				it = _graveyard.find(handle); // either contained in core or graveyard
+				it = _graveyard.find(handle);
 				_process_graveyard(event, it);
 			} else
 				_process_core(event, it);

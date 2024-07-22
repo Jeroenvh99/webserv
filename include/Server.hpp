@@ -23,7 +23,6 @@ class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
 	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
-	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 
 	Server() = delete;
@@ -45,12 +44,8 @@ public:
 	route::Location		locate(URI const&) const;
 	stdfs::path const&	locate_errpage(http::Status) const noexcept;
 
-	void	process(int);
+	void	process();
 
-	static constexpr Poller::EventTypes	poller_events = {
-		Poller::EventType::read, Poller::EventType::write
-	};
-	static constexpr Poller::Modes		poller_mode = {};
 	static stdfs::path const			no_errpage;
 
 private:
@@ -60,10 +55,10 @@ private:
 	using IOStatus = webserv::GenericStatus;
 
 	void		_accept();
-	void		_process_core(Poller::Event const&, ClientIt);
+	void		_process_core(network::Poller::Event const&, ClientIt);
 	IOStatus	_process_read(Client&);
 	IOStatus	_process_write(Client&);
-	void		_process_graveyard(Poller::Event const&, ClientIt);
+	void		_process_graveyard(network::Poller::Event const&, ClientIt);
 	void		_to_graveyard(ClientIt);
 	void		_drop(ClientIt);
 
@@ -79,7 +74,6 @@ private:
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
 	std::string				_name;
-	Poller					_poller;
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;

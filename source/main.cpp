@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Environment.hpp"
+#include "Poller.hpp"
 #include "route.hpp"
 
 #include <iostream>
@@ -8,8 +9,7 @@
 #include <stdexcept>
 
 static constexpr in_port_t	dfl_port = 1100;
-static constexpr int		dfl_backlog_size = 5192;
-static constexpr int		dfl_poller_timeout = 1000;
+static constexpr int		backlog_size = 1024;
 
 static size_t	_get_cenvsize(char const* const*);
 
@@ -24,10 +24,12 @@ main(int argc, char** argv, char** envp) {
 	in_port_t const	port = (argc == 1) ? dfl_port : std::stol(argv[1]); // temp
 
 	try {
-		Server	server("localhost", port, dfl_backlog_size);
+		Server	server("localhost", port, backlog_size);
 
-		while (true)
-			server.process(dfl_poller_timeout);
+		while (true) {
+			g_poller.wait();
+			server.process();
+		}
 	} catch (std::exception& e) {
 		return (std::cerr << "webserv: " << e.what() << '\n', 1);
 	}

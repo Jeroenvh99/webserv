@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Poller.hpp"
 
 // Accessors
 
@@ -52,13 +53,17 @@ Server::locate_errpage(http::Status status) const noexcept {
 
 void
 Server::_accept() {
+	using EventType = webserv::Poller::EventType;
+
 	Client::Address	address;
 	Client::Socket	socket = acceptor().accept(address);
 
 	_elog.log(LogLevel::notice,
 		"Established connection with peer at ", std::string(address), ".");
-	Client::SocketBox	box = _poller.add(std::move(socket), poller_events, poller_mode);
-	_clients.insert(std::make_pair(box, ClientImpl(address)));
+	_clients.insert({
+		g_poller.add(std::move(socket), {EventType::read, EventType::write, EventType::hangup}),
+		ClientImpl(address)
+	});
 }
 
 void
@@ -66,6 +71,6 @@ Server::_drop(ClientMap::iterator it) {
 	_elog.log(LogLevel::notice,
 		"Terminated connection with peer at ",
 		std::string(Client(*it).address()), ".");
-	_poller.remove(it->first);
+	g_poller.remove(it->first);
 	_graveyard.erase(it);
 }
