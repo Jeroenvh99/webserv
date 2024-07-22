@@ -1,13 +1,23 @@
 #include "job/CGI.hpp"
+#include "Poller.hpp"
 
 using job::CGI;
+using EventType = webserv::Poller::EventType;
 
-size_t
+std::optional<size_t>
 CGI::read(webserv::Buffer& buf) const {
-	return (_socket.read(buf));
+	auto	eventit = std::find(g_poller.begin(), g_poller.end(), _socket);
+
+	if (eventit == g_poller.end() || !eventit->happened(EventType::read))
+		return (std::nullopt);
+	return (_socket->read(buf));
 }
 
-size_t
+std::optional<size_t>
 CGI::write(webserv::Buffer const& buf) const {
-	return (_socket.write(buf));
+	auto	eventit = std::find(g_poller.begin(), g_poller.end(), _socket);
+
+	if (eventit == g_poller.end() || !eventit->happened(EventType::write))
+		return (std::nullopt);
+	return (_socket->write(buf));
 }

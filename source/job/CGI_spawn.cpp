@@ -1,5 +1,6 @@
 #include "job/CGI.hpp"
 #include "Environment.hpp"
+#include "Poller.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -30,7 +31,7 @@ CGI::wait() {
 
 	int wstat;
 
-	switch (waitpid(_pid, &wstat, WNOHANG)) {
+	switch (::waitpid(_pid, &wstat, WNOHANG)) {
 	case -1:
 		throw (WaitException());
 	case 0:
@@ -49,6 +50,8 @@ CGI::wait() {
 
 void
 CGI::_fork(Job const& job) {
+	using EventType = webserv::Poller::EventType;
+
 	network::SocketPair<Socket>	pair;
 
 	_pid = ::fork();
@@ -61,7 +64,7 @@ CGI::_fork(Job const& job) {
 		_exec(job);
 		break;
 	default:
-		_socket = std::move(pair.first);
+		_socket = g_poller.add(std::move(pair.first), {EventType::read, EventType::write});
 		break;
 	}
 }
@@ -72,7 +75,6 @@ CGI::_redirect_io(Socket& socket) {
 
 	_dup2(fd, STDIN_FILENO);
 	_dup2(fd, STDOUT_FILENO);
-	_dup2(fd, STDERR_FILENO);
 	::close(fd);
 }
 

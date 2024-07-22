@@ -6,6 +6,7 @@
 #include "network/StreamSocket.hpp"
 
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 
 namespace job {
@@ -19,10 +20,10 @@ namespace job {
 		CGI(Job const&);
 		~CGI();
 
-		size_t	write(webserv::Buffer const&) const;
-		size_t	read(webserv::Buffer&) const;
-		Status	wait();
-		void	kill() noexcept;
+		std::optional<size_t>	write(webserv::Buffer const&) const;
+		std::optional<size_t>	read(webserv::Buffer&) const;
+		Status					wait();
+		void					kill() noexcept;
 
 	private:
 		using Socket = network::StreamSocket<network::Domain::local>;
@@ -33,8 +34,8 @@ namespace job {
 
 		static constexpr pid_t	_no_child = 0;
 
-		pid_t	_pid;
-		Socket	_socket;
+		pid_t					_pid;
+		network::SharedHandle	_socket;
 	}; // class CGI
 
 	class CGI::Exception: public std::exception {
