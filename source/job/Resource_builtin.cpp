@@ -15,7 +15,12 @@ Resource::_make_error_page(http::Status status) {
 
 std::string
 Resource::_make_redirection(URI const& to) {
-	return (std::string("Location: ") + to.path().string() +"\r\n\r\n");
+	std::string dest = to.path().string();
+	if (to.query() != "")
+		dest += "?" + to.query();
+	if (to.fragment() != "")
+		dest += "#" + to.fragment();
+	return (std::string("Location: ") + dest +"\r\n\r\n");
 }
 
 std::string
