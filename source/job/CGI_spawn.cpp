@@ -16,33 +16,33 @@ static void			_dup2(int, int);
 
 // Public methods
 
-void
+CGI::ProcessStatus
 CGI::kill() noexcept {
 	if (_pid == _no_child)
 		return;
 	::kill(_pid, SIGKILL);
-	_pid = _no_child;
+	return (wait());
 }
 
-job::Status
+CGI::ProcessStatus
 CGI::wait() {
 	if (_pid == _no_child)
-		return (Status::success);
+		return (ProcessStatus::success);
 
 	int wstat;
 
 	switch (::waitpid(_pid, &wstat, WNOHANG)) {
 	case -1:
-		throw (WaitException());
+		throw (WaitException()); // whenever this happens...
 	case 0:
-		return (Status::pending);
+		return (ProcessStatus::busy);
 	default:
 		_pid = _no_child;
 		if (WIFSIGNALED(wstat))
-			return (Status::aborted);
+			return (ProcessStatus::aborted);
 		if (WEXITSTATUS(wstat) != EXIT_SUCCESS)
-			return (Status::failure);
-		return (Status::success);
+			return (ProcessStatus::failure);
+		return (ProcessStatus::success);
 	}
 }
 

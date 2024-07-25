@@ -10,10 +10,16 @@
 # include "http/Response.hpp"
 
 # include <iostream>
+# include <optional>
+# include <time.h>
 
 class Worker {
 public:
 	enum class State;
+	enum class InputStatus;
+	enum class OutputStatus;
+
+	static constexpr double	timeout_interval = 10.0; // s
 
 	Worker();
 	~Worker();
@@ -25,13 +31,17 @@ public:
 	std::optional<http::Status>	start(job::Job const&);
 	void						start(job::ErrorJob const&);
 	void						stop() noexcept;
-	job::Status					wait();
 
-	size_t	read(webserv::Buffer&);
-	size_t	write(webserv::Buffer const&);
+	OutputStatus	fetch(webserv::Buffer&);
+	InputStatus		deliver(webserv::Buffer const&);
 
 private:
+	size_t	read(webserv::Buffer&);
+	size_t	write(webserv::Buffer const&);
+	bool	timeout() const noexcept;
+
 	State				_state;
+	time_t				_last_read;
 	union {
 		job::Resource	_resource;
 		job::CGI		_cgi;
@@ -43,5 +53,18 @@ enum class Worker::State {
 	resource,
 	cgi,
 }; // enum class Worker::State
+
+enum class Worker::InputStatus {
+	pending,
+	failure,
+}; // enum class Worker::InputStatus
+
+enum class Worker::OutputStatus {
+	pending,
+	success,
+	failure,
+	aborted,
+	timeout,
+}; // enum class Worker::OutputStatus
 
 #endif // WORKER_HPP

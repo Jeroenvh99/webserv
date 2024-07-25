@@ -49,3 +49,10 @@ Client::Address const&
 Client::address() const noexcept {
 	return (_impl._address);
 }
+
+// Modifiers
+
+bool
+Client::timeout(double interval) const noexcept {
+	return (::difftime(::time(nullptr), _impl._last_read) >= interval);
+}

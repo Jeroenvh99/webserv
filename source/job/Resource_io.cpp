@@ -25,33 +25,36 @@ Resource::open(job::ErrorJob const& job) {
 		_open_builtin(_make_error_page(job.status));
 }
 
+void
+Resource::close() noexcept {
+	close_in();
+	close_out();
+}
+
+void
+Resource::close_in() noexcept {
+	_iss.clear(std::ios::eof);
+	_ifs.close();
+}
+
+void
+Resource::close_out() noexcept {
+	_ofs.close();
+}
+
 size_t
 Resource::write(webserv::Buffer const& buf) {
 	if (_ofs.bad())
-		throw (std::runtime_error("resource not available for writing"));
-	size_t const	bytes = buf.put(_ofs);
-
-	if (bytes == 0) { // assuming that an empty buffer signifies the end of client input
-		_ofs.close();
-		if (!_ifs.is_open())
-			_status = Status::success;
-	}
-	return (bytes);
+		throw (IOException("resource not available for writing"));
+	return (buf.put(_ofs));
 }
 
 size_t
 Resource::read(webserv::Buffer& buf) {
 	if (_iss.eof()) { // read stringstream before filestream
 		if (_ifs.bad())
-			throw (std::runtime_error("resource not available for reading"));
-		size_t const	bytes = buf.get(_ifs);
-
-		if (_ifs.eof()) {
-			_ifs.close();
-			if (!_ofs.is_open())
-				_status = Status::success;
-		}
-		return (bytes);
+			throw (IOException("resource not available for reading"));
+		return (buf.get(_ifs));
 	}
 	return (buf.get(_iss));
 }
@@ -62,18 +65,17 @@ void
 Resource::_open_ifile(stdfs::path const& pt) {
 	_ifs.close();
 	_ifs.open(pt);
-	_status = Status::pending;
 }
 
 void
 Resource::_open_ofile(stdfs::path const& pt) {
 	_ofs.close();
 	_ofs.open(pt);
-	_status = Status::pending;
 }
 
 void
 Resource::_open_builtin(std::string&& str) {
+	if (str.length() > 0)
+		_iss.clear(std::ios::good);
 	_iss.str(str);
-	_status = Status::pending;
 }

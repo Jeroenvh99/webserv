@@ -16,6 +16,7 @@
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
 
+# include <time.h>
 # include <unordered_map>
 # include <utility>
 
@@ -45,13 +46,15 @@ private:
 	OutputState					_ostate;
 	std::stringstream			_buffer;
 	http::parse::RequestParser	_parser;		// union
-	http::parse::HeaderParser	_header_parser; // union
-	http::Dechunker				_dechunker;
+	http::parse::HeaderParser	_header_parser; // "
+	size_t						_body_size;		// union
+	http::Dechunker				_dechunker;		// "
 	http::Request				_request;
 	http::Response				_response;
 	http::Body					_response_body;
 	Address						_address;
 	Worker						_worker;
+	time_t						_last_read;
 }; // class ClientImpl
 
 enum class ClientImpl::InputState {
@@ -77,6 +80,7 @@ public:
 	using SocketBox = network::SharedHandle;
 	using InputState = ClientImpl::InputState;
 	using OutputState = ClientImpl::OutputState;
+	enum class OperationStatus;
 
 	Client(ClientMap::value_type&);
 	Client(SocketBox const&, ClientImpl&);
@@ -90,19 +94,29 @@ public:
 	OutputState				ostate() const noexcept;
 	Worker const&			worker() const noexcept;
 
-	bool		parse_request(webserv::Buffer&);
-	bool		parse_response(webserv::Buffer const&);
-	job::Status	respond(job::Job const&);
-	job::Status	respond(job::ErrorJob const&);
-	job::Status	deliver(webserv::Buffer const&);
-	job::Status	dechunk(webserv::Buffer const&);
-	job::Status	fetch(webserv::Buffer&);
-	job::Status	fetch(webserv::ChunkBuffer&);
-	job::Status	wait();
+	void	respond(job::Job const&);
+	void	respond(job::ErrorJob const&);
+
+	bool			parse_request(webserv::Buffer&);
+	bool			parse_response(webserv::Buffer const&);
+	OperationStatus	dechunk(webserv::Buffer&);
+	OperationStatus	dechunk_and_deliver(webserv::Buffer&);
+	OperationStatus	deliver(webserv::Buffer const&);
+	OperationStatus	fetch(webserv::Buffer&);
+	OperationStatus	fetch(webserv::ChunkBuffer&);
+
+	bool	timeout(double) const noexcept;
 
 private:
 	SocketBox	_socket;
 	ClientImpl&	_impl;
 }; // class Client
+
+enum class Client::OperationStatus {
+	pending,
+	success,
+	failure,
+	timeout,
+}; // enum class Client::OperationStatus
 
 #endif // CLIENT_HPP

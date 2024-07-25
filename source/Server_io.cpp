@@ -41,7 +41,6 @@ Server::_parse_response(Client& client) {
 		if (client.parse_response(buf)) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Response parsing from CGI finished.");
-			
 			return (IOStatus::success);
 		}
 	} catch (http::parse::Exception& e) {
@@ -66,16 +65,18 @@ Server::_deliver(Client& client) {
 		return (IOStatus::failure);
 
 	switch (client.deliver(buf)) {
-	case job::Status::success:
-	case job::Status::pending:
+	case Client::OperationStatus::success:
+	case Client::OperationStatus::pending:
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Delivered ", buf.len(), " bytes.");
 		return (IOStatus::success);
-	default: // aborted, failure
+	case Client::OperationStatus::failure:
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Error delivering resource.");
 		// todo: inject error message into body
 		return (IOStatus::failure);
+	default: // timeout
+		__builtin_unreachable();
 	}
 }
 
@@ -96,19 +97,25 @@ Server::_enchunk_and_send(Client& client) {
 Server::IOStatus
 Server::_fetch(Client& client, webserv::Buffer& buf) {
 	switch (client.fetch(buf)) {
-	case job::Status::success:
+	case Client::OperationStatus::success:
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Fetched ", buf.len(), " bytes. Resource fetched successfully.");
 		return (Server::IOStatus::success);
-	case job::Status::pending:
+	case Client::OperationStatus::pending:
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Fetched ", buf.len(), " bytes.");
 		return (Server::IOStatus::success);
-	default: // aborted, failure
+	case Client::OperationStatus::timeout:
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": Timeout occurred whilst fetching resource.");
+		return (IOStatus::failure);
+	case Client::OperationStatus::failure:
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Error fetching resource.");
 		// todo: inject error message into body
 		return (IOStatus::failure);
+	default:
+		__builtin_unreachable();
 	}
 }
 

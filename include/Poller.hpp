@@ -6,7 +6,7 @@
 namespace webserv {
 	class Poller: public network::Poller {
 	public:
-		static constexpr size_t			max_events = 1024;
+		static constexpr size_t			max_events = 8192;
 		static constexpr unsigned int	timeout = 1000;
 
 		static constexpr EventTypes	events = {
@@ -14,11 +14,12 @@ namespace webserv {
 		};
 		static constexpr Modes		mode = {};
 
-		Events::iterator	begin() noexcept;
-		Events::iterator	end() noexcept;
+		Events::iterator			begin() noexcept;
+		Events::iterator			end() noexcept;
+		Events::value_type const&	event() const;
 
-		void			clear_events() noexcept;
-		void			wait();
+		void	clear_events() noexcept;
+		void	wait();
 
 	private:
 		Events	_events;

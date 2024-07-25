@@ -56,14 +56,14 @@ Client::parse_response(webserv::Buffer const& buf) {
 	return (false);
 }
 
-job::Status
+void
 Client::respond(job::Job const& job) {
 	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
 	if (!jstat)						 // job is CGI; must be waited for first
 		_impl._ostate = OutputState::parse_response;
 	else if (http::is_error(*jstat)) // job couldn't be started
-		return (respond({*jstat, job}));
+		respond({*jstat, job});
 	else {
 		_impl._response = http::Response(*jstat);
 		// todo: insert more headers based on file type
@@ -72,46 +72,55 @@ Client::respond(job::Job const& job) {
 		_impl._buffer << _impl._response;
 		_impl._ostate = OutputState::fetch;
 	}
-	return (wait());
 }
 
-job::Status
+void
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
 	_impl._buffer_empty();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._ostate = OutputState::fetch;
-	return (wait());
 }
 
-job::Status
+Client::OperationStatus
 Client::deliver(webserv::Buffer const& buf) {
-	_impl._worker.write(buf);
-
-	return (wait()); // replace: job status should not depend on the same mechanism that determines end of worker output
+	switch (_impl._worker.deliver(buf)) {
+	case Worker::InputStatus::pending:
+		return ((_impl._body_size == 0)
+			? OperationStatus::success
+			: OperationStatus::pending);
+	default: // failure
+		return (OperationStatus::failure);
+	}
 }
 
-job::Status
-Client::dechunk(webserv::Buffer const&) {
-	return (job::Status::failure); // placeholder
+Client::OperationStatus
+Client::dechunk_and_deliver(webserv::Buffer& buf) {
+	return (dechunk(buf)); // placeholder
 }
 
-job::Status
+Client::OperationStatus
+Client::dechunk(webserv::Buffer&) {
+	return (OperationStatus::failure); // placeholder
+}
+
+Client::OperationStatus
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
 		buf.get(_impl._buffer);
-		return (job::Status::pending);
+		return (OperationStatus::pending);
 	}
-	_impl._worker.read(buf);
-	return (wait());
-}
-
-job::Status
-Client::wait() {
-	job::Status const	stat = _impl._worker.wait();
-
-	if (stat != job::Status::pending)
-		_impl._clear(); // this should only clear output-related variables
-	return (stat);
+	switch (_impl._worker.fetch(buf)) {
+	case Worker::OutputStatus::success:
+		_impl._worker.stop();
+		_impl._ostate = OutputState::closed;
+		return (OperationStatus::success);
+	case Worker::OutputStatus::pending:
+		return (OperationStatus::pending);
+	case Worker::OutputStatus::timeout:
+		return (OperationStatus::timeout);
+	default: // failure, aborted
+		return (OperationStatus::failure);
+	}
 }

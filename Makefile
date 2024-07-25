@@ -35,11 +35,10 @@ SRC_FILES	:= Environment_build.cpp \
 			http/parse/HeaderParser.cpp \
 			http/parse/RequestParser.cpp \
 			job/CGI_ctor.cpp \
-			job/CGI_except.cpp \
 			job/CGI_io.cpp \
 			job/CGI_spawn.cpp \
+			job/except.cpp \
 			job/Job.cpp \
-			job/Resource.cpp \
 			job/Resource_builtin.cpp \
 			job/Resource_delete.cpp \
 			job/Resource_get.cpp \

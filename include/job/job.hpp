@@ -6,17 +6,9 @@
 # include "http/Status.hpp"
 # include "route.hpp"
 
-# include <optional>
+# include <stdexcept>
 
 namespace job {
-	enum class Status {
-		success,
-		failure,
-		aborted,
-		pending,
-		timeout,
-	}; // enum class Status
-
 	struct Job {
 		Job(Client const&, Server const&);
 
@@ -35,6 +27,30 @@ namespace job {
 		http::Status const	status;
 		stdfs::path const&	file;
 	}; // struct ErrorJob
+
+	class BaseResource {
+	public:
+		class Exception;
+		class IOException;
+
+		virtual ~BaseResource() = 0;
+	}; // class BaseResource
+
+	class BaseResource::Exception: public std::exception {
+	public:
+		Exception();
+		Exception(char const*);
+
+		char const*	what() const noexcept;
+
+	private:
+		char const*	_msg;
+	}; // class BaseResource::Exception
+
+	class BaseResource::IOException: public BaseResource::Exception {
+	public:
+		IOException(char const*);
+	}; // class BaseResource::IOException
 }; // namespace job
 
 #endif // JOB_HPP

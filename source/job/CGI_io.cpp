@@ -4,20 +4,29 @@
 using job::CGI;
 using EventType = webserv::Poller::EventType;
 
-std::optional<size_t>
-CGI::read(webserv::Buffer& buf) const {
-	auto	eventit = std::find(g_poller.begin(), g_poller.end(), _socket);
+// what if I/O fails due to the socket descriptor not appearing in the poller list?
 
-	if (eventit == g_poller.end() || !eventit->happened(EventType::read))
-		return (std::nullopt);
-	return (_socket->read(buf));
+CGI::Socket const&
+CGI::socket() const {
+	if (_socket == nullptr)
+		throw (Exception("uninitialized socket"));
+	return (static_cast<CGI::Socket const&>(*_socket));
 }
 
-std::optional<size_t>
-CGI::write(webserv::Buffer const& buf) const {
-	auto	eventit = std::find(g_poller.begin(), g_poller.end(), _socket);
+size_t
+CGI::read(webserv::Buffer& buf) const {
+	auto	eventit = g_poller.event(_socket);
 
-	if (eventit == g_poller.end() || !eventit->happened(EventType::write))
-		return (std::nullopt);
-	return (_socket->write(buf));
+	if (eventit == g_poller.end() || !eventit->second.happened(EventType::read))
+		throw (IOException("socket unavailable for reading"));
+	return (socket().read(buf));
+}
+
+size_t
+CGI::write(webserv::Buffer const& buf) const {
+	auto	eventit = g_poller.event(_socket);
+
+	if (eventit == g_poller.end() || !eventit->second.happened(EventType::write))
+		throw (IOException("socket unavailable for writing"));
+	return (socket().write(buf));
 }

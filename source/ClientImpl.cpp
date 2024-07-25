@@ -4,7 +4,8 @@
 
 ClientImpl::ClientImpl(Address const& address):
 	_istate(InputState::parse_request), _ostate(OutputState::closed),
-	_address(address) {}
+	_address(address),
+	_last_read(::time(nullptr)) {}
 
 // Modifiers
 
