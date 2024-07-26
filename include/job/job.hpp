@@ -33,7 +33,7 @@ namespace job {
 		class Exception;
 		class IOException;
 
-		virtual ~BaseResource() = 0;
+		virtual ~BaseResource() = default;
 	}; // class BaseResource
 
 	class BaseResource::Exception: public std::exception {

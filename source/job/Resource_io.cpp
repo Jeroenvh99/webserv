@@ -33,7 +33,7 @@ Resource::close() noexcept {
 
 void
 Resource::close_in() noexcept {
-	_iss.clear(std::ios::eof);
+	_iss.clear(std::ios::eofbit);
 	_ifs.close();
 }
 
@@ -76,6 +76,6 @@ Resource::_open_ofile(stdfs::path const& pt) {
 void
 Resource::_open_builtin(std::string&& str) {
 	if (str.length() > 0)
-		_iss.clear(std::ios::good);
+		_iss.clear(std::ios::goodbit);
 	_iss.str(str);
 }

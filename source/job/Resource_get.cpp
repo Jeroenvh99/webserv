@@ -15,10 +15,8 @@ http::Status
 Resource::_get_file(stdfs::path const& pt) {
 	_ifs.open(pt);
 
-	if (!_ifs.is_open()) {
-		_status = Status::failure;
+	if (!_ifs.is_open())
 		return (http::Status::not_found);
-	}
 	_iss.clear();
 	_iss.str(_make_headers(pt));
 	return (http::Status::ok);

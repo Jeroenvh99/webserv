@@ -10,7 +10,7 @@ using job::CGI;
 extern int	errno;
 
 BaseResource::Exception::Exception():
-	_msg(::strerror()) {}
+	_msg(::strerror(errno)) {}
 
 BaseResource::Exception::Exception(char const* msg):
 	_msg(msg) {}

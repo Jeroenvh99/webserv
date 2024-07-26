@@ -19,7 +19,7 @@ static void			_dup2(int, int);
 CGI::ProcessStatus
 CGI::kill() noexcept {
 	if (_pid == _no_child)
-		return;
+		return (ProcessStatus::success);
 	::kill(_pid, SIGKILL);
 	return (wait());
 }

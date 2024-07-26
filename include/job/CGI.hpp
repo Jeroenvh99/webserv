@@ -39,19 +39,19 @@ namespace job {
 
 	class CGI::WaitException: public CGI::Exception {
 	public:
-		WaitException();
+		WaitException() = default;
 		WaitException(char const*);
 	}; // class CGI::WaitException
 
 	class CGI::SocketException: public CGI::Exception {
 	public:
-		SocketException();
+		SocketException() = default;
 		SocketException(char const*);
 	}; // class CGI::SocketException
 
 	class CGI::ForkException: public CGI::Exception {
 	public:
-		ForkException();
+		ForkException() = default;
 		ForkException(char const*);
 	}; // class CGI::ForkException
 

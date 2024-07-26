@@ -99,7 +99,7 @@ Server::_fetch(Client& client, webserv::Buffer& buf) {
 	switch (client.fetch(buf)) {
 	case Client::OperationStatus::success:
 		_elog.log(LogLevel::debug, std::string(client.address()),
-			": Fetched ", buf.len(), " bytes. Resource fetched successfully.");
+			": Resource fetched successfully.");
 		return (Server::IOStatus::success);
 	case Client::OperationStatus::pending:
 		_elog.log(LogLevel::debug, std::string(client.address()),
@@ -138,6 +138,8 @@ Server::_recv(Client& client, webserv::Buffer& buf) {
 
 Server::IOStatus
 Server::_send(Client& client, webserv::Buffer const& buf) {
+	if (buf.len() == 0)
+		return (IOStatus::success);
 	try {
 		size_t const	bytes = client.socket().write(buf);
 

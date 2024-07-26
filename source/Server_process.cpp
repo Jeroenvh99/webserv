@@ -26,7 +26,7 @@ Server::_process_core(Poller::Event const& event, ClientIt it) {
 
 	if (event.happened(Poller::EventType::hangup)) {
 		_elog.log(LogLevel::notice, std::string(client.address()),
-			"Connection closed by peer.");
+			": Connection closed by peer.");
 		_to_graveyard(it);
 	}
 	if (event.happened(Poller::EventType::read)
@@ -46,9 +46,10 @@ Server::_process_read(Client& client) {
 		return (_deliver(client));
 	case Client::InputState::dechunk:
 		return (_dechunk(client));
-	default:	// closed
-		return (IOStatus::failure); // ?
+	case Client::InputState::closed:
+		return (IOStatus::failure);
 	}
+	__builtin_unreachable();
 }
 
 Server::IOStatus

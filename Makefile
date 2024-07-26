@@ -65,7 +65,7 @@ SRC_FILES	:= Environment_build.cpp \
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
 CXX			:= c++
-CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g
+CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 EXEC_MAIN	:= source/main.cpp

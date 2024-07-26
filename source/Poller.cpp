@@ -16,6 +16,11 @@ Poller::end() noexcept {
 	return (_events.end());
 }
 
+Poller::Event
+Poller::event(network::SharedHandle const& handle) const {
+	return (_events.at(handle));
+}
+
 // Modifiers
 
 void

@@ -99,7 +99,6 @@ public:
 
 	bool			parse_request(webserv::Buffer&);
 	bool			parse_response(webserv::Buffer const&);
-	OperationStatus	dechunk(webserv::Buffer&);
 	OperationStatus	dechunk_and_deliver(webserv::Buffer&);
 	OperationStatus	deliver(webserv::Buffer const&);
 	OperationStatus	fetch(webserv::Buffer&);

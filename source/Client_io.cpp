@@ -8,7 +8,7 @@ Client::parse_request(webserv::Buffer& buf) {
 
 		switch (body.type()) {
 		case http::Body::Type::none:
-			_impl._istate = InputState::closed;
+			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
 			break;
 		case http::Body::Type::by_length:
 			_impl._istate = InputState::deliver; // and set length indicator
@@ -87,22 +87,35 @@ Client::OperationStatus
 Client::deliver(webserv::Buffer const& buf) {
 	switch (_impl._worker.deliver(buf)) {
 	case Worker::InputStatus::pending:
-		return ((_impl._body_size == 0)
-			? OperationStatus::success
-			: OperationStatus::pending);
+		if (_impl._body_size == 0) {
+			_impl._istate = (_impl._ostate == OutputState::closed)
+				? InputState::parse_request
+				: InputState::closed;
+			return (OperationStatus::success);
+		}
+		return (OperationStatus::pending);
 	default: // failure
 		return (OperationStatus::failure);
 	}
 }
 
 Client::OperationStatus
-Client::dechunk_and_deliver(webserv::Buffer& buf) {
-	return (dechunk(buf)); // placeholder
-}
-
-Client::OperationStatus
-Client::dechunk(webserv::Buffer&) {
-	return (OperationStatus::failure); // placeholder
+Client::dechunk_and_deliver(webserv::Buffer&) {
+	// try {
+	// 	_impl._dechunker.dechunk(buf);
+	// } catch (http)
+	// switch (_impl._worker.deliver(buf)) {
+	// case Worker::InputStatus::pending:
+	// 	if (_impl._dechunker.done()) {
+	// 		_impl._istate = (_impl._ostate == OutputState::closed)
+	// 			? InputState::parse_request
+	// 			: InputState::closed;
+	// 		return (OperationStatus::success);
+	// 	}
+	// 	return (OperationStatus::pending);
+	// default: // failure
+		return (OperationStatus::failure);
+	// }
 }
 
 Client::OperationStatus
@@ -114,6 +127,8 @@ Client::fetch(webserv::Buffer& buf) {
 	switch (_impl._worker.fetch(buf)) {
 	case Worker::OutputStatus::success:
 		_impl._worker.stop();
+		if (_impl._istate == InputState::closed) // reopen socket for reading
+			_impl._istate = InputState::parse_request;
 		_impl._ostate = OutputState::closed;
 		return (OperationStatus::success);
 	case Worker::OutputStatus::pending:
