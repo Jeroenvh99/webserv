@@ -2,21 +2,22 @@
 # define CLIENT_HPP
 
 # include "webserv.hpp"
+
 # include "Buffer.hpp"
-# include "Worker.hpp"
-# include "job/job.hpp"
 # include "http/Body.hpp"
 # include "http/chunk.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
 # include "http/parse.hpp"
+# include "job/job.hpp"
+# include "time.hpp"
 # include "route.hpp"
+# include "Worker.hpp"
 
 # include "network/StreamSocket.hpp"
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
 
-# include <time.h>
 # include <unordered_map>
 # include <utility>
 
@@ -54,7 +55,7 @@ private:
 	http::Body					_response_body;
 	Address						_address;
 	Worker						_worker;
-	time_t						_last_read;
+	webserv::Time				_last_read;
 }; // class ClientImpl
 
 enum class ClientImpl::InputState {

@@ -88,9 +88,10 @@ Client::deliver(webserv::Buffer const& buf) {
 	switch (_impl._worker.deliver(buf)) {
 	case Worker::InputStatus::pending:
 		if (_impl._body_size == 0) {
-			_impl._istate = (_impl._ostate == OutputState::closed)
-				? InputState::parse_request
-				: InputState::closed;
+			if (_impl._ostate == OutputState::closed)
+				_impl._clear();
+			else
+				_impl._istate = InputState::closed;
 			return (OperationStatus::success);
 		}
 		return (OperationStatus::pending);
@@ -126,10 +127,9 @@ Client::fetch(webserv::Buffer& buf) {
 	}
 	switch (_impl._worker.fetch(buf)) {
 	case Worker::OutputStatus::success:
-		_impl._worker.stop();
-		if (_impl._istate == InputState::closed) // reopen socket for reading
-			_impl._istate = InputState::parse_request;
 		_impl._ostate = OutputState::closed;
+		if (_impl._istate == InputState::closed)
+			_impl._clear();
 		return (OperationStatus::success);
 	case Worker::OutputStatus::pending:
 		return (OperationStatus::pending);

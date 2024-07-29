@@ -60,7 +60,7 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 			}
 			return (stop(), OutputStatus::success);
 		}
-		_last_read = ::time(nullptr);
+		_last_read = webserv::Time();
 		return (OutputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
 		if (timeout())
@@ -110,5 +110,5 @@ Worker::read(webserv::Buffer& wsbuf) {
 
 bool
 Worker::timeout() const noexcept {
-	return (::difftime(::time(nullptr), _last_read) >= timeout_interval);
+	return (::difftime(webserv::Time(), _last_read) >= timeout_interval);
 }

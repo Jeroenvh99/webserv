@@ -2,16 +2,17 @@
 # define WORKER_HPP
 
 # include "webserv.hpp"
+
 # include "Buffer.hpp"
-# include "job/Resource.hpp"
-# include "job/CGI.hpp"
 # include "Environment.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
+# include "job/Resource.hpp"
+# include "job/CGI.hpp"
+# include "time.hpp"
 
 # include <iostream>
 # include <optional>
-# include <time.h>
 
 class Worker {
 public:
@@ -41,7 +42,7 @@ private:
 	bool	timeout() const noexcept;
 
 	State				_state;
-	time_t				_last_read;
+	webserv::Time		_last_read;
 	union {
 		job::Resource	_resource;
 		job::CGI		_cgi;

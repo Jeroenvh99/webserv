@@ -35,6 +35,8 @@ Server::_parse_response(Client& client) {
 
 	if (_fetch(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	if (buf.len() == 0)
+		return (IOStatus::success);
 	_elog.log(LogLevel::debug, std::string(client.address()),
 		": Directing ", buf.len(), " bytes to response parser.");
 	try {
@@ -63,7 +65,6 @@ Server::_deliver(Client& client) {
 
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
-
 	switch (client.deliver(buf)) {
 	case Client::OperationStatus::success:
 	case Client::OperationStatus::pending:
@@ -102,8 +103,9 @@ Server::_fetch(Client& client, webserv::Buffer& buf) {
 			": Resource fetched successfully.");
 		return (Server::IOStatus::success);
 	case Client::OperationStatus::pending:
-		_elog.log(LogLevel::debug, std::string(client.address()),
-			": Fetched ", buf.len(), " bytes.");
+		if (buf.len() > 0)
+			_elog.log(LogLevel::debug, std::string(client.address()),
+				": Fetched ", buf.len(), " bytes.");
 		return (Server::IOStatus::success);
 	case Client::OperationStatus::timeout:
 		_elog.log(LogLevel::error, std::string(client.address()),
@@ -112,7 +114,7 @@ Server::_fetch(Client& client, webserv::Buffer& buf) {
 	case Client::OperationStatus::failure:
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Error fetching resource.");
-		// todo: inject error message into body
+		// inject error message into body?
 		return (IOStatus::failure);
 	default:
 		__builtin_unreachable();

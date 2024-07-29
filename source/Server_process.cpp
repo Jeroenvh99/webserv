@@ -11,8 +11,10 @@ Server::process() {
 		else {
 			ClientIt	it = _clients.find(handle);
 
-			if (it == _clients.end()) {
+			if (it == _clients.end()) {			// not an active client
 				it = _graveyard.find(handle);
+				if (it == _graveyard.end())		// CGI or belongs to another server
+					continue;
 				_process_graveyard(event, it);
 			} else
 				_process_core(event, it);
@@ -29,10 +31,10 @@ Server::_process_core(Poller::Event const& event, ClientIt it) {
 			": Connection closed by peer.");
 		_to_graveyard(it);
 	}
-	if (event.happened(Poller::EventType::read)
+	else if (event.happened(Poller::EventType::read)
 		&& _process_read(client) == IOStatus::failure)
 		_to_graveyard(it);
-	if (event.happened(Poller::EventType::write)
+	else if (event.happened(Poller::EventType::write)
 		&& _process_write(client) == IOStatus::failure)
 		_to_graveyard(it);
 }

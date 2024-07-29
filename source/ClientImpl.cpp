@@ -4,20 +4,19 @@
 
 ClientImpl::ClientImpl(Address const& address):
 	_istate(InputState::parse_request), _ostate(OutputState::closed),
-	_address(address),
-	_last_read(::time(nullptr)) {}
+	_address(address) {}
 
 // Modifiers
 
 void
 ClientImpl::_clear() noexcept {
 	_istate = InputState::parse_request;
+	_ostate = OutputState::closed;
 	_buffer_empty();
 	_parser.clear();
 	_request.clear();
 	_response.clear();
 	_response_body = {http::Body::Type::none};
-	_ostate = OutputState::closed;
 	_worker.stop();
 }
 
