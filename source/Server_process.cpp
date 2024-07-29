@@ -11,9 +11,9 @@ Server::process() {
 		else {
 			ClientIt	it = _clients.find(handle);
 
-			if (it == _clients.end()) {			// not an active client
+			if (it == _clients.end()) {		// not an active client
 				it = _graveyard.find(handle);
-				if (it == _graveyard.end())		// CGI or belongs to another server
+				if (it == _graveyard.end())	// CGI or belongs to another server
 					continue;
 				_process_graveyard(event, it);
 			} else

@@ -4,7 +4,8 @@
 using job::CGI;
 using EventType = webserv::Poller::EventType;
 
-// what if I/O fails due to the socket descriptor not appearing in the poller list?
+// Note: if I/O fails due to the CGI socket not appearing in the poller list,
+// an exception will still be thrown
 
 CGI::Socket const&
 CGI::socket() const {
@@ -20,7 +21,7 @@ CGI::read(webserv::Buffer& buf) const {
 			throw (IOException("socket unavailable for reading"));
 		return (socket().read(buf));
 	} catch (std::out_of_range&) {
-		throw (IOException("socket unavailable for reading"));
+		throw (IOException("socket unavailable"));
 	}
 }
 
@@ -31,6 +32,6 @@ CGI::write(webserv::Buffer const& buf) const {
 			throw (IOException("socket unavailable for writing"));
 		return (socket().write(buf));
 	} catch (std::out_of_range&) {
-		throw (IOException("socket unavailable for writing"));
+		throw (IOException("socket unavailable"));
 	}
 }

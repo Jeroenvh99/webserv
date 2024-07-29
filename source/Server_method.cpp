@@ -61,8 +61,9 @@ Server::_accept() {
 	_elog.log(LogLevel::notice,
 		"Established connection with peer at ", std::string(address), ".");
 	_clients.insert({
-		g_poller.add(std::move(socket), {EventType::read, EventType::write, EventType::hangup}),
-		ClientImpl(address)
+		g_poller.add(std::move(socket),
+			{ EventType::read, EventType::write, EventType::hangup }),
+			ClientImpl(address)
 	});
 }
 

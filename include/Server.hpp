@@ -46,7 +46,7 @@ public:
 
 	void	process();
 
-	static stdfs::path const			no_errpage;
+	static stdfs::path const	no_errpage;
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
@@ -73,7 +73,7 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string				_name;
+	std::string				_hostname;
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;
