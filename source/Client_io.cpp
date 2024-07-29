@@ -8,7 +8,7 @@ Client::parse_request(webserv::Buffer& buf) {
 
 		switch (body.type()) {
 		case http::Body::Type::none:
-			_impl._istate = InputState::closed;
+			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
 			break;
 		case http::Body::Type::by_length:
 			_impl._istate = InputState::deliver; // and set length indicator
@@ -56,7 +56,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 	return (false);
 }
 
-job::Status
+void
 Client::respond(job::Job const& job) {
 	int httpredirindex = job::is_httpredirect(job);
 	if (httpredirindex > -1){
@@ -82,10 +82,9 @@ Client::respond(job::Job const& job) {
 		_impl._buffer << _impl._response;
 		_impl._ostate = OutputState::fetch;
 	}
-	return (wait());
 }
 
-job::Status
+void
 Client::respond(job::RedirectionJob const& job) {
 	if (job.permanent)
 		_impl._response = http::Response(http::Status::moved_permanently);
@@ -96,48 +95,71 @@ Client::respond(job::RedirectionJob const& job) {
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._ostate = OutputState::fetch;
-	return (wait());
 }
 
-job::Status
+void
 Client::respond(job::ErrorJob const& job) {
 	_impl._response = http::Response(job.status);
-	// todo: insert more headers based on file type
 	_impl._buffer_empty();
 	_impl._buffer.clear();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._ostate = OutputState::fetch;
-	return (wait());
 }
 
-job::Status
+Client::OperationStatus
 Client::deliver(webserv::Buffer const& buf) {
-	_impl._worker.write(buf);
-
-	return (wait()); // replace: job status should not depend on the same mechanism that determines end of worker output
+	switch (_impl._worker.deliver(buf)) {
+	case Worker::InputStatus::pending:
+		if (_impl._body_size == 0) {
+			if (_impl._ostate == OutputState::closed)
+				_impl._clear();
+			else
+				_impl._istate = InputState::closed;
+			return (OperationStatus::success);
+		}
+		return (OperationStatus::pending);
+	default: // failure
+		return (OperationStatus::failure);
+	}
 }
 
-job::Status
-Client::dechunk(webserv::Buffer const&) {
-	return (job::Status::failure); // placeholder
+Client::OperationStatus
+Client::dechunk_and_deliver(webserv::Buffer&) {
+	// try {
+	// 	_impl._dechunker.dechunk(buf);
+	// } catch (http)
+	// switch (_impl._worker.deliver(buf)) {
+	// case Worker::InputStatus::pending:
+	// 	if (_impl._dechunker.done()) {
+	// 		_impl._istate = (_impl._ostate == OutputState::closed)
+	// 			? InputState::parse_request
+	// 			: InputState::closed;
+	// 		return (OperationStatus::success);
+	// 	}
+	// 	return (OperationStatus::pending);
+	// default: // failure
+		return (OperationStatus::failure);
+	// }
 }
 
-job::Status
+Client::OperationStatus
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
 		buf.get(_impl._buffer);
-		return (job::Status::pending);
+		return (OperationStatus::pending);
 	}
-	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed
-	return (wait());
-}
-
-job::Status
-Client::wait() {
-	job::Status const	stat = _impl._worker.wait();
-
-	if (stat != job::Status::pending)
-		_impl._clear(); // this should only clear output-related variables
-	return (stat);
+	switch (_impl._worker.fetch(buf)) {
+	case Worker::OutputStatus::success:
+		_impl._ostate = OutputState::closed;
+		if (_impl._istate == InputState::closed)
+			_impl._clear();
+		return (OperationStatus::success);
+	case Worker::OutputStatus::pending:
+		return (OperationStatus::pending);
+	case Worker::OutputStatus::timeout:
+		return (OperationStatus::timeout);
+	default: // failure, aborted
+		return (OperationStatus::failure);
+	}
 }

@@ -8,8 +8,8 @@
 # include <cstddef>
 # include <cstdint>
 # include <initializer_list>
+# include <unordered_map>
 # include <unordered_set>
-# include <vector>
 
 extern "C" {
 # include <sys/epoll.h>
@@ -24,7 +24,7 @@ namespace network {
 		enum class Mode: uint32_t;
 		using EventTypes = std::initializer_list<EventType>;
 		using Modes = std::initializer_list<Mode>;
-		using Events = std::vector<Event>;
+		using Events = std::unordered_map<SharedHandle, Event>;
 
 		Poller();
 		~Poller() = default;
@@ -34,7 +34,7 @@ namespace network {
 		Poller&	operator=(Poller&&);
 
 		template<typename T>
-		SharedHandle	add(T&&, EventTypes, Modes);
+		SharedHandle	add(T&&, EventTypes, Modes = {});
 		void			add_shared(SharedHandle const&, EventTypes, Modes);
 		template<size_t MAX_EVENTS>
 		Events			wait(unsigned int) const;
@@ -43,31 +43,23 @@ namespace network {
 		size_t			size() const noexcept;
 
 	private:
-		using Set = std::unordered_set<SharedHandle>;
+		using Handles = std::unordered_set<SharedHandle>;
 
-		Set	_handles;
+		Handles	_handles;
 	}; // class Poller
 
 	class Poller::Event {
 	public:
-		Event(Event&&) = default;
-		~Event() = default;
-
-		bool			happened(EventType) const noexcept;
-		SharedHandle	handle() const noexcept;
+		bool	expire(EventType) noexcept;
+		bool	happened(EventType) const noexcept;
 
 	private:
 		friend class Poller;
 		using Raw = epoll_event;
 
-		Event() = delete;
-		Event(SharedHandle const&, Raw const&);
-		Event(Event const&) = default;
-		Event&	operator=(Event const&) = delete;
-		Event&	operator=(Event&&) = delete;
+		Event(Raw);
 
-		SharedHandle	_handle;
-		Raw				_raw;
+		Raw	_raw;
 	}; // class Event
 
 	class Poller::Exception: public network::Exception {

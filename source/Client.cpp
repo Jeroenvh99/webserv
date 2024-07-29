@@ -50,6 +50,10 @@ Client::address() const noexcept {
 	return (_impl._address);
 }
 
+bool
+Client::timeout(double interval) const noexcept {
+	return (::difftime(webserv::Time(), _impl._last_read) >= interval);
+
 // Exceptions
 
 Client::RedirectionException::RedirectionException(const http::Status status):

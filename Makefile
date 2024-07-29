@@ -12,6 +12,7 @@ SRC_FILES	:= Environment_build.cpp \
 			config/Config.cpp \
 			ClientImpl.cpp \
 			html.cpp \
+			Poller.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
 			Server_method.cpp \
@@ -34,11 +35,10 @@ SRC_FILES	:= Environment_build.cpp \
 			http/parse/HeaderParser.cpp \
 			http/parse/RequestParser.cpp \
 			job/CGI_ctor.cpp \
-			job/CGI_except.cpp \
 			job/CGI_io.cpp \
 			job/CGI_spawn.cpp \
+			job/except.cpp \
 			job/Job.cpp \
-			job/Resource.cpp \
 			job/Resource_builtin.cpp \
 			job/Resource_delete.cpp \
 			job/Resource_get.cpp \
@@ -65,7 +65,7 @@ SRC_FILES	:= Environment_build.cpp \
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
 CXX			:= c++
-CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g
+CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g # -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 EXEC_MAIN	:= source/main.cpp

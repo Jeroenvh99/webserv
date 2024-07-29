@@ -25,7 +25,6 @@ class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
 	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
-	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 
 	struct Redirection {
@@ -55,13 +54,9 @@ public:
 	void								add_httpredirect(std::string from, std::string to, bool permanent);
 	std::vector<Server::Redirection>	getRedirections() const;
 
-	void	process(int);
+	void	process();
 
-	static constexpr Poller::EventTypes	poller_events = {
-		Poller::EventType::read, Poller::EventType::write
-	};
-	static constexpr Poller::Modes		poller_mode = {};
-	static stdfs::path const			no_errpage;
+	static stdfs::path const	no_errpage;
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
@@ -70,10 +65,10 @@ private:
 	using IOStatus = webserv::GenericStatus;
 
 	void		_accept();
-	void		_process_core(Poller::Event const&, ClientIt);
+	void		_process_core(network::Poller::Event const&, ClientIt);
 	IOStatus	_process_read(Client&);
 	IOStatus	_process_write(Client&);
-	void		_process_graveyard(Poller::Event const&, ClientIt);
+	void		_process_graveyard(network::Poller::Event const&, ClientIt);
 	void		_to_graveyard(ClientIt);
 	void		_drop(ClientIt);
 
@@ -88,16 +83,15 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string					_name;
-	Poller						_poller;
-	SharedHandle				_acceptor;
-	ClientMap					_clients;
-	ClientMap					_graveyard;
-	route::Route				_route;
-	ErrorPageMap				_error_pages;
-	logging::AccessLogger		_alog;
-	logging::ErrorLogger		_elog;
-	std::vector<Redirection>	_redirections;
+	std::string				_name;
+	SharedHandle			_acceptor;
+	ClientMap				_clients;
+	ClientMap				_graveyard;
+	route::Route			_route;
+	ErrorPageMap			_error_pages;
+ 	std::vector<Redirection>	_redirections;
+	logging::AccessLogger	_alog;
+	logging::ErrorLogger	_elog;
 }; // class Server
 
 #endif // SERVER_HPP

@@ -43,13 +43,14 @@ Server::_parse_response(Client& client) {
 
 	if (_fetch(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	if (buf.len() == 0)
+		return (IOStatus::success);
 	_elog.log(LogLevel::debug, std::string(client.address()),
 		": Directing ", buf.len(), " bytes to response parser.");
 	try {
 		if (client.parse_response(buf)) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Response parsing from CGI finished.");
-			
 			return (IOStatus::success);
 		}
 	} catch (http::parse::Exception& e) {
@@ -72,18 +73,19 @@ Server::_deliver(Client& client) {
 
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
-
 	switch (client.deliver(buf)) {
-	case job::Status::success:
-	case job::Status::pending:
+	case Client::OperationStatus::success:
+	case Client::OperationStatus::pending:
 		_elog.log(LogLevel::debug, std::string(client.address()),
 			": Delivered ", buf.len(), " bytes.");
 		return (IOStatus::success);
-	default: // aborted, failure
+	case Client::OperationStatus::failure:
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Error delivering resource.");
 		// todo: inject error message into body
 		return (IOStatus::failure);
+	default: // timeout
+		__builtin_unreachable();
 	}
 }
 
@@ -104,19 +106,26 @@ Server::_enchunk_and_send(Client& client) {
 Server::IOStatus
 Server::_fetch(Client& client, webserv::Buffer& buf) {
 	switch (client.fetch(buf)) {
-	case job::Status::success:
+	case Client::OperationStatus::success:
 		_elog.log(LogLevel::debug, std::string(client.address()),
-			": Fetched ", buf.len(), " bytes. Resource fetched successfully.");
+			": Resource fetched successfully.");
 		return (Server::IOStatus::success);
-	case job::Status::pending:
-		_elog.log(LogLevel::debug, std::string(client.address()),
-			": Fetched ", buf.len(), " bytes.");
+	case Client::OperationStatus::pending:
+		if (buf.len() > 0)
+			_elog.log(LogLevel::debug, std::string(client.address()),
+				": Fetched ", buf.len(), " bytes.");
 		return (Server::IOStatus::success);
-	default: // aborted, failure
+	case Client::OperationStatus::timeout:
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": Timeout occurred whilst fetching resource.");
+		return (IOStatus::failure);
+	case Client::OperationStatus::failure:
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Error fetching resource.");
-		// todo: inject error message into body
+		// inject error message into body?
 		return (IOStatus::failure);
+	default:
+		__builtin_unreachable();
 	}
 }
 
@@ -139,6 +148,8 @@ Server::_recv(Client& client, webserv::Buffer& buf) {
 
 Server::IOStatus
 Server::_send(Client& client, webserv::Buffer const& buf) {
+	if (buf.len() == 0)
+		return (IOStatus::success);
 	try {
 		size_t const	bytes = client.socket().write(buf);
 

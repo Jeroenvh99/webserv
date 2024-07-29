@@ -6,18 +6,19 @@
 # include "Buffer.hpp"
 
 # include <fstream>
+# include <optional>
 
 namespace job {
-	class Resource {
+	class Resource: public BaseResource {
 	public:
-		Resource();
-
 		http::Status	open(Job const&);
 		void			open(job::RedirectionJob const& job);
 		void			open(ErrorJob const&);
+		void			close() noexcept;
+		void			close_in() noexcept;
+		void			close_out() noexcept;
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
-		Status			status() const noexcept;
 
 	private:
 		http::Status	_get(route::Location const&);
@@ -36,7 +37,6 @@ namespace job {
 		std::string	_make_redirection(URI const& to);
 		std::string	_make_error_page(http::Status);
 
-		Status				_status;
 		std::istringstream	_iss;
 		std::ifstream		_ifs;
 		std::ofstream		_ofs;

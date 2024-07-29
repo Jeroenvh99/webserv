@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "Config.hpp"
 #include "Environment.hpp"
+#include "Poller.hpp"
 #include "route.hpp"
 
 #include <iostream>
@@ -9,7 +10,6 @@
 #include <stdexcept>
 
 static constexpr int		dfl_backlog_size = 5192;
-static constexpr int		dfl_poller_timeout = 1000;
 
 static size_t	_get_cenvsize(char const* const*);
 
@@ -43,8 +43,9 @@ main(int argc, char** argv, char** envp) {
 			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
+     			g_poller.wait();
 					for (size_t j = 0; j < servers.size(); j++) {
-						servers[j].process(dfl_poller_timeout);
+						servers[j].process();
 					}
 				}
 			}

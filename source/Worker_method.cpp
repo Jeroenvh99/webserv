@@ -1,4 +1,5 @@
 #include "Worker.hpp"
+#include "job/CGI.hpp"
 
 std::optional<http::Status>
 Worker::start(job::Job const& job) {
@@ -49,43 +50,73 @@ Worker::stop() noexcept {
 	}
 }
 
-job::Status
-Worker::wait() {
-	switch (_state) {
-	case State::resource:
-		return (_resource.status());
-	case State::cgi:
-		return (_cgi.wait());
-	default:
-		throw (std::runtime_error("cannot get status from uninitialized resource"));
+Worker::OutputStatus
+Worker::fetch(webserv::Buffer& wsbuf) {
+	using ProcessStatus = job::CGI::ProcessStatus;
+
+	try {
+		if (read(wsbuf) == 0) {
+			if (_state == State::cgi) {
+				switch (_cgi.wait()) {
+				case ProcessStatus::busy: // CGI running with closed stdout
+					return (stop(), OutputStatus::failure);
+				case ProcessStatus::success:
+					return (OutputStatus::success);
+				default: // failure, aborted
+					return (OutputStatus::failure);
+				}
+			}
+			return (stop(), OutputStatus::success);
+		}
+		_last_read = webserv::Time();
+		return (OutputStatus::pending);
+	} catch (job::BaseResource::IOException& e) {
+		if (timeout())
+			return (stop(), OutputStatus::timeout);
+		return (OutputStatus::pending);
+	} catch (job::BaseResource::Exception& e) {
+		std::cerr << e.what() << std::endl;
+		return (stop(), OutputStatus::failure);
 	}
 }
 
-Worker::State
-Worker::state() const noexcept {
-	return (_state);
+Worker::InputStatus
+Worker::deliver(webserv::Buffer const& wsbuf) {
+	try {
+		if (write(wsbuf) != wsbuf.size())
+			throw (job::BaseResource::IOException("incomplete write"));
+		return (InputStatus::pending);
+	} catch (job::BaseResource::IOException& e) {
+		std::cerr << e.what() << std::endl;
+		return (stop(), InputStatus::failure);
+	}
 }
 
 size_t
-Worker::write(webserv::Buffer const& buf) {
+Worker::write(webserv::Buffer const& wsbuf) {
 	switch (_state) {
 	case State::resource:
-		return (_resource.write(buf));
+		return (_resource.write(wsbuf));
 	case State::cgi:
-		return (_cgi.write(buf));
+		return (_cgi.write(wsbuf));
 	default:
 		return (0);
 	}
 }
 
 size_t
-Worker::read(webserv::Buffer& buf) {
+Worker::read(webserv::Buffer& wsbuf) {
 	switch (_state) {
 	case State::resource:
-		return (_resource.read(buf));
+		return (_resource.read(wsbuf));
 	case State::cgi:
-		return (_cgi.read(buf));
+		return (_cgi.read(wsbuf));
 	default:
 		return (0);
 	}
+}
+
+bool
+Worker::timeout() const noexcept {
+	return (::difftime(webserv::Time(), _last_read) >= timeout_interval);
 }
