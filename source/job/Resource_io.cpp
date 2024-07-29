@@ -18,6 +18,7 @@ Resource::open(job::Job const& job) {
 	}
 }
 
+void
 Resource::open(job::RedirectionJob const& job) {
 	_open_builtin(_make_redirection(job.destination));
 }

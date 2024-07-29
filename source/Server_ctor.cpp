@@ -22,7 +22,7 @@ stdfs::path const	Server::no_errpage = "";
 Server::Server(Config::Server config, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
 	_name(config.servername),
-	_acceptor(g_poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
+	_acceptor(g_poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
 							{webserv::Poller::EventType::read})),
 	_clients(),
 	_route("/"),

@@ -53,6 +53,7 @@ Client::address() const noexcept {
 bool
 Client::timeout(double interval) const noexcept {
 	return (::difftime(webserv::Time(), _impl._last_read) >= interval);
+}
 
 // Exceptions
 
