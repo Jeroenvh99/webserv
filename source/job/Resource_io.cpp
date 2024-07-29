@@ -18,6 +18,10 @@ Resource::open(job::Job const& job) {
 	}
 }
 
+Resource::open(job::RedirectionJob const& job) {
+	_open_builtin(_make_redirection(job.destination));
+}
+
 void
 Resource::open(job::ErrorJob const& job) {
 	if (job.file == Server::no_errpage

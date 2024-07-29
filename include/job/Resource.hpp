@@ -12,6 +12,7 @@ namespace job {
 	class Resource: public BaseResource {
 	public:
 		http::Status	open(Job const&);
+		void			open(job::RedirectionJob const& job);
 		void			open(ErrorJob const&);
 		void			close() noexcept;
 		void			close_in() noexcept;
@@ -33,6 +34,7 @@ namespace job {
 
 		std::string	_make_headers(stdfs::path const&);
 		std::string	_make_directory_list(stdfs::path const&);
+		std::string	_make_redirection(URI const& to);
 		std::string	_make_error_page(http::Status);
 
 		std::istringstream	_iss;

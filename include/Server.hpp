@@ -8,11 +8,13 @@
 # include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
 # include "logging.hpp"
+# include "http.hpp"
 # include "http/Status.hpp"
 # include "http/Request.hpp"
 # include "Environment.hpp"
 # include "Client.hpp"
 # include "route.hpp"
+# include "Config.hpp"
 
 # include <filesystem>
 # include <string>
@@ -25,24 +27,32 @@ public:
 	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
 	using SharedHandle = network::SharedHandle;
 
+	struct Redirection {
+		URI		from;
+		URI		to;
+		bool	permanent;
+	};
+
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
-	Server(Server&&);
-	Server(std::string const&, in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(Server&&) = default;
+	Server(Config::Server, int, std::ostream&, std::ostream&);
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&			acceptor() noexcept;
-	Acceptor const&		acceptor() const noexcept;
-	std::string const&	name() const noexcept;
-	in_port_t			port() const noexcept;
-	route::Route const&	route() const noexcept;
+	Acceptor&							acceptor() noexcept;
+	Acceptor const&						acceptor() const noexcept;
+	std::string const&					name() const noexcept;
+	in_port_t							port() const noexcept;
+	route::Route const&					route() const noexcept;
 
-	route::Location		locate(std::filesystem::path const&) const;
-	route::Location		locate(URI const&) const;
-	stdfs::path const&	locate_errpage(http::Status) const noexcept;
+	route::Location						locate(std::filesystem::path const&) const;
+	route::Location						locate(URI const&) const;
+	stdfs::path const&					locate_errpage(http::Status) const noexcept;
+	void								add_httpredirect(std::string from, std::string to, bool permanent);
+	std::vector<Server::Redirection>	getRedirections() const;
 
 	void	process();
 
@@ -73,12 +83,13 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string				_hostname;
+	std::string				_name;
 	SharedHandle			_acceptor;
 	ClientMap				_clients;
 	ClientMap				_graveyard;
 	route::Route			_route;
 	ErrorPageMap			_error_pages;
+ 	std::vector<Redirection>	_redirections;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server

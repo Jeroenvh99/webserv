@@ -49,6 +49,20 @@ Server::locate_errpage(http::Status status) const noexcept {
 	return (it->second);
 }
 
+void
+Server::add_httpredirect(std::string from, std::string to, bool permanent) {
+	Server::Redirection redir;
+	redir.from = URI(from);
+	redir.to = URI(to);
+	redir.permanent = permanent;
+	_redirections.emplace_back(redir);
+}
+
+std::vector<Server::Redirection>
+Server::getRedirections() const {
+	return _redirections;
+}
+
 // Private methods
 
 void

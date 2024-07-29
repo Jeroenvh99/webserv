@@ -1,7 +1,6 @@
 NAME		:= webserv
-
 SRC_DIR		:= ./source/
-SRC_SUBDIRS	:= network/ cgi/ http/ http/parse job/ logging/ route/
+SRC_SUBDIRS	:= network/ cgi/ http/ http/parse job/ logging/ route/ config/
 OBJ_DIR		:= ./object/
 HDR_DIR		:= ./include/
 
@@ -10,6 +9,7 @@ SRC_FILES	:= Environment_build.cpp \
 			Environment_method.cpp \
 			Client.cpp \
 			Client_io.cpp \
+			config/Config.cpp \
 			ClientImpl.cpp \
 			html.cpp \
 			Poller.cpp \

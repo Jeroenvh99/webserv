@@ -15,6 +15,14 @@ Server::_parse_request(Client& client) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
 		}
+	} catch (Client::RedirectionException& e) {
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": Verkeerd verbonden: ", e.what());
+		return (IOStatus::failure);
+	} catch (Client::ErrorException& e) {
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": An error happened: ", e.what());
+		return (IOStatus::failure);
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());

@@ -30,6 +30,7 @@ public:
 	Worker&	operator=(Worker&&);
 
 	std::optional<http::Status>	start(job::Job const&);
+	void						start(job::RedirectionJob const& job);
 	void						start(job::ErrorJob const&);
 	void						stop() noexcept;
 

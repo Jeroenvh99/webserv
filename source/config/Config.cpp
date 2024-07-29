@@ -5,7 +5,16 @@ const char* Config::InvalidSyntaxException::what() const throw()
 	return "configException: syntax error in config file";
 }
 
+const char* Config::InvalidFileException::what() const throw()
+{
+	return "configException: invalid config file";
+}
+
 Config::Config(std::string &filename) {
+	size_t extension = filename.find_last_of(".");
+	if (extension == std::string::npos || filename.substr(extension + 1) != "conf") {
+		throw Config::InvalidFileException();
+	}
 	std::ifstream in(filename);
 	if (!in.is_open()) { 
         throw std::exception();
@@ -28,52 +37,56 @@ Config &Config::operator=(const Config& src) {
 	return *this;
 }
 
-std::string loglevels[8] = {"debug", "info", "notice", "warn", "error", "crit", "alert", "emerg"};
-
-Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
-	ServerLog log = {"", LogLevel::ERROR};
-	std::getline(s, word, ' ');
-	word.erase(word.find_last_not_of(";") + 1);
-	log.filename = word;
-	if (!s.eof()) {
-		std::getline(s, word, ' ');
-		word.erase(word.find_last_not_of(";") + 1);
-		for (int i = 0; i <= 8; i++) {
-			if (word == loglevels[i]) {
-				log.level = static_cast<LogLevel>(i);
-				break;
+void Config::PreParse(std::ifstream &in) {
+	std::string line;
+	std::string res = "";
+	unsigned int openbrackets = 0;
+	while (!in.eof()) {
+		std::getline(in, line);
+		size_t comment = line.find('#');
+		if (comment != std::string::npos) {
+			line.erase(comment);
+		}
+		size_t lastchar = line.find_last_not_of(" \n\r\t");
+		if (line == "" || lastchar == std::string::npos) {
+			continue;
+		}
+		line.erase(lastchar + 1);
+		size_t open = line.find('{');
+		while (open != std::string::npos) {
+			++openbrackets;
+			open = line.find('{', open + 1);
+		}
+		size_t close = line.find('}');
+		while (close != std::string::npos) {
+			--openbrackets;
+			close = line.find('}', close + 1);
+		}
+		for (size_t i = 0; i < line.length(); i++) {
+			if (line[i] == '\t') {
+				line[i] = ' ';
+			}
+			if (i > 0 && line[i - 1] == ' ' && line[i] == ' ') {
+				line.erase(i, 1);
+				--i;
 			}
 		}
-	}
-	return log;
-}
-
-void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::RequestMethod> &allowed) {
-	int allow = 0;
-	if (word.find("allow_") != std::string::npos) {
-		allow = 1;
-	}
-	std::string methods[http::RequestMethod::NONE] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
-	while (1) {
-		std::getline(linestream, word, ' ');
-		for (int i = 0; i < http::RequestMethod::NONE; i++) {
-			if (word.find(methods[i]) != std::string::npos) {
-				if (!allow) {
-					allowed[i] = http::RequestMethod::NONE;
-				}
-			} else if (allow) {
-				allowed[i] = http::RequestMethod::NONE;
-			}
+		if (line.back() != '{' && line.back() != '}' && line.back() != ';') {
+			throw Config::InvalidSyntaxException();
 		}
-		if (word.find(';') != std::string::npos) {
-			return;
-		}
+		res += line + "\n";
 	}
+	if (openbrackets > 0) {
+		throw Config::InvalidSyntaxException();
+	}
+	_config = res;
 }
 
 void Config::Parse() {
 	std::stringstream s(_config);
 	std::string line;
+	_errorlog = {"", logging::ErrorLogger::Level::debug};
+	_accesslog = {"", logging::ErrorLogger::Level::error};
 	while (!s.eof()) {
 		std::getline(s, line);
 		std::string temp;
@@ -87,44 +100,29 @@ void Config::Parse() {
 			ParseServer(s);
 		}
 	}
+	MatchErrorPages();
 }
 
-void Config::ParseLocation(std::string &previousloc, std::string &word, std::stringstream &s, Server &server) {
-	Location loc {previousloc, {}, server.allowedmethods};
-	loc.path += word;
-	while (1) {
-		std::string line;
-		std::getline(s, line);
-		line.erase(0, line.find_first_not_of(' '));
-		if (line.find('}') != std::string::npos) {
-			server.locations.push_back(loc);
-			return;
-		}
-		std::stringstream linestream(line);
-		std::string temp;
-		std::getline(linestream, temp, ' ');
-		if (temp == "location") {
-			std::getline(linestream, temp, ' ');
-			ParseLocation(loc.path, temp, s, server);
-		} else if (temp == "allow_methods" || temp == "deny_methods"){
-			ParseMethods(temp, linestream, loc.allowedmethods);
-		} else {
-			std::string name = temp;
-			while (1) {
-				std::getline(linestream, temp, ' ');
-				std::string value = temp;
-				value.erase(value.find_last_not_of(';') + 1);
-				loc.parameters.insert({name, value});
-				if (temp.back() == ';') {
-					break;
-				}
+Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
+	ServerLog log = {"", logging::ErrorLogger::Level::error};
+	std::getline(s, word, ' ');
+	word.erase(word.find_last_not_of(";") + 1);
+	log.filename = word;
+	if (!s.eof()) {
+		std::getline(s, word, ' ');
+		word.erase(word.find_last_not_of(";") + 1);
+		for (int i = 0; i <= 8; i++) {
+			if (word == logging::ErrorLogger::_levels[i].second) {
+				log.level = logging::ErrorLogger::_levels[i].first;
+				break;
 			}
 		}
 	}
+	return log;
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	Server server = {_errorlog, _accesslog, -1, "", {}, {}, {http::RequestMethod::GET, http::RequestMethod::HEAD, http::RequestMethod::POST, http::RequestMethod::PUT, http::RequestMethod::DELETE, http::RequestMethod::CONNECT, http::RequestMethod::OPTIONS, http::RequestMethod::TRACE}};
+	Server server = {_errorlog, _accesslog, -1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -133,6 +131,9 @@ void Config::ParseServer(std::stringstream &s) {
 		std::stringstream linestream(line);
 		std::getline(linestream, temp, ' ');
 		if (temp == "}") {
+			if (server.port == -1) {
+				server.port = 1100;
+			}
 			_servers.push_back(server);
 			return;
 		}
@@ -155,9 +156,21 @@ void Config::ParseServer(std::stringstream &s) {
 				server.errorpages.insert(std::make_pair(code, temp));
 			}
 		} else if (temp == "location") {
+			std::vector<std::string> locs{""};
+			ParseLocation(locs, linestream, s, server);
+		} else if (temp == "rewrite") {
 			std::getline(linestream, temp, ' ');
-			std::string loc = "";
-			ParseLocation(loc, temp, s, server);
+			Config::Redirection redirect {"", "", false};
+			redirect.from = temp;
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			redirect.to = temp;
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			if (temp == "permanent") {
+				redirect.permanent = true;
+			};
+			server.redirections.emplace_back(redirect);
 		} else if (temp == "allow_methods" || temp == "deny_methods"){
 			ParseMethods(temp, linestream, server.allowedmethods);
 		} else if (temp == "listen") {
@@ -172,49 +185,90 @@ void Config::ParseServer(std::stringstream &s) {
 	}
 }
 
-void Config::PreParse(std::ifstream &in) {
-	std::string line;
-	std::string res = "";
-	unsigned int openbrackets = 0;
-	while (!in.eof()) {
-		std::getline(in, line);
-		int comment = line.find('#');
-		if (comment != std::string::npos) {
-			line.erase(comment);
-		}
-		size_t lastchar = line.find_last_not_of(" \n\r\t");
-		if (line == "" || lastchar == std::string::npos) {
-			continue;
-		}
-		line.erase(lastchar + 1);
-		size_t open = line.find('{');
-		while (open != std::string::npos) {
-			++openbrackets;
-			open = line.find('{', open + 1);
-		}
-		size_t close = line.find('}');
-		while (close != std::string::npos) {
-			--openbrackets;
-			close = line.find('}', close + 1);
-		}
-		for (int i = 0; i < line.length(); i++) {
-			if (line[i] == '\t') {
-				line[i] = ' ';
-			}
-			if (i > 0 && line[i - 1] == ' ' && line[i] == ' ') {
-				line.erase(i, 1);
-				--i;
+void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed) {
+	int allow = 0;
+	if (word.find("allow_") != std::string::npos) {
+		allow = 1;
+	}
+	do {
+		std::getline(linestream, word, ' ');
+		for (size_t i = 0; i < http::methods.size(); i++) {
+			if (word.find(http::methods[i].second) != std::string::npos) {
+				if (!allow) {
+					allowed[i] = http::Method::NONE;
+				}
+			} else if (allow) {
+				allowed[i] = http::Method::NONE;
 			}
 		}
-		if (line.back() != '{' && line.back() != '}' && line.back() != ';') {
-			throw Config::InvalidSyntaxException();
+	} while (word.find(';') == std::string::npos);
+}
+
+void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server) {
+	Location loc {{}, {}, "", "", {}, server.allowedmethods};
+	std::string word;
+	std::getline(startstream, word, ' ');
+	while (word != "{") {
+		for (size_t i = 0; i < previouslocs.size(); i++) {
+			loc.paths.push_back(previouslocs[i] + word);
 		}
-		res += line + "\n";
+		std::getline(startstream, word, ' ');
 	}
-	if (openbrackets > 0) {
-		throw Config::InvalidSyntaxException();
+	while (1) {
+		std::string line;
+		std::getline(s, line);
+		line.erase(0, line.find_first_not_of(' '));
+		if (line.find('}') != std::string::npos) {
+			server.locations.push_back(loc);
+			return;
+		}
+		std::stringstream linestream(line);
+		std::string temp;
+		std::getline(linestream, temp, ' ');
+		if (temp == "location") {
+			ParseLocation(loc.paths, linestream, s, server);
+		} else if (temp == "allow_methods" || temp == "deny_methods"){
+			ParseMethods(temp, linestream, loc.allowedmethods);
+		} else if (temp == "root"){
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			loc.root = temp;
+		} else if (temp == "index"){
+			std::getline(linestream, temp, ' ');
+			temp.erase(temp.find_last_not_of(';') + 1);
+			loc.index = temp;
+		} else if (temp == "allow_cgi") {
+			do {
+				std::getline(linestream, temp, ' ');
+				temp.erase(0, 1);
+				std::string value = temp;
+				value.erase(value.find_last_not_of(';') + 1);
+				loc.allowedcgi.push_back(value);
+			} while (temp.back() != ';');
+		} else {
+			std::string name = temp;
+			do {
+				std::getline(linestream, temp, ' ');
+				std::string value = temp;
+				value.erase(value.find_last_not_of(';') + 1);
+				loc.parameters.insert({name, value});
+			} while (temp.back() != ';');
+		}
 	}
-	_config = res;
+}
+
+void Config::MatchErrorPages() {
+	for (size_t i = 0; i < _servers.size(); i++) {
+		for (auto errorpage : _servers[i].errorpages) {
+			for (Config::Location loc : _servers[i].locations) {
+				for (size_t j = 0; j < loc.paths.size(); j++) {
+					if (loc.paths[j].find(errorpage.second) != std::string::npos) {
+						_servers[i].errorpages.at(errorpage.first) = loc.root + "/" + std::to_string(errorpage.first) + ".html";
+					}
+				}
+			}
+		}
+	}
 }
 
 const Config::ServerLog &Config::getErrorLog() const {
@@ -234,13 +288,3 @@ const std::string &Config::getConfig() const {
 }
 
 Config::~Config() {}
-
-// int main() {
-// 	try {
-// 		std::string file = "/home/jvan-hal/Desktop/webserv/test/test5.conf";
-// 		Config conf(file);
-// 		Server server = conf.getServers()[0];
-// 	} catch (std::exception &e) {
-// 		std::cerr << e.what();
-// 	}
-// }

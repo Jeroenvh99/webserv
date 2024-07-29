@@ -18,6 +18,7 @@
 # include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
 
+# include <exception>
 # include <unordered_map>
 # include <utility>
 
@@ -97,6 +98,7 @@ public:
 
 	void	respond(job::Job const&);
 	void	respond(job::ErrorJob const&);
+  void	respond(job::RedirectionJob const& job);
 
 	bool			parse_request(webserv::Buffer&);
 	bool			parse_response(webserv::Buffer const&);
@@ -106,6 +108,22 @@ public:
 	OperationStatus	fetch(webserv::ChunkBuffer&);
 
 	bool	timeout(double) const noexcept;
+
+	class RedirectionException : std::exception{
+		private:
+			std::string		_message;
+		public:
+			RedirectionException(const http::Status status);
+			const char *what() const throw();
+	};
+
+	class ErrorException : std::exception {
+		private:
+			std::string		_message;
+		public:
+			ErrorException(const http::Status status);
+			const char *what() const throw();
+	};
 
 private:
 	SocketBox	_socket;

@@ -19,6 +19,13 @@ namespace job {
 		route::Location const	location;
 		Environment				environment;
 	}; // struct Job
+	int		is_httpredirect(job::Job const& job);
+
+	struct RedirectionJob {
+		RedirectionJob(job::Job const& todo, int redirindex);
+		URI const	destination;
+		const bool	permanent;
+	};
 
 	struct ErrorJob {
 		ErrorJob(http::Status, Server const&);
