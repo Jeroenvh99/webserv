@@ -8,32 +8,35 @@
 # include <stdexcept>
 
 namespace http {
-	webserv::Buffer	enchunk(webserv::ChunkBuffer const&);
+	webserv::Buffer&	enchunk(webserv::Buffer&, webserv::ChunkBuffer const&);
 
 	class Dechunker {
 	public:
-		using Chunk = std::optional<std::string>;
-		class ChunkException;
+		using Result = std::optional<size_t>;
+		class Exception;
 
 		Dechunker();
 
-		Chunk	dechunk(webserv::Buffer const&);
+		std::ostream&	buffer() noexcept;
+
+		Result	dechunk(webserv::Buffer&);
+		Result	dechunk(webserv::Buffer&, std::istream&);
+		Result	dechunk_single(webserv::Buffer&, std::istream&);
 
 	private:
-		using ChunkSize = std::optional<size_t>;
+		void	get_size(std::istream&);
+		size_t	get_end(std::istream&);
 
-		bool	_get_size();
-
-		ChunkSize			_size;
-		std::stringstream	_buffer;
+		std::optional<size_t>	_chunk_size;
+		size_t					_bytes_dechunked;
+		std::stringstream		_buf;
 	}; // class Dechunker
 
-	class Dechunker::ChunkException: public std::exception {
+	class Dechunker::Exception: public std::exception {
 	public:
-		ChunkException(char const*);
+		Exception(char const*);
 
 		char const*	what() const noexcept;
-
 	private:
 		char const*	_msg;
 	}; // class Dechunker::ChunkException
