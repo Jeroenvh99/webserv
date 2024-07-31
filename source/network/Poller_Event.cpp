@@ -3,6 +3,9 @@
 
 using Event = network::Poller::Event;
 
+Event::Event():
+	_raw({}) {}
+
 Event::Event(Event::Raw raw):
 	_raw(raw) {}
 
