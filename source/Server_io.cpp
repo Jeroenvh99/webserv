@@ -51,7 +51,6 @@ Server::_parse_response(Client& client) {
 		if (client.parse_response(buf)) {
 			_elog.log(LogLevel::debug, client.address(),
 				": Response parsing from CGI finished.");
-			return (IOStatus::success);
 		}
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, client.address(),

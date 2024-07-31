@@ -57,6 +57,7 @@ namespace network {
 		friend class Poller;
 		using Raw = epoll_event;
 
+		Event();
 		Event(Raw);
 
 		Raw	_raw;

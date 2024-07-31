@@ -37,12 +37,14 @@ main(int argc, char** argv, char** envp) {
 			if(serverconfigs[i].errorlog.filename != "")
 				errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
 			std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
-			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));	
-		}
-		while (true) {
-			g_poller.wait();
-			for (size_t i = 0; i < servers.size(); i++) {
-				servers[i].process();
+			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
+			if (i == serverconfigs.size() - 1) {
+				while (true) {
+					g_poller.wait();
+					for (size_t j = 0; j < servers.size(); j++) {
+						servers[j].process();
+					}
+				}
 			}
 		}
 	} catch (std::exception& e) {
