@@ -43,7 +43,7 @@ main(int argc, char** argv, char** envp) {
 			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
-     			g_poller.wait();
+					g_poller.wait();
 					for (size_t j = 0; j < servers.size(); j++) {
 						servers[j].process();
 					}

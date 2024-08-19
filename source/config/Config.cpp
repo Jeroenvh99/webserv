@@ -134,6 +134,11 @@ void Config::ParseServer(std::stringstream &s) {
 			if (server.port == -1) {
 				server.port = 1100;
 			}
+			for (size_t i = 0; i < _servers.size(); i++) {
+				if (server.servername == _servers[i].servername && server.port == _servers[i].port) {
+					throw Config::InvalidSyntaxException();
+				}
+			}
 			_servers.push_back(server);
 			return;
 		}

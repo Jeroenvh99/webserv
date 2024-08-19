@@ -43,22 +43,22 @@ Server::Server(Config::Server config, int backlog_size,
 		}
 	}
 	for (Config::Location loc : config.locations) {
-		for (size_t j = 0; j < loc.paths.size(); j++) {
-			_route.extend(loc.paths[j])
+		for (size_t i = 0; i < loc.paths.size(); i++) {
+			_route.extend(loc.paths[i])
 				.redirect(loc.root)
 				.list_directory();
 			if (!loc.index.empty()) {
 				_route.seek(loc.paths[0]).set_directory_file(loc.index);
 			}
-			for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
-				if (loc.allowedmethods[i] != http::Method::NONE) {
-					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[i]);
+			for (int j = 0; j < static_cast<int>(http::Method::NONE); j++) {
+				if (loc.allowedmethods[j] != http::Method::NONE) {
+					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[j]);
 				} else {
-					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[i]);
+					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[j]);
 				}
 			}
-			for (std::string cgitype : loc.allowedcgi) {
-				_route.seek(loc.paths[j]).allow_cgi(cgitype);
+			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
+				_route.seek(loc.paths[i]).allow_cgi(loc.allowedcgi[j]);
 			}
 		}
 	}
