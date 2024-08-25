@@ -2,7 +2,7 @@ NAME		:= webserv
 SRC_DIR		:= ./source/
 SRC_SUBDIRS	:= network/ cgi/ http/ http/parse job/ logging/ route/ config/
 OBJ_DIR		:= ./object/
-HDR_DIR		:= ./include/
+INCLUDE_DIR	:= ./include/
 
 SRC_FILES	:= Environment_build.cpp \
 			Environment_ctor.cpp \
@@ -12,6 +12,7 @@ SRC_FILES	:= Environment_build.cpp \
 			config/Config.cpp \
 			ClientImpl.cpp \
 			html.cpp \
+			main.cpp \
 			Poller.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
@@ -65,15 +66,17 @@ SRC_FILES	:= Environment_build.cpp \
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
 CXX			:= clang++
-CXXFLAGS	+= -Wall -Wextra -Werror -I$(HDR_DIR) --std=c++20 -g # -fsanitize=address
+CXXFLAGS	:= -Wall -Wextra -Werror -I$(INCLUDE_DIR) --std=c++20
+DEBUG_FLAGS	:= -g -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
-EXEC_MAIN	:= source/main.cpp
-# EXEC_MAIN	:= test/chunkertest.cpp
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re test debug
 
 all: $(NAME)
+
+debug: CXXFLAGS += $(DEBUG_FLAGS)
+debug: $(NAME)
 
 $(NAME): $(addprefix $(OBJ_DIR),$(OBJ_FILES))
 	@$(CXX) $(CXXFLAGS) $(EXEC_MAIN) $^ -o $@
