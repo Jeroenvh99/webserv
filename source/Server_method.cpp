@@ -13,8 +13,39 @@ Server::acceptor() const noexcept {
 	return (static_cast<Acceptor const&>(*_acceptor));
 }
 
+VirtualServer::VirtualServer(Config::Server config) :
+_name(config.servername),
+_route("/") {
+	for (size_t i = 0; i < config.redirections.size(); i++) {
+		add_httpredirect(config.redirections[i].from, config.redirections[i].to, config.redirections[i].permanent);
+	}
+	for (Config::Location loc : config.locations) {
+		for (size_t i = 0; i < loc.paths.size(); i++) {
+			_route.extend(loc.paths[i])
+				.redirect(loc.root)
+				.list_directory();
+			if (!loc.index.empty()) {
+				_route.seek(loc.paths[0]).set_directory_file(loc.index);
+			}
+			for (int j = 0; j < static_cast<int>(http::Method::NONE); j++) {
+				if (loc.allowedmethods[j] != http::Method::NONE) {
+					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[j]);
+				} else {
+					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[j]);
+				}
+			}
+			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
+				_route.seek(loc.paths[i]).allow_cgi(loc.allowedcgi[j]);
+			}
+		}
+	}
+	for (auto& errorpage : config.errorpages) {
+		_error_pages.insert(std::pair<http::Status, std::filesystem::path>(static_cast<http::Status>(errorpage.first), errorpage.second));
+	}
+}
+
 std::string const&
-Server::name() const noexcept {
+VirtualServer::name() const noexcept {
 	return (_name);
 }
 
@@ -26,22 +57,22 @@ Server::port() const noexcept {
 }
 
 route::Route const&
-Server::route() const noexcept {
+VirtualServer::route() const noexcept {
 	return (_route);
 }
 
 route::Location
-Server::locate(std::filesystem::path const& path) const {
+VirtualServer::locate(std::filesystem::path const& path) const {
 	return (_route.follow(path));
 }
 
 route::Location
-Server::locate(URI const& uri) const {
+VirtualServer::locate(URI const& uri) const {
 	return (locate(uri.path()));
 }
 
 stdfs::path const&
-Server::locate_errpage(http::Status status) const noexcept {
+VirtualServer::locate_errpage(http::Status status) const noexcept {
 	auto const	it = _error_pages.find(status);
 
 	if (it == _error_pages.end())
@@ -50,17 +81,32 @@ Server::locate_errpage(http::Status status) const noexcept {
 }
 
 void
-Server::add_httpredirect(std::string from, std::string to, bool permanent) {
-	Server::Redirection redir;
+VirtualServer::add_httpredirect(std::string from, std::string to, bool permanent) {
+	VirtualServer::Redirection redir;
 	redir.from = URI(from);
 	redir.to = URI(to);
 	redir.permanent = permanent;
 	_redirections.emplace_back(redir);
 }
 
-std::vector<Server::Redirection>
-Server::getRedirections() const {
+std::vector<VirtualServer::Redirection>
+VirtualServer::getRedirections() const {
 	return _redirections;
+}
+
+void
+Server::addVirtualServer(Config::Server config) {
+	VirtualServer virtualServer(config);
+	_possibleservers.insert({virtualServer.name(), virtualServer});
+}
+
+VirtualServer const&	Server::searchVirtualServer(std::string name) {
+	for (auto const& possibility :_possibleservers) {
+		if (possibility.first == name) {
+			return (possibility.second);
+		}
+	}
+	return (_possibleservers.begin()->second);
 }
 
 // Private methods

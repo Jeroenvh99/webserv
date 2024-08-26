@@ -25,7 +25,7 @@ Resource::open(job::RedirectionJob const& job) {
 
 void
 Resource::open(job::ErrorJob const& job) {
-	if (job.file == Server::no_errpage
+	if (job.file == VirtualServer::no_errpage
 		|| _get_file(job.file) == http::Status::not_found)
 		_open_builtin(_make_error_page(job.status));
 }

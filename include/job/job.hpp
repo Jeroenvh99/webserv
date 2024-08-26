@@ -10,11 +10,12 @@
 
 namespace job {
 	struct Job {
-		Job(Client const&, Server const&);
+		Job(Client const&, Server const&, VirtualServer const&);
 
 		bool	is_cgi() const noexcept;
 
 		http::Request const&	request;
+		VirtualServer const&	vserver;
 		Server const&			server;
 		route::Location const	location;
 		Environment				environment;
@@ -28,7 +29,7 @@ namespace job {
 	};
 
 	struct ErrorJob {
-		ErrorJob(http::Status, Server const&);
+		ErrorJob(http::Status, VirtualServer const&);
 		ErrorJob(http::Status, Job const&);
 
 		http::Status const	status;

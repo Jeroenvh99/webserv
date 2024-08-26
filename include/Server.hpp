@@ -21,17 +21,35 @@
 # include <unordered_map>
 # include <vector>
 
+class VirtualServer {
+	public:
+		struct Redirection {
+			URI		from;
+			URI		to;
+			bool	permanent;
+		};
+		using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
+		VirtualServer(Config::Server config);
+		std::string const&						name() const noexcept;
+		route::Route const&						route() const noexcept;
+		route::Location							locate(std::filesystem::path const&) const;
+		route::Location							
+			locate(URI const&) const;
+		stdfs::path const&						locate_errpage(http::Status) const noexcept;
+		std::vector<VirtualServer::Redirection>	getRedirections() const;
+		void									add_httpredirect(std::string from, std::string to, bool permanent);
+		static stdfs::path const				no_errpage;
+	private:
+		std::string					_name;
+		route::Route				_route;
+		ErrorPageMap				_error_pages;
+		std::vector<Redirection>	_redirections;
+};
+
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
 	using SharedHandle = network::SharedHandle;
-
-	struct Redirection {
-		URI		from;
-		URI		to;
-		bool	permanent;
-	};
 
 	Server() = delete;
 	~Server() = default;
@@ -42,21 +60,15 @@ public:
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
+	in_port_t							port() const noexcept;
+
 	Acceptor&							acceptor() noexcept;
 	Acceptor const&						acceptor() const noexcept;
-	std::string const&					name() const noexcept;
-	in_port_t							port() const noexcept;
-	route::Route const&					route() const noexcept;
 
-	route::Location						locate(std::filesystem::path const&) const;
-	route::Location						locate(URI const&) const;
-	stdfs::path const&					locate_errpage(http::Status) const noexcept;
-	void								add_httpredirect(std::string from, std::string to, bool permanent);
-	std::vector<Server::Redirection>	getRedirections() const;
+	void								addVirtualServer(Config::Server config);
+	VirtualServer const&				searchVirtualServer(std::string name);
 
 	void	process();
-
-	static stdfs::path const	no_errpage;
 
 private:
 	using LogLevel = logging::ErrorLogger::Level;
@@ -83,13 +95,10 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string				_name;
-	SharedHandle			_acceptor;
-	ClientMap				_clients;
-	ClientMap				_graveyard;
-	route::Route			_route;
-	ErrorPageMap			_error_pages;
- 	std::vector<Redirection>	_redirections;
+	SharedHandle							_acceptor;
+	ClientMap								_clients;
+	ClientMap								_graveyard;
+	std::map<std::string, VirtualServer>	_possibleservers;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server

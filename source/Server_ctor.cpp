@@ -17,53 +17,16 @@ using logging::ErrorLogger;
 using logging::Format;
 using logging::Variable;
 
-stdfs::path const	Server::no_errpage = "";
+stdfs::path const	VirtualServer::no_errpage = "";
 
 Server::Server(Config::Server config, int backlog_size,
 		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
-	_name(config.servername),
 	_acceptor(g_poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
 							{webserv::Poller::EventType::read})),
 	_clients(),
-	_route("/"),
-	_error_pages(),
 	_alog(alog, Format{
 		Variable("["), Variable(Variable::Type::time_local), Variable("]")
 	}),
 	_elog(elog, config.errorlog.level) {
-	for (size_t i = 0; i < config.redirections.size(); i++) {
-		add_httpredirect(config.redirections[i].from, config.redirections[i].to, config.redirections[i].permanent);
-	}
-	_route.redirect("./");
-	for (int i = 0; i < static_cast<int>(http::Method::NONE); i++) {
-		if (config.allowedmethods[i] != http::Method::NONE) {
-			_route.allow_method(config.allowedmethods[i]);
-		} else {
-			_route.disallow_method(config.allowedmethods[i]);
-		}
-	}
-	for (Config::Location loc : config.locations) {
-		for (size_t i = 0; i < loc.paths.size(); i++) {
-			_route.extend(loc.paths[i])
-				.redirect(loc.root)
-				.list_directory();
-			if (!loc.index.empty()) {
-				_route.seek(loc.paths[0]).set_directory_file(loc.index);
-			}
-			for (int j = 0; j < static_cast<int>(http::Method::NONE); j++) {
-				if (loc.allowedmethods[j] != http::Method::NONE) {
-					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[j]);
-				} else {
-					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[j]);
-				}
-			}
-			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
-				_route.seek(loc.paths[i]).allow_cgi(loc.allowedcgi[j]);
-			}
-		}
-	}
-	for (auto& errorpage : config.errorpages) {
-		_error_pages.insert(std::pair<http::Status, std::filesystem::path>(static_cast<http::Status>(errorpage.first), errorpage.second));
-	}
 	acceptor().listen(backlog_size);
 }

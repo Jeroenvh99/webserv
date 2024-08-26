@@ -10,21 +10,22 @@ using job::ErrorJob;
 
 // Basic operations
 
-Job::Job(Client const& client, Server const& serv):
+Job::Job(Client const& client, Server const& serv, VirtualServer const& vserv):
 	request(client.request()),
+	vserver(vserv),
 	server(serv),
-	location(server.locate(client.request().uri())),
-	environment(server, client, location) {}
+	location(vserver.locate(client.request().uri())),
+	environment(server, vserver, client, location) {}
 
 job::RedirectionJob::RedirectionJob(job::Job const& todo, int redirindex):
-	destination(todo.server.getRedirections()[redirindex].to),
-	permanent(todo.server.getRedirections()[redirindex].permanent) {}
+	destination(todo.vserver.getRedirections()[redirindex].to),
+	permanent(todo.vserver.getRedirections()[redirindex].permanent) {}
 
 // Methods
 
 int
 job::is_httpredirect(job::Job const& job) {
-	std::vector<Server::Redirection> redirections = job.server.getRedirections();
+	std::vector<VirtualServer::Redirection> redirections = job.vserver.getRedirections();
 	for (size_t i = 0; i < redirections.size(); i++) {
 		if (job.location.from() == redirections[i].from.path()) {
 			return i;
@@ -42,8 +43,8 @@ Job::is_cgi() const noexcept {
 
 // Basic operations
 
-ErrorJob::ErrorJob(http::Status _status, Server const& server):
-	status(_status), file(server.locate_errpage(_status)) {}
+ErrorJob::ErrorJob(http::Status _status, VirtualServer const& vserver):
+	status(_status), file(vserver.locate_errpage(_status)) {}
 
 ErrorJob::ErrorJob(http::Status _status, Job const& job):
-	ErrorJob(_status, job.server) {}
+	ErrorJob(_status, job.vserver) {}

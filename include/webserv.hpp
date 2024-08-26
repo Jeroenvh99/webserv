@@ -2,6 +2,7 @@
 # define WEBSERV_HPP
 
 class Server;
+class VirtualServer;
 class Client;
 class Environment;
 class URI;
