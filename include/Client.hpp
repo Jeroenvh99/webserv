@@ -98,7 +98,7 @@ public:
 
 	void	respond(job::Job const&);
 	void	respond(job::ErrorJob const&);
-  void	respond(job::RedirectionJob const& job);
+  	void	respond(job::RedirectionJob const& job);
 
 	bool			parse_request(webserv::Buffer&);
 	bool			parse_response(webserv::Buffer const&);
