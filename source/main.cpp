@@ -17,6 +17,7 @@ int
 main(int argc, char** argv, char** envp) {
 	Environment::_parent_env = envp;
 	Environment::_parent_env_size = _get_cenvsize(envp);
+	bool	duplicate = false;
 
 	if (argc > 2)
 		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
@@ -32,21 +33,28 @@ main(int argc, char** argv, char** envp) {
 		std::vector<Server> servers;
 
 		for (size_t i = 0; i < serverconfigs.size(); i++) {
-			std::ofstream accessFile;
-			if(serverconfigs[i].accesslog.filename != "")
-				accessFile.open(serverconfigs[i].accesslog.filename, std::ios::out);
-			std::ostream& access = (serverconfigs[i].accesslog.filename != ""? accessFile : std::cout);
-			std::ofstream errorFile;
-			if(serverconfigs[i].errorlog.filename != "")
-				errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
-			std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
-			Server serv(serverconfigs[i], dfl_backlog_size, access, error);
-			for (size_t j = 0; j < serverconfigs.size(); j++) {
-				if (serverconfigs[j].port == serverconfigs[i].port) {
-					serv.addVirtualServer(serverconfigs[i]);
-				}
+			for (size_t j = 0; j < i; j++) {
+				if (serverconfigs[j].port == serverconfigs[i].port)
+					duplicate = true;
 			}
-			servers.emplace_back(std::move(serv));
+			if (duplicate == false) {
+				std::ofstream accessFile;
+				if(serverconfigs[i].accesslog.filename != "")
+					accessFile.open(serverconfigs[i].accesslog.filename, std::ios::out);
+				std::ostream& access = (serverconfigs[i].accesslog.filename != ""? accessFile : std::cout);
+				std::ofstream errorFile;
+				if(serverconfigs[i].errorlog.filename != "")
+					errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
+				std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
+				Server serv(serverconfigs[i], dfl_backlog_size, access, error);
+				for (size_t j = 0; j < serverconfigs.size(); j++) {
+					if (serverconfigs[j].port == serverconfigs[i].port) {
+						serv.addVirtualServer(serverconfigs[j]);
+					}
+				}
+				servers.emplace_back(std::move(serv));
+			}
+			duplicate = false;
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
 					g_poller.wait();

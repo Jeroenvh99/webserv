@@ -17,15 +17,23 @@ namespace network {
 
 	template<Domain DOMAIN, Type TYPE>
 	Socket<DOMAIN, TYPE>::Socket(Raw raw):
-		Handle(raw) {}
+		Handle(raw) {
+			int val = 1;
+			setsockopt(this->raw(), SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
+		}
 
 	template<Domain DOMAIN, Type TYPE>
 	Socket<DOMAIN, TYPE>::Socket(OptionList opts, char const* prot):
-		Handle(_new_handle(opts, prot)) {}
+		Handle(_new_handle(opts, prot)) {
+			int val = 1;
+			setsockopt(this->raw(), SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
+		}
 	
 	template<Domain DOMAIN, Type TYPE>
 	Socket<DOMAIN, TYPE>::Socket(Address const& addr, OptionList opts, char const* prot):
 		Handle(_new_handle(opts, prot)) {
+		int val = 1;
+		setsockopt(this->raw(), SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
 		bind(addr);
 	}
 
