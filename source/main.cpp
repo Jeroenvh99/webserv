@@ -37,7 +37,13 @@ main(int argc, char** argv, char** envp) {
 			if(serverconfigs[i].errorlog.filename != "")
 				errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
 			std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
-			servers.emplace_back(Server(serverconfigs[i], dfl_backlog_size, access, error));
+			Server serv(serverconfigs[i], dfl_backlog_size, access, error);
+			for (size_t j = 0; j < serverconfigs.size(); j++) {
+				if (serverconfigs[j].port == serverconfigs[i].port) {
+					serv.addVirtualServer(serverconfigs[i]);
+				}
+			}
+			servers.emplace_back(std::move(serv));
 			if (i == serverconfigs.size() - 1) {
 				while (true) {
 					g_poller.wait();
