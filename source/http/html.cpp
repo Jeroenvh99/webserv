@@ -1,4 +1,4 @@
-#include "html.hpp"
+#include "http/html.hpp"
 
 #include <sstream>
 
@@ -17,7 +17,7 @@ html::error_page(http::Status status) {
 }
 
 std::string
-html::directory_list(stdfs::path const& path) {
+html::directory_list(std::filesystem::path const& path) {
 	std::ostringstream	oss;
 
 	oss << "!DOCTYPE html><html><meta charset=\"utf-8\" /><title>"

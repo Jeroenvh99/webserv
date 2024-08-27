@@ -1,6 +1,5 @@
 #include "job/Resource.hpp"
 #include "Server.hpp"
-#include "html.hpp"
 
 using job::Resource;
 

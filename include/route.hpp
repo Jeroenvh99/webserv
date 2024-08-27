@@ -1,9 +1,8 @@
 #ifndef ROUTE_HPP
 # define ROUTE_HPP
 
-# include "http.hpp"
-# include "http/Status.hpp"
-# include "utils.hpp"
+# include "http/http.hpp"
+# include "utils/utils.hpp"
 
 # include <forward_list>
 # include <filesystem>

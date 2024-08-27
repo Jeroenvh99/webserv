@@ -5,7 +5,6 @@
 
 # include <optional>
 # include <sstream>
-# include <stdexcept>
 
 namespace http {
 	webserv::Buffer	enchunk(webserv::ChunkBuffer const&);
