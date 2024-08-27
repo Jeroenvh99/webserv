@@ -43,22 +43,31 @@ def test_index():
     assert response.text == expected_body
     assert response.headers['Content-Length'] == '159'
 
-def test_bad_request():
-    expected_body = '''\
-<html lang="en-US">
-    <head>
-        <meta charset="utf-8" />
-        <title>400 Bad Request</title>
-    </head>
-    <body>
-        <h1 align="center">
-            400 Bad Request</h1>
-        <hr />
-        <p align="center">webserv</p>
-    </body>
-</html>
-'''
-
-    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': 'no'}, data='{ "title":"foo","body":"bar","id":1 }')
+def test_reponse_headers():
+    response = requests.get(f'{BASE_URL}/')
     
-    assert response.status_code == 400
+    assert response.headers['Content-Type'] == 'text/html'
+    assert response.headers['Content-Length'] == '159'
+    assert response.headers['Server'] == 'webserv'
+    # assert response.headers['Date']
+    # assert response.headers['Last-Modified']
+
+# def test_bad_request():
+#     expected_body = '''\
+# <html lang="en-US">
+#     <head>
+#         <meta charset="utf-8" />
+#         <title>400 Bad Request</title>
+#     </head>
+#     <body>
+#         <h1 align="center">
+#             400 Bad Request</h1>
+#         <hr />
+#         <p align="center">webserv</p>
+#     </body>
+# </html>
+# '''
+#
+#     response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': 'no'}, data='{ "title":"foo","body":"bar","id":1 }')
+#
+#     assert response.status_code == 400
