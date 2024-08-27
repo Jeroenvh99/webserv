@@ -93,4 +93,8 @@ fclean: clean
 
 re: fclean all
 
+test:
+	@docker build -t webserv-tests -f ./tests/Dockerfile .
+	docker run -it webserv-tests
+
 -include $(DEP_FILES)
