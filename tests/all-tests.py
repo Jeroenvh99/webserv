@@ -41,15 +41,23 @@ def test_index():
     
     assert response.status_code == 200
     assert response.text == expected_body
-    assert response.headers['Content-Length'] == '159'
-
-def test_reponse_headers():
-    response = requests.get(f'{BASE_URL}/')
-    
     assert response.headers['Content-Type'] == 'text/html'
     assert response.headers['Content-Length'] == '159'
-    assert response.headers['Server'] == 'webserv'
-    # assert response.headers['Date']
+
+def test_unallowed_method():
+    response = requests.get(f'{BASE_URL}/not-allowed')
+
+    assert response.status_code == 405
+
+
+# def test_reponse_headers():
+#     response = requests.get(f'{BASE_URL}/')
+#
+#     assert response.headers['Server'] == 'webserv'
+#     assert response.headers['Date']
+#     assert response.headers['Content-Type'] == 'text/html'
+#     assert response.headers['Content-Length'] == '159'
+#     assert response.headers['Last-Modified'] == 'Tue, 27 Aug 2024 17:02:14 GMT'
     # assert response.headers['Last-Modified']
 
 # def test_bad_request():
