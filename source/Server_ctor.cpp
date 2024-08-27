@@ -12,7 +12,6 @@ Server::Server(RouteConfig&& config):
 	_buffer() {}
 */
 
-using logging::AccessLogger;
 using logging::ErrorLogger;
 using logging::Format;
 using logging::Variable;
@@ -66,4 +65,5 @@ Server::Server(Config::Server config, int backlog_size,
 		_error_pages.insert(std::pair<http::Status, std::filesystem::path>(static_cast<http::Status>(errorpage.first), errorpage.second));
 	}
 	acceptor().listen(backlog_size);
+    _elog.log(ErrorLogger::Level::notice, "Server ", _name, " listening on port ", config.port);
 }

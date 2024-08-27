@@ -1,5 +1,5 @@
 #include "job/Resource.hpp"
-#include "html.hpp"
+#include "http/html.hpp"
 
 using job::Resource;
 

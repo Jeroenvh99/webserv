@@ -1,7 +1,6 @@
-#include "logging.hpp"
+#include "logging/logging.hpp"
 
 #include <cstring>
-#include <sstream>
 
 using logging::ErrorLogger;
 

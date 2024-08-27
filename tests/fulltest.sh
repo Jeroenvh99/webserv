@@ -21,13 +21,13 @@ curl -H 'Content-Type: application/json' \
 	-d '{ "title":"foo","body":"bar","id":1 }' \
 	-X POST \
 	http://localhost:1100/curl.txt
-if cat ./tests/default/curl.txt | grep -q '{ "title":"foo","body":"bar","id":1 }'; then
+if cat ./www/default/curl.txt | grep -q '{ "title":"foo","body":"bar","id":1 }'; then
   echo "matched"
 fi
 if curl http://localhost:1100/curl.txt | grep -q '{ "title":"foo","body":"bar","id":1 }'; then
   echo "matched"
 fi
-rm -rf ./tests/default/curl.txt
+rm -rf ./www/default/curl.txt
 if curl http://localhost:1100/curl.txt | grep -q "<!DOCTYPE html>
 <html lang=\"en-US\">
 	<head>
@@ -59,12 +59,12 @@ das ist ein test"; then
 fi
 
 # delete request
-touch ./tests/default/curl.txt
+touch ./www/default/curl.txt
 curl -X DELETE http://localhost:1100/curl.txt
-if cat ./tests/default/curl.txt 2>&1 | grep -q "cat: ./tests/default/curl.txt: No such file or directory"; then
+if cat ./www/default/curl.txt 2>&1 | grep -q "cat: ./www/default/curl.txt: No such file or directory"; then
   echo "success, the file is gone"
 else
-  rm -rf ./tests/default/curl.txt
+  rm -rf ./www/default/curl.txt
 fi
 
 # no host

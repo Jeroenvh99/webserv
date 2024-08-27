@@ -11,7 +11,6 @@ SRC_FILES	:= Environment_build.cpp \
 			Client_io.cpp \
 			config/Config.cpp \
 			ClientImpl.cpp \
-			html.cpp \
 			main.cpp \
 			Poller.cpp \
 			Server_ctor.cpp \
@@ -24,6 +23,7 @@ SRC_FILES	:= Environment_build.cpp \
 			http/Body.cpp \
 			http/chunk.cpp \
 			http/Header.cpp \
+			http/html.cpp \
 			http/Message.cpp \
 			http/Method.cpp \
 			http/Request.cpp \
