@@ -1,4 +1,4 @@
-#include "network.hpp"
+#include "network/network.hpp"
 #include "network/Poller.hpp"
 
 using Event = network::Poller::Event;

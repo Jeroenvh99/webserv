@@ -2,12 +2,9 @@
 #include "Config.hpp"
 #include "Environment.hpp"
 #include "Poller.hpp"
-#include "route.hpp"
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <stdexcept>
 
 static constexpr int		dfl_backlog_size = 5192;
 
@@ -28,7 +25,7 @@ main(int argc, char** argv, char** envp) {
 			file = "configs/default.conf";
 		}
 		Config	conf(file);
-		const std::vector<Config::Server> serverconfigs = conf.getServers();
+		auto serverconfigs = conf.getServers();
 		std::vector<Server> servers;
 
 		for (size_t i = 0; i < serverconfigs.size(); i++) {
@@ -53,6 +50,9 @@ main(int argc, char** argv, char** envp) {
 	} catch (std::exception& e) {
 		return (std::cerr << "webserv: " << e.what() << '\n', 1);
 	}
+
+    std::cout << "webserv: exiting\n";
+
 	return (0);
 }
 

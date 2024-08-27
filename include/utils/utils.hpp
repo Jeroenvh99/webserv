@@ -2,9 +2,7 @@
 # define UTILS_HPP
 
 # include <algorithm>
-# include <stdexcept>
 # include <iostream>
-# include <utility>
 
 namespace utils {
 	template<size_t N>

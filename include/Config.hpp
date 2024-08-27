@@ -3,13 +3,11 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <unordered_map>
 #include <vector>
 #include <exception>
 
-#include "http/Request.hpp"
-#include "logging.hpp"
+#include "logging/logging.hpp"
 
 class Config
 {
