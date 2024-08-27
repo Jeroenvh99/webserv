@@ -12,7 +12,6 @@ Server::Server(RouteConfig&& config):
 	_buffer() {}
 */
 
-using logging::ErrorLogger;
 using logging::Format;
 using logging::Variable;
 
@@ -28,5 +27,4 @@ Server::Server(Config::Server config, int backlog_size,
 	}),
 	_elog(elog, config.errorlog.level) {
 	acceptor().listen(backlog_size);
-    _elog.log(ErrorLogger::Level::notice, "Server ", _name, " listening on port ", config.port);
 }
