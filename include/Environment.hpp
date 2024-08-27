@@ -13,7 +13,7 @@ class Environment {
 public:
 	using Container = std::vector<std::string>;
 
-	Environment(Server const&, Client const&, route::Location const&);
+	Environment(Server const&, VirtualServer const&, Client const&, route::Location const&);
 	~Environment();
 
 	void	build();
@@ -43,6 +43,7 @@ private:
 	void	_build_cenv();
 
 	Server const&			_server;
+	VirtualServer const&	_vserver;
 	Client const&			_client;
 	route::Location const&	_location;
 

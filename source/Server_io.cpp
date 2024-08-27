@@ -11,7 +11,8 @@ Server::_parse_request(Client& client) {
 		": Directing ", buf.len(), " bytes to request parser.");
 	try {
 		if (client.parse_request(buf) == true) {
-			client.respond({client, *this});
+
+			client.respond({client, *this, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
 		}
@@ -26,12 +27,12 @@ Server::_parse_request(Client& client) {
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
-		client.respond({http::Status::version_not_supported, *this});
+		client.respond({http::Status::version_not_supported, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
 		return (IOStatus::failure);
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
-		client.respond({http::Status::bad_request, *this});
+		client.respond({http::Status::bad_request, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
@@ -51,12 +52,11 @@ Server::_parse_response(Client& client) {
 		if (client.parse_response(buf)) {
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Response parsing from CGI finished.");
-			return (IOStatus::success);
 		}
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": CGI parsing error: ", e.what());
-		client.respond({http::Status::internal_error, *this});
+		client.respond({http::Status::internal_error, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);

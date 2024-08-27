@@ -20,7 +20,7 @@ Resource::_make_redirection(URI const& to) {
 		dest += "?" + to.query();
 	if (to.fragment() != "")
 		dest += "#" + to.fragment();
-	return (std::string("Location: ") + dest +"\r\n\r\n");
+	return (std::string("Location: ") + dest + "\r\n\r\n");
 }
 
 std::string
