@@ -24,6 +24,7 @@ public:
 		std::vector<std::string> allowedcgi;
 		std::string root;
 		std::string index;
+		// int maxbodysize;
 		std::unordered_map<std::string, std::string> parameters;
 		std::vector<http::Method> allowedmethods;
 	};
