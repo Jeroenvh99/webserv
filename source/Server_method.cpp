@@ -15,7 +15,8 @@ Server::acceptor() const noexcept {
 
 VirtualServer::VirtualServer(Config::Server config) :
 _name(config.servername),
-_route("/") {
+_route("/"),
+_maxbodysize(config.maxbodysize) {
 	for (size_t i = 0; i < config.redirections.size(); i++) {
 		add_httpredirect(config.redirections.at(i).from, config.redirections.at(i).to, config.redirections.at(i).permanent);
 	}
@@ -92,6 +93,11 @@ VirtualServer::add_httpredirect(std::string from, std::string to, bool permanent
 std::vector<VirtualServer::Redirection>
 VirtualServer::getRedirections() const {
 	return _redirections;
+}
+
+int
+VirtualServer::getMaxBodySize() const {
+	return _maxbodysize;
 }
 
 void

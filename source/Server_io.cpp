@@ -11,8 +11,14 @@ Server::_parse_request(Client& client) {
 		": Directing ", buf.len(), " bytes to request parser.");
 	try {
 		if (client.parse_request(buf) == true) {
-
-			client.respond({client, *this, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
+			VirtualServer vserv = Server::searchVirtualServer(client.request().headers().at("Host").csvalue());
+			if (vserv.getMaxBodySize() > 0 && client.request().headers().contains("Content-Length", std::string())) {
+				int bodysize = std::stoi(client.request().headers().at("Content-Length").csvalue());
+				if (bodysize > vserv.getMaxBodySize()) {
+					throw (Client::BodySizeException());
+				}
+			}
+			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
 		}
@@ -23,6 +29,10 @@ Server::_parse_request(Client& client) {
 	} catch (Client::ErrorException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": An error happened: ", e.what());
+		return (IOStatus::failure);
+	} catch (Client::BodySizeException& e) {
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": That didn't work: ", e.what());
 		return (IOStatus::failure);
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
