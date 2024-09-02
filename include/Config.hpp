@@ -24,7 +24,7 @@ public:
 		std::vector<std::string> allowedcgi;
 		std::string root;
 		std::string index;
-		// int maxbodysize;
+		int maxbodysize;
 		std::unordered_map<std::string, std::string> parameters;
 		std::vector<http::Method> allowedmethods;
 	};
@@ -37,6 +37,8 @@ public:
 
 	struct Server
 	{
+		void AddErrorPage(std::stringstream &linestream);
+		void AddRedirect(std::stringstream &linestream);
 		struct ServerLog errorlog;
 		struct ServerLog accesslog;
 		int port;
@@ -66,6 +68,7 @@ public:
 	ServerLog ParseLog(std::string &word, std::stringstream &s);
 	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed);
 	void ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server);
+	static int ParseBodySize(std::stringstream &linestream);
 	void Parse();
 	void ParseServer(std::stringstream &s);
 	void PreParse(std::ifstream &in);
