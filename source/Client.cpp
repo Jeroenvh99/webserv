@@ -78,7 +78,7 @@ Client::ErrorException::what() const throw() {
 }
 
 Client::BodySizeException::BodySizeException():
-_message("Please stand by, Something went wrong, code: ") {}
+_message("request body is too big") {}
 
 const char*
 Client::BodySizeException::what() const throw() {
