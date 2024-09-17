@@ -102,17 +102,16 @@ VirtualServer::getMaxBodySize() const {
 
 void
 Server::addVirtualServer(Config::Server config) {
-	VirtualServer virtualServer(config);
-	_possibleservers.insert({virtualServer.name(), virtualServer});
+	_possibleservers.emplace_back(new VirtualServer(config));
 }
 
 VirtualServer const&	Server::searchVirtualServer(std::string name) {
-	for (auto const& possibility :_possibleservers) {
-		if (possibility.first == name) {
-			return (possibility.second);
+	for (size_t i = 0; i < _possibleservers.size(); i++) {
+		if (_possibleservers[i]->name() == name) {
+			return (*_possibleservers[i]);
 		}
 	}
-	return (_possibleservers.begin()->second);
+	return (*_possibleservers[0]);
 }
 
 // Private methods
