@@ -1,0 +1,21 @@
+:root {
+	background-color: rgb(160, 178, 158);
+}
+
+body {
+    font-family: "Open Sans", "Helvetica", "sans-serif";
+    text-align: center;
+}
+
+h1 {
+	font-size: 2rem;
+	font-weight: bold;
+	color: rgb(23, 56, 19)
+}
+
+sh1 {
+	font-size: 1.5rem;
+	font-style: italic;
+	font-weight: bold;
+	color: rgb(64, 98, 61)
+}
