@@ -92,10 +92,10 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	SharedHandle							_acceptor;
-	ClientMap								_clients;
-	ClientMap								_graveyard;
-	std::map<std::string, VirtualServer>	_possibleservers;
+	SharedHandle				_acceptor;
+	ClientMap					_clients;
+	ClientMap					_graveyard;
+	std::vector<VirtualServer *>	_possibleservers;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server
