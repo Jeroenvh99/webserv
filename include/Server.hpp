@@ -95,7 +95,7 @@ private:
 	SharedHandle				_acceptor;
 	ClientMap					_clients;
 	ClientMap					_graveyard;
-	std::vector<VirtualServer *>	_possibleservers;
+	std::vector<VirtualServer>	_possibleservers;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server
