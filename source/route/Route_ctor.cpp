@@ -17,6 +17,17 @@ Route::Route(stdfs::path const& path):
 	extend(path);
 }
 
+Route::Route(Route &&route):
+	BaseRoute(),
+	_super(route._super),
+	_subroutes(std::move(route._subroutes)),
+	_fname(std::move(route._fname)) {
+		for (auto &subroute : _subroutes) {
+			subroute._super = this;
+		}
+		route._super = nullptr;
+	}
+
 // Private constructors
 
 Route::Route(Route const& super, PathIt seg, PathIt end):
