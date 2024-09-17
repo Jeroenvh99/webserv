@@ -13,13 +13,17 @@ Server::_parse_request(Client& client) {
 		if (client.parse_request(buf) == true) {
 			std::string name = client.request().headers().at("Host").csvalue();
 			name.erase(name.find_last_of(':'));
-			VirtualServer vserv = searchVirtualServer(name);
-			if (vserv.getMaxBodySize() > 0) {
-				int bodysize = std::stoi(client.request().headers().at("Content-Length").csvalue());
-				if (bodysize > 0 && bodysize > vserv.getMaxBodySize()) {
-					throw (Client::BodySizeException());
-				}
-			}
+			VirtualServer const &vserv = searchVirtualServer(name);
+			// if (vserv.getMaxBodySize() > 0) {
+			// 	try {
+			// 		int bodysize = std::stoi(client.request().headers().at("Content-Length"));
+			// 		if (bodysize > 0 && bodysize > vserv.getMaxBodySize()) {
+			// 			throw (Client::BodySizeException());
+			// 		}
+			// 	} catch (std::exception &e) {
+			// 		std::cout << "no body length specified\n";
+			// 	}
+			// }
 			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
