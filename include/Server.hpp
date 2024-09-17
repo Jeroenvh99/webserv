@@ -32,11 +32,13 @@ class VirtualServer {
 			locate(URI const&) const;
 		stdfs::path const&						locate_errpage(http::Status) const noexcept;
 		std::vector<VirtualServer::Redirection>	getRedirections() const;
+		int										getMaxBodySize() const;
 		void									add_httpredirect(std::string from, std::string to, bool permanent);
 		static stdfs::path const				no_errpage;
 	private:
 		std::string					_name;
 		route::Route				_route;
+		int							_maxbodysize;
 		ErrorPageMap				_error_pages;
 		std::vector<Redirection>	_redirections;
 };
@@ -90,10 +92,10 @@ private:
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	SharedHandle							_acceptor;
-	ClientMap								_clients;
-	ClientMap								_graveyard;
-	std::map<std::string, VirtualServer>	_possibleservers;
+	SharedHandle				_acceptor;
+	ClientMap					_clients;
+	ClientMap					_graveyard;
+	std::vector<VirtualServer>	_possibleservers;
 	logging::AccessLogger	_alog;
 	logging::ErrorLogger	_elog;
 }; // class Server

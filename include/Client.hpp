@@ -125,6 +125,14 @@ public:
 			const char *what() const throw();
 	};
 
+	class BodySizeException : std::exception {
+		private:
+			std::string		_message;
+		public:
+			BodySizeException();
+			const char *what() const throw();
+	};
+
 private:
 	SocketBox	_socket;
 	ClientImpl&	_impl;

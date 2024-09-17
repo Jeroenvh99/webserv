@@ -76,3 +76,11 @@ const char*
 Client::ErrorException::what() const throw() {
 	return _message.c_str();
 }
+
+Client::BodySizeException::BodySizeException():
+_message("request body is too big") {}
+
+const char*
+Client::BodySizeException::what() const throw() {
+	return _message.c_str();
+}

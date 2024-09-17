@@ -15,27 +15,28 @@ Server::acceptor() const noexcept {
 
 VirtualServer::VirtualServer(Config::Server config) :
 _name(config.servername),
-_route("/") {
+_route("/"),
+_maxbodysize(config.maxbodysize) {
 	for (size_t i = 0; i < config.redirections.size(); i++) {
-		add_httpredirect(config.redirections[i].from, config.redirections[i].to, config.redirections[i].permanent);
+		add_httpredirect(config.redirections.at(i).from, config.redirections.at(i).to, config.redirections.at(i).permanent);
 	}
 	for (Config::Location loc : config.locations) {
 		for (size_t i = 0; i < loc.paths.size(); i++) {
-			_route.extend(loc.paths[i])
+			_route.extend(loc.paths.at(i))
 				.redirect(loc.root)
 				.list_directory();
 			if (!loc.index.empty()) {
-				_route.seek(loc.paths[0]).set_directory_file(loc.index);
+				_route.seek(loc.paths.at(0)).set_directory_file(loc.index);
 			}
-			for (int j = 0; j < static_cast<int>(http::Method::NONE); j++) {
-				if (loc.allowedmethods[j] != http::Method::NONE) {
-					_route.seek(loc.paths[0]).allow_method(loc.allowedmethods[j]);
+			for (size_t j = 0; j < loc.allowedmethods.size(); j++) {
+				if (loc.allowedmethods.at(j) != http::Method::NONE) {
+					_route.seek(loc.paths.at(0)).allow_method(loc.allowedmethods.at(j));
 				} else {
-					_route.seek(loc.paths[0]).disallow_method(loc.allowedmethods[j]);
+					_route.seek(loc.paths.at(0)).disallow_method(loc.allowedmethods.at(j));
 				}
 			}
 			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
-				_route.seek(loc.paths[i]).allow_cgi(loc.allowedcgi[j]);
+				_route.seek(loc.paths.at(i)).allow_cgi(loc.allowedcgi[j]);
 			}
 		}
 	}
@@ -94,19 +95,23 @@ VirtualServer::getRedirections() const {
 	return _redirections;
 }
 
+int
+VirtualServer::getMaxBodySize() const {
+	return _maxbodysize;
+}
+
 void
 Server::addVirtualServer(Config::Server config) {
-	VirtualServer virtualServer(config);
-	_possibleservers.insert({virtualServer.name(), virtualServer});
+	_possibleservers.emplace_back(VirtualServer(config));
 }
 
 VirtualServer const&	Server::searchVirtualServer(std::string name) {
-	for (auto const& possibility :_possibleservers) {
-		if (possibility.first == name) {
-			return (possibility.second);
+	for (size_t i = 0; i < _possibleservers.size(); i++) {
+		if (_possibleservers[i].name() == name) {
+			return (_possibleservers[i]);
 		}
 	}
-	return (_possibleservers.begin()->second);
+	return (_possibleservers[0]);
 }
 
 // Private methods

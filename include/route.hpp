@@ -51,6 +51,7 @@ namespace route {
 	class Route: public BaseRoute {
 	public:
 		Route(stdfs::path const& = "");
+		Route(Route &&route);
 
 		stdfs::path	from() const;
 		stdfs::path	to() const;
@@ -103,7 +104,7 @@ namespace route {
 		Container::iterator			_subroute(std::string const&) noexcept;
 		Container::const_iterator	_subroute(std::string const&) const noexcept;
 
-		Route const* const	_super;
+		Route const*		_super;
 		Container			_subroutes;
 		std::string			_fname;
 		stdfs::path			_redirection;

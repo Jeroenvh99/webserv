@@ -75,7 +75,7 @@ DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 
 all: $(NAME)
 
-debug: CXXFLAGS += $(DEBUG_FLAGS)
+CXXFLAGS += $(DEBUG_FLAGS)
 debug: $(NAME)
 
 $(NAME): $(addprefix $(OBJ_DIR),$(OBJ_FILES))

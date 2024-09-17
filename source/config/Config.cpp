@@ -1,4 +1,5 @@
 #include "Config.hpp"
+#include <iostream>
 
 const char* Config::InvalidSyntaxException::what() const throw()
 {
@@ -20,6 +21,7 @@ Config::Config(std::string &filename) {
         throw std::exception();
     }
 	PreParse(in);
+	// std::cout << _config;
 	Parse();
 	in.close();
 }
@@ -48,10 +50,12 @@ void Config::PreParse(std::ifstream &in) {
 			line.erase(comment);
 		}
 		size_t lastchar = line.find_last_not_of(" \n\r\t");
-		if (line == "" || lastchar == std::string::npos) {
+		if (lastchar == std::string::npos) {
+			line.erase(lastchar + 1);
+		}
+		if (line == "") {
 			continue;
 		}
-		line.erase(lastchar + 1);
 		size_t open = line.find('{');
 		while (open != std::string::npos) {
 			++openbrackets;
@@ -63,12 +67,11 @@ void Config::PreParse(std::ifstream &in) {
 			close = line.find('}', close + 1);
 		}
 		for (size_t i = 0; i < line.length(); i++) {
-			if (line[i] == '\t') {
-				line[i] = ' ';
-			}
-			if (i > 0 && line[i - 1] == ' ' && line[i] == ' ') {
+			if (i > 0 && (line.at(i - 1) == ' ' || line.at(i - 1) == '\t') && (line.at(i) == ' ' || line.at(i) == '\t')) {
 				line.erase(i, 1);
 				--i;
+			} else if (line.at(i) == '\t') {
+				line.at(i) = ' ';
 			}
 		}
 		if (line.back() != '{' && line.back() != '}' && line.back() != ';') {
@@ -121,8 +124,57 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 	return log;
 }
 
+int Config::ParseBodySize(std::stringstream &linestream) {
+	std::string temp;
+	int maxbodysize = 1000;
+	std::getline(linestream, temp, ' ');
+	temp.pop_back();
+	if (temp.back() == 'M') {
+		maxbodysize *= 1000;
+	}
+	temp.pop_back();
+	try {
+		return (maxbodysize * std::stoi(temp));
+	} catch (std::exception &e) {
+		std::cerr << e.what();
+	}
+	return (0);
+}
+
+void Config::Server::AddErrorPage(std::stringstream &linestream) {
+	std::vector<int> codes;
+	std::string temp;
+	while (1) {
+		std::getline(linestream, temp, ' ');
+		try {
+			codes.push_back(std::stoi(temp));
+		} catch(std::exception &e) {
+			break;
+		}
+	}
+	temp.pop_back();
+	for (auto code : codes) {
+		this->errorpages.insert(std::make_pair(code, temp));
+	}
+}
+
+void Config::Server::AddRedirect(std::stringstream &linestream) {
+	std::string temp;
+	std::getline(linestream, temp, ' ');
+	Config::Redirection redirect{temp, "", false};
+	std::getline(linestream, temp, ' ');
+	temp.erase(temp.find_last_not_of(';') + 1);
+	redirect.to = temp;
+	std::getline(linestream, temp, ' ');
+	temp.erase(temp.find_last_not_of(';') + 1);
+	if (temp == "permanent") {
+		redirect.permanent = true;
+	};
+	this->redirections.emplace_back(redirect);
+}
+
 void Config::ParseServer(std::stringstream &s) {
-	Server server = {_errorlog, _accesslog, -1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
+	Server server{_errorlog, _accesslog, -1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -147,41 +199,20 @@ void Config::ParseServer(std::stringstream &s) {
 		} else if (temp == "access_log") {
 			server.accesslog = ParseLog(temp, linestream);
 		} else if (temp == "error_page") {
-			std::vector<int> codes;
-			while (1) {
-				std::getline(linestream, temp, ' ');
-				try {
-					codes.push_back(std::stoi(temp));
-				} catch(std::exception &e) {
-					break;
-				}
-			}
-			temp.pop_back();
-			for (auto code : codes) {
-				server.errorpages.insert(std::make_pair(code, temp));
-			}
+			server.AddErrorPage(linestream);
 		} else if (temp == "location") {
 			std::vector<std::string> locs{""};
 			ParseLocation(locs, linestream, s, server);
 		} else if (temp == "rewrite") {
-			std::getline(linestream, temp, ' ');
-			Config::Redirection redirect {"", "", false};
-			redirect.from = temp;
-			std::getline(linestream, temp, ' ');
-			temp.erase(temp.find_last_not_of(';') + 1);
-			redirect.to = temp;
-			std::getline(linestream, temp, ' ');
-			temp.erase(temp.find_last_not_of(';') + 1);
-			if (temp == "permanent") {
-				redirect.permanent = true;
-			};
-			server.redirections.emplace_back(redirect);
+			server.AddRedirect(linestream);
 		} else if (temp == "allow_methods" || temp == "deny_methods"){
 			ParseMethods(temp, linestream, server.allowedmethods);
 		} else if (temp == "listen") {
 			std::getline(linestream, temp, ' ');
 			temp.pop_back();
 			server.port = std::stoi(temp);
+		} else if (temp == "client_max_body_size") {
+			server.maxbodysize = Config::ParseBodySize(linestream);
 		} else if (temp == "server_name") {
 			std::getline(linestream, temp, ' ');
 			temp.pop_back();
@@ -198,19 +229,19 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 	do {
 		std::getline(linestream, word, ' ');
 		for (size_t i = 0; i < http::methods.size(); i++) {
-			if (word.find(http::methods[i].second) != std::string::npos) {
+			if (word.find(http::methods.at(i).second) != std::string::npos) {
 				if (!allow) {
-					allowed[i] = http::Method::NONE;
+					allowed.at(i) = http::Method::NONE;
 				}
 			} else if (allow) {
-				allowed[i] = http::Method::NONE;
+				allowed.at(i) = http::Method::NONE;
 			}
 		}
 	} while (word.find(';') == std::string::npos);
 }
 
 void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server) {
-	Location loc {{}, {}, "", "", {}, server.allowedmethods};
+	Location loc {{}, {}, "", "", server.maxbodysize, {}, server.allowedmethods};
 	std::string word;
 	std::getline(startstream, word, ' ');
 	while (word != "{") {
@@ -250,6 +281,8 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringst
 				value.erase(value.find_last_not_of(';') + 1);
 				loc.allowedcgi.push_back(value);
 			} while (temp.back() != ';');
+		} else if (temp == "client_max_body_size") {
+			loc.maxbodysize = Config::ParseBodySize(linestream);
 		} else {
 			std::string name = temp;
 			do {
@@ -264,11 +297,11 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringst
 
 void Config::MatchErrorPages() {
 	for (size_t i = 0; i < _servers.size(); i++) {
-		for (auto errorpage : _servers[i].errorpages) {
-			for (Config::Location loc : _servers[i].locations) {
+		for (auto errorpage : _servers.at(i).errorpages) {
+			for (Config::Location loc : _servers.at(i).locations) {
 				for (size_t j = 0; j < loc.paths.size(); j++) {
-					if (loc.paths[j].find(errorpage.second) != std::string::npos) {
-						_servers[i].errorpages.at(errorpage.first) = loc.root + "/" + std::to_string(errorpage.first) + ".html";
+					if (loc.paths.at(j).find(errorpage.second) != std::string::npos) {
+						_servers.at(i).errorpages.at(errorpage.first) = loc.root + "/" + std::to_string(errorpage.first) + ".html";
 					}
 				}
 			}
