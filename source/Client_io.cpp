@@ -73,7 +73,7 @@ Client::respond(job::Job const& job) {
 		_impl._ostate = OutputState::parse_response;
 	else if (http::is_error(*jstat)) { // job couldn't be started
 		respond({*jstat, job});
-		throw (Client::ErrorException(*jstat));
+		throw (Client::HTTPErrorException(*jstat));
 	} else {
 		_impl._response = http::Response(*jstat);
 		// todo: insert more headers based on file type

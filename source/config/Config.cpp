@@ -197,12 +197,13 @@ void Config::ParseServer(std::stringstream &s) {
 		if (temp == "error_log") {
 			server.errorlog = ParseLog(temp, linestream);
 		} else if (temp == "access_log") {
-			server.accesslog = ParseLog(temp, linestream);
+			server.accesslog = ParseLog(temp, linestream);	
 		} else if (temp == "error_page") {
 			server.AddErrorPage(linestream);
 		} else if (temp == "location") {
 			std::vector<std::string> locs{""};
-			ParseLocation(locs, linestream, s, server);
+			std::string initroot = "";
+			ParseLocation(locs, initroot, linestream, s, server);
 		} else if (temp == "rewrite") {
 			server.AddRedirect(linestream);
 		} else if (temp == "allow_methods" || temp == "deny_methods"){
@@ -240,13 +241,16 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 	} while (word.find(';') == std::string::npos);
 }
 
-void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server) {
-	Location loc {{}, {}, "", "", server.maxbodysize, {}, server.allowedmethods};
+void Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server) {
+	Location loc {{}, {}, previousroot, "", server.maxbodysize, {}, server.allowedmethods};
 	std::string word;
 	std::getline(startstream, word, ' ');
 	while (word != "{") {
 		for (size_t i = 0; i < previouslocs.size(); i++) {
 			loc.paths.push_back(previouslocs[i] + word);
+		}
+		if (!previousroot.empty()) {
+			loc.root += "/" + word;
 		}
 		std::getline(startstream, word, ' ');
 	}
@@ -262,7 +266,7 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::stringst
 		std::string temp;
 		std::getline(linestream, temp, ' ');
 		if (temp == "location") {
-			ParseLocation(loc.paths, linestream, s, server);
+			ParseLocation(loc.paths, loc.root, linestream, s, server);
 		} else if (temp == "allow_methods" || temp == "deny_methods"){
 			ParseMethods(temp, linestream, loc.allowedmethods);
 		} else if (temp == "root"){

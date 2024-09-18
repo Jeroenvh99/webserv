@@ -39,7 +39,9 @@ BaseRoute::directory_file() const noexcept {
 
 bool
 BaseRoute::allows_method(http::Method method) const noexcept {
-	return (_allowed_methods & static_cast<MethodBitmask>(method));
+	(void)method;
+	return (true);
+	//_allowed_methods & static_cast<MethodBitmask>(method)
 }
 
 bool

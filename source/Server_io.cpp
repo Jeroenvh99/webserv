@@ -14,16 +14,17 @@ Server::_parse_request(Client& client) {
 			std::string name = client.request().headers().at("Host").csvalue();
 			name.erase(name.find_last_of(':'));
 			VirtualServer const &vserv = searchVirtualServer(name);
-			// if (vserv.getMaxBodySize() > 0) {
-			// 	try {
-			// 		int bodysize = std::stoi(client.request().headers().at("Content-Length"));
-			// 		if (bodysize > 0 && bodysize > vserv.getMaxBodySize()) {
-			// 			throw (Client::BodySizeException());
-			// 		}
-			// 	} catch (std::exception &e) {
-			// 		std::cout << "no body length specified\n";
-			// 	}
-			// }
+			if (vserv.getMaxBodySize() > 0) {
+				try {
+					std::string lengthheader = client.request().headers().at("Content-Length").csvalue();
+					int bodysize = std::stoi(lengthheader);
+					if (bodysize > 0 && bodysize > vserv.getMaxBodySize()) {
+						throw (Client::BodySizeException());
+					}
+				} catch (std::exception &e) {
+					std::cout << "no body length specified\n";
+				}
+			}
 			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
@@ -32,8 +33,8 @@ Server::_parse_request(Client& client) {
 		_elog.log(LogLevel::error, client.address(),
 			": Verkeerd verbonden: ", e.what());
 		return (IOStatus::failure);
-	} catch (Client::ErrorException& e) {
-		_elog.log(LogLevel::error, client.address(),
+	} catch (Client::HTTPErrorException& e) {
+		_elog.log(LogLevel::error, std::string(client.address()),
 			": An error happened: ", e.what());
 		return (IOStatus::failure);
 	} catch (Client::BodySizeException& e) {

@@ -18,7 +18,7 @@ Route::Route(stdfs::path const& path):
 }
 
 Route::Route(Route &&route):
-	BaseRoute(),
+	BaseRoute(route),
 	_super(route._super),
 	_subroutes(std::move(route._subroutes)),
 	_fname(std::move(route._fname)) {

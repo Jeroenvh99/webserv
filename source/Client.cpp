@@ -67,13 +67,13 @@ Client::RedirectionException::what() const throw() {
 	return _message.c_str();
 }
 
-Client::ErrorException::ErrorException(const http::Status status):
+Client::HTTPErrorException::HTTPErrorException(const http::Status status):
 _message("Please stand by, Something went wrong, code: ") {
 	_message += http::to_string(status);
 }
 
 const char*
-Client::ErrorException::what() const throw() {
+Client::HTTPErrorException::what() const throw() {
 	return _message.c_str();
 }
 
