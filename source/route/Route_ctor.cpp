@@ -21,7 +21,8 @@ Route::Route(Route &&route):
 	BaseRoute(route),
 	_super(route._super),
 	_subroutes(std::move(route._subroutes)),
-	_fname(std::move(route._fname)) {
+	_fname(std::move(route._fname)),
+	_redirection(route._redirection) {
 		for (auto &subroute : _subroutes) {
 			subroute._super = this;
 		}
