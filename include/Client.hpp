@@ -117,11 +117,11 @@ public:
 			const char *what() const throw();
 	};
 
-	class ErrorException : std::exception {
+	class HTTPErrorException : std::exception {
 		private:
 			std::string		_message;
 		public:
-			ErrorException(const http::Status status);
+			HTTPErrorException(const http::Status status);
 			const char *what() const throw();
 	};
 

@@ -85,7 +85,7 @@ namespace route {
 	private:
 		friend class BaseRoute;
 
-		using Container = std::forward_list<Route>;
+		using Container = std::forward_list<Route>; // allowed methods not moved correctly
 
 		Route(Route const&, stdfs::path::iterator, stdfs::path::iterator);
 		Route(Route const&, std::string const&);
