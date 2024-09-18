@@ -67,7 +67,7 @@ public:
 
 	ServerLog ParseLog(std::string &word, std::stringstream &s);
 	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed);
-	void ParseLocation(std::vector<std::string> &previouslocs, std::stringstream &startstream, std::stringstream &s, Server &server);
+	void ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server);
 	static int ParseBodySize(std::stringstream &linestream);
 	void Parse();
 	void ParseServer(std::stringstream &s);
