@@ -7,7 +7,7 @@ using job::Resource;
 
 static char const*	_get_mime_type(stdfs::path const&);
 
-static const std::unordered_map<char const*, char const*>	mime_types = {
+static const std::unordered_map<std::string, char const*>	mime_types = {
 	{".json", "application/json"},
 	{".pdf", "application/pdf"},
 	{".xml", "application/xml"},
