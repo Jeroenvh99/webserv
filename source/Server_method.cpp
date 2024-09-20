@@ -26,13 +26,13 @@ _maxbodysize(config.maxbodysize) {
 				.redirect(loc.root)
 				.list_directory();
 			if (!loc.index.empty()) {
-				_route.seek(loc.paths.at(0)).set_directory_file(loc.index);
+				_route.seek(loc.paths.at(i)).set_directory_file(loc.index);
 			}
 			for (size_t j = 0; j < loc.allowedmethods.size(); j++) {
 				if (loc.allowedmethods.at(j) != http::Method::NONE) {
-					_route.seek(loc.paths.at(0)).allow_method(loc.allowedmethods.at(j));
+					_route.seek(loc.paths.at(i)).allow_method(loc.allowedmethods.at(j));
 				} else {
-					_route.seek(loc.paths.at(0)).disallow_method(loc.allowedmethods.at(j));
+					_route.seek(loc.paths.at(i)).disallow_method(loc.allowedmethods.at(j));
 				}
 			}
 			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
