@@ -37,6 +37,10 @@ Server::_parse_request(Client& client) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": An error happened: ", e.what());
 		return (IOStatus::failure);
+	} catch (Client::BodySizeException& e) {
+		_elog.log(LogLevel::error, std::string(client.address()),
+			": That didn't work: ", e.what());
+		return (IOStatus::failure);
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, client.address(),
 			": Parse error: ", e.what());
