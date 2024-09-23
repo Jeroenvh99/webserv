@@ -2,78 +2,75 @@
 #include "Config.hpp"
 #include "Environment.hpp"
 #include "Poller.hpp"
+#include "logging/logging.hpp"
 
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 
-static constexpr int	dfl_backlog_size = 5192;
+using Servers = std::vector<Server>;
 
-static size_t	_get_cenvsize(char const* const*);
+static constexpr int	default_backlog = 5192;
+
+static size_t	get_envsize(char const* const*);
+static void		configure(Servers&, char const*);
+
+logging::AccessLogger	logging::alog;
+logging::ErrorLogger	logging::elog;
 
 int
 main(int argc, char** argv, char** envp) {
 	Environment::_parent_env = envp;
-	Environment::_parent_env_size = _get_cenvsize(envp);
-	bool	duplicate = false;
+	Environment::_parent_env_size = get_envsize(envp);
 
-	if (argc > 2)
-		return (std::cerr << "Usage: ./webserv [path_to_config]\n", 1);
+	if (argc > 2) {
+		std::cerr << "Usage: " << argv[0] << " [path_to_config]\n";
+		return (EXIT_FAILURE);
+	}
 	try {
-		std::string file;
-		if (argc == 2) {
-			file = argv[1];
-		} else {
-			file = "configs/default.conf";
-		}
-		Config	conf(file);
-		auto serverconfigs = conf.getServers();
-		std::vector<Server> servers;
-
-		for (size_t i = 0; i < serverconfigs.size(); i++) {
-			for (size_t j = 0; j < i; j++) {
-				if (serverconfigs[j].port == serverconfigs[i].port)
-					duplicate = true;
-			}
-			if (duplicate == false) {
-				std::ofstream accessFile;
-				if(serverconfigs[i].accesslog.filename != "")
-					accessFile.open(serverconfigs[i].accesslog.filename, std::ios::out);
-				std::ostream& access = (serverconfigs[i].accesslog.filename != ""? accessFile : std::cout);
-				std::ofstream errorFile;
-				if(serverconfigs[i].errorlog.filename != "")
-					errorFile.open(serverconfigs[i].errorlog.filename, std::ios::out);
-				std::ostream& error = (serverconfigs[i].errorlog.filename != ""? errorFile : std::cerr);
-				Server serv(serverconfigs[i], dfl_backlog_size, access, error);
-				for (size_t j = 0; j < serverconfigs.size(); j++) {
-					if (serverconfigs[j].port == serverconfigs[i].port) {
-						serv.addVirtualServer(serverconfigs[j]);
-					}
-				}
-				servers.emplace_back(std::move(serv));
-			}
-			duplicate = false;
-			if (i == serverconfigs.size() - 1) {
-				while (true) {
-					g_poller.wait();
-					for (size_t j = 0; j < servers.size(); j++) {
-						servers[j].process();
-					}
-				}
-			}
+		Servers servers;
+		
+		configure(servers, (argc == 2) ? argv[1] : "configs/default.conf");
+		while (true) {
+			g_poller.wait();
+			for (auto& server: servers)
+				server.process();
 		}
 	} catch (std::exception& e) {
-		return (std::cerr << "webserv: " << e.what() << '\n', 1);
+		std::cerr << "webserv: " << e.what() << '\n';
+		return (EXIT_FAILURE);
 	}
-
     std::cout << "webserv: exiting\n";
-
-	return (0);
+	return (EXIT_SUCCESS);
 }
 
-static size_t	_get_cenvsize(char const* const* envp) {
+static size_t
+get_envsize(char const* const* envp) {
 	size_t	size = 0;
 
 	while (envp[size] != nullptr)
 		++size;
 	return (size);
+}
+
+static void
+configure(Servers& servers, char const* cpath) {
+	std::string		path(cpath);
+	Config const	conf(path);
+
+	// configure access and error log files
+
+	for (auto const& config: conf.getServers()) {
+		auto	it = std::find_if(servers.begin(), servers.end(),
+			[config](Servers::value_type const& server) {
+				return (server.port() == config.port);
+			}
+		);
+		
+		if (it == servers.end())
+			servers.emplace_back(config, default_backlog);
+		else
+			it->addVirtualServer(config);
+	}
 }

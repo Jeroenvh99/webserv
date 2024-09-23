@@ -10,111 +10,121 @@
 #include <vector>
 
 namespace logging {
+
 class Variable {
 public:
-  enum class Type : unsigned char;
+	enum class Type: unsigned char { // see NGINX docs for possible additions
+		literal,
+		time_local,
+		request,
+		status,
+	}; // enum class Type
+	using enum Type;
 
-  Variable(Type);
-  Variable(Type, std::string const &);
-  Variable(Type, std::string &&);
-  Variable(std::string const &);
-  Variable(std::string &&);
+	Variable(Type = literal);
+	Variable(Type, std::string const&);
+	Variable(Type, std::string&&);
+	Variable(std::string const&);
+	Variable(std::string&&);
 
-  Type type() const noexcept;
-  std::string const &data() const noexcept;
+	Type 				type() const noexcept;
+	std::string const&	data() const noexcept;
 
 private:
-  Type _type;
-  std::string _data;
+	Type		_type;
+	std::string	_data;
 }; // class LogFormat::Element;
-
-enum class Variable::Type : unsigned char { // see NGINX docs for possible
-                                            // additions
-  literal,
-  time_local,
-  request,
-  status,
-}; // enum class Variable::Type
-
-using Format = std::vector<Variable>; // nest in AccessLogger?
 
 class Logger {
 public:
-  Logger() = delete;
-  Logger(std::ostream &);
-  virtual ~Logger() = default;
+	~Logger();
 
-  std::ostream &os() const noexcept;
-  std::string const &timestamp() const noexcept;
-  void timestamp_update();
+	std::ostream&		os() noexcept;
+	void				attach_file(std::string const&);
+	std::string const&	timestamp() const noexcept;
+	void				timestamp_update();
 
 private:
-  std::ostream &_os;
-  std::string _timestamp;
+	friend class AccessLogger;
+	friend class ErrorLogger;
+
+	Logger(std::ostream&);
+
+	void	detach_file() noexcept;
+
+	std::ostream*	_os;
+	std::string		_timestamp;
 }; // class Logger
 
-class AccessLogger : public Logger {
+class AccessLogger: public Logger {
 public:
-  AccessLogger();
-  ~AccessLogger() = default;
-  AccessLogger(std::ostream &, Format const &);
-  AccessLogger(std::ostream &, Format &&);
-  AccessLogger(AccessLogger const &) = delete;
-  AccessLogger(AccessLogger &&) = default;
-  AccessLogger &operator=(AccessLogger const &) = delete;
-  AccessLogger &operator=(AccessLogger &&) = delete;
+	using Format = std::vector<Variable>;
 
-  void log(Client const &);
+	AccessLogger();
+
+	Format&			format() noexcept;
+	Format const&	format() const noexcept;
+
+	void	log(Client const&);
+
+	static const Format	default_fmt;
 
 private:
-  Format const _fmt;
+	Format	_fmt;
 }; // class AccessLogger
 
-class ErrorLogger : public Logger {
+class ErrorLogger: public Logger {
 public:
-  enum Level : int;
+	enum class Level: int {
+		debug,
+		info,
+		notice,
+		warning,
+		error,
+		critical,
+		alert,
+		emergency,
+	}; // enum Level
+	using enum Level;
+	using Literals = std::array<std::pair<Level, char const *>, 8>;
 
-  ErrorLogger();
-  ~ErrorLogger() = default;
-  ErrorLogger(std::ostream &, Level);
-  ErrorLogger(ErrorLogger const &) = delete;
-  ErrorLogger(ErrorLogger &&) = default;
-  ErrorLogger &operator=(ErrorLogger const &) = delete;
-  ErrorLogger &operator=(ErrorLogger &&) = delete;
+	ErrorLogger();
 
-  template <typename... Ts> void log(Level, Ts...);
+	Level&			level() noexcept;
+	Level const&	level() const noexcept;
 
-  static char const *level_to_string(ErrorLogger::Level);
-  static ErrorLogger::Level level_from_string(std::string const &);
+	template<typename... Ts>
+	void log(Level, Ts...);
 
-  using LevelStringMap = std::array<std::pair<Level, char const *>, 8>;
+	static char const*			level_to_string(Level);
+	static ErrorLogger::Level	level_from_string(std::string const&);
 
-  static const LevelStringMap _levels;
+	static constexpr Level	default_level = error;
+	static const Literals	literals;
 
-  Level const _level;
+private:
+	Level	_level;
 }; // class ErrorLogger
 
-enum ErrorLogger::Level : int {
-  debug,
-  info,
-  notice,
-  warning,
-  error,
-  critical,
-  alert,
-  emergency,
-}; // enum ErrorLogger::Level
-
-inline constexpr ErrorLogger::LevelStringMap ErrorLogger::_levels = {{
-    {debug, "debug"},
-    {info, "info"},
-    {notice, "notice"},
-    {warning, "warning"},
-    {error, "error"},
-    {critical, "critical"},
-    {alert, "alert"},
-    {emergency, "emergency"},
+inline const AccessLogger::Format		AccessLogger::default_fmt = {
+	{"["},
+	{Variable::time_local},
+	{"] processed a request :)"},
+};
+inline constexpr ErrorLogger::Literals	ErrorLogger::literals = {{
+	{debug, "debug"},
+	{info, "info"},
+	{notice, "notice"},
+	{warning, "warning"},
+	{error, "error"},
+	{critical, "critical"},
+	{alert, "alert"},
+	{emergency, "emergency"},
 }};
+
+extern AccessLogger	alog;
+extern ErrorLogger	elog;
+
 }; // namespace logging
 
 #include "logging/ErrorLogger.tpp"

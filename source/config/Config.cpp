@@ -115,8 +115,8 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 		std::getline(s, word, ' ');
 		word.erase(word.find_last_not_of(";") + 1);
 		for (int i = 0; i <= 8; i++) {
-			if (word == logging::ErrorLogger::_levels[i].second) {
-				log.level = logging::ErrorLogger::_levels[i].first;
+			if (word == logging::ErrorLogger::literals[i].second) {
+				log.level = logging::ErrorLogger::literals[i].first;
 				break;
 			}
 		}

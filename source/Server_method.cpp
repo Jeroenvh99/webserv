@@ -1,5 +1,8 @@
 #include "Server.hpp"
 #include "Poller.hpp"
+#include "logging/logging.hpp"
+
+using Elog = logging::ErrorLogger;
 
 // Accessors
 
@@ -123,7 +126,7 @@ Server::_accept() {
 	Client::Address	address;
 	Client::Socket	socket = acceptor().accept(address);
 
-	_elog.log(LogLevel::notice,
+	logging::elog.log(Elog::notice,
 		"Established connection with peer at ", address, ".");
 	_clients.insert({
 		g_poller.add(std::move(socket),
@@ -134,7 +137,7 @@ Server::_accept() {
 
 void
 Server::_drop(ClientMap::iterator it) {
-	_elog.log(LogLevel::notice,
+	logging::elog.log(Elog::notice,
 		"Terminated connection with peer at ", Client(*it).address(), ".");
 	g_poller.remove(it->first);
 	_graveyard.erase(it);
