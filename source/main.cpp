@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 
-static constexpr int		dfl_backlog_size = 5192;
+static constexpr int	dfl_backlog_size = 5192;
 
 static size_t	_get_cenvsize(char const* const*);
 

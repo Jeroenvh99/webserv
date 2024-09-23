@@ -124,7 +124,7 @@ Server::_accept() {
 	Client::Socket	socket = acceptor().accept(address);
 
 	_elog.log(LogLevel::notice,
-		"Established connection with peer at ", std::string(address), ".");
+		"Established connection with peer at ", address, ".");
 	_clients.insert({
 		g_poller.add(std::move(socket),
 			{ EventType::read, EventType::write, EventType::hangup }),
@@ -135,8 +135,7 @@ Server::_accept() {
 void
 Server::_drop(ClientMap::iterator it) {
 	_elog.log(LogLevel::notice,
-		"Terminated connection with peer at ",
-		std::string(Client(*it).address()), ".");
+		"Terminated connection with peer at ", Client(*it).address(), ".");
 	g_poller.remove(it->first);
 	_graveyard.erase(it);
 }
