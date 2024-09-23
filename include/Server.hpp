@@ -38,7 +38,7 @@ class VirtualServer {
 	private:
 		std::string					_name;
 		route::Route				_route;
-		int							_maxbodysize;
+		size_t						_maxbodysize;
 		ErrorPageMap				_error_pages;
 		std::vector<Redirection>	_redirections;
 };
@@ -57,13 +57,15 @@ public:
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	in_port_t							port() const noexcept;
+	in_port_t				port() const noexcept;
 
-	Acceptor&							acceptor() noexcept;
-	Acceptor const&						acceptor() const noexcept;
+	Acceptor&				acceptor() noexcept;
+	Acceptor const&			acceptor() const noexcept;
 
-	void								addVirtualServer(Config::Server config);
-	VirtualServer const&				searchVirtualServer(std::string name);
+	void					addVirtualServer(Config::Server config);
+	VirtualServer const&	searchVirtualServer(std::string name);
+	VirtualServer const&	virtual_server(std::string name);
+	VirtualServer const&	virtual_server(Client const&);
 
 	void	process();
 
@@ -86,7 +88,8 @@ private:
 	IOStatus	_fetch(Client&, webserv::Buffer&);
 	IOStatus	_enchunk_and_send(Client&);
 	IOStatus	_fetch_and_send(Client&);
-	IOStatus	_deliver(Client&);
+	IOStatus	_recv_and_deliver(Client&);
+	IOStatus	_deliver(Client&, webserv::Buffer const&);
 	IOStatus	_dechunk(Client&);
 	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);

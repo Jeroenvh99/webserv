@@ -1,6 +1,9 @@
 #include "Server.hpp"
 #include "http/Response.hpp"
 
+static std::string	get_hostname(Client const&);
+static void			validate_body_size(http::Headers const&, int);
+
 Server::IOStatus
 Server::_parse_request(Client& client) {
 	webserv::Buffer	buf;
@@ -10,46 +13,16 @@ Server::_parse_request(Client& client) {
 	_elog.log(LogLevel::debug, std::string(client.address()),
 		": Directing ", buf.len(), " bytes to request parser.");
 	try {
-		if (client.parse_request(buf) == true) {
-			std::string name = client.request().headers().at("Host").csvalue();
-			name.erase(name.find_last_of(':'));
-			VirtualServer const &vserv = searchVirtualServer(name);
-			if (vserv.getMaxBodySize() > 0) {
-				try {
-					std::string lengthheader = client.request().headers().at("Content-Length").csvalue();
-					int bodysize = std::stoi(lengthheader);
-					if (bodysize > 0 && bodysize > vserv.getMaxBodySize()) {
-						throw (Client::BodySizeException());
-					}
-				} catch (std::exception &e) {
-					std::cout << "no body length specified\n";
-				}
-			}
+		if (client.parse_request(buf)) {
+			http::Headers const&	headers = client.request().headers();	
+			VirtualServer const&	vserv = searchVirtualServer(get_hostname(client));
+
+			validate_body_size(headers, vserv.getMaxBodySize());
 			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
-			if (buf.len() > 0) { // deliver trailing bytes to worker
-				switch (client.istate()) {
-				case Client::InputState::dechunk:
-				case Client::InputState::deliver:
-					switch (client.deliver(buf)) {
-					case Client::OperationStatus::success:
-					case Client::OperationStatus::pending:
-						_elog.log(LogLevel::debug, std::string(client.address()),
-							": Delivered ", buf.len(), " bytes.");
-						return (IOStatus::success);
-					case Client::OperationStatus::failure:
-						_elog.log(LogLevel::error, std::string(client.address()),
-							": Error delivering resource.");
-						// todo: inject error message into body
-						return (IOStatus::failure);
-					default: // timeout
-						__builtin_unreachable();
-					}
-				default:
-					return (IOStatus::failure); // trailing bytes, but client will not accept incoming data
-				}
-			}
+			if (buf.len() > 0) // deliver trailing bytes to worker
+				return (_deliver(client, buf));
 		}
 	} catch (Client::RedirectionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
@@ -71,7 +44,7 @@ Server::_parse_request(Client& client) {
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
-		client.respond({http::Status::bad_request, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
+		client.respond({http::Status::bad_request, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())}); // gaat dit goed?
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
@@ -107,11 +80,16 @@ Server::_dechunk(Client&) {
 }
 
 Server::IOStatus
-Server::_deliver(Client& client) {
+Server::_recv_and_deliver(Client& client) {
 	webserv::Buffer	buf;
 
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	return (_deliver(client, buf));
+}
+
+Server::IOStatus
+Server::_deliver(Client& client, webserv::Buffer const& buf) {
 	switch (client.deliver(buf)) {
 	case Client::OperationStatus::success:
 	case Client::OperationStatus::pending:
@@ -201,4 +179,24 @@ Server::_send(Client& client, webserv::Buffer const& buf) {
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
+}
+
+static std::string
+get_hostname(Client const& client) {
+	std::string	hostname = client.request().headers().at("Host").csvalue();
+
+	hostname.erase(hostname.find_last_of(':'));
+	return (hostname);
+}
+
+static void
+validate_body_size(http::Headers const& headers, int max) {
+	if (max > 0) {
+		try {
+			if (std::stoi(headers.at("Content-Length").csvalue()) > max)
+				throw (Client::BodySizeException());
+		} catch (std::exception&) { // faulty or absent header
+			throw (Client::BodySizeException());
+		}
+	}
 }
