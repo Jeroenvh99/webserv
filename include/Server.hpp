@@ -63,7 +63,6 @@ public:
 	Acceptor const&			acceptor() const noexcept;
 
 	void					addVirtualServer(Config::Server config);
-	VirtualServer const&	searchVirtualServer(std::string name);
 	VirtualServer const&	virtual_server(std::string name);
 	VirtualServer const&	virtual_server(Client const&);
 

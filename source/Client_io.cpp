@@ -11,7 +11,7 @@ Client::parse_request(webserv::Buffer& buf) {
 			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
 			return (true);
 		case http::Body::Type::by_length:
-			_impl._istate = InputState::deliver; // and set length indicator
+			_impl._istate = InputState::deliver;
 			_impl._body_size = body.length();
 			break;
 		case http::Body::Type::chunked:
@@ -20,7 +20,6 @@ Client::parse_request(webserv::Buffer& buf) {
 		}
 		_impl._buffer_flush(buf);
 		return (true);
-		//return (deliver(buf) != OperationStatus::failure);
 	}
 	return (false);
 }
@@ -36,8 +35,6 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (!_impl._buffer.eof()) {
 		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
-
-			// http::Body const	body = _impl._response.expects_body();
 			_impl._response_body = _impl._response.expects_body(); // replace by:
 			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
 			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
@@ -48,7 +45,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._buffer_flush(trail);
 			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
-			_impl._ostate = OutputState::fetch; // replace
+			_impl._ostate = OutputState::fetch;
 			return (true);
 		}
 		_impl._response.headers().insert(line);
