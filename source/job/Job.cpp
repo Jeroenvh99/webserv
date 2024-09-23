@@ -18,16 +18,16 @@ Job::Job(Client const& client, Server const& serv, VirtualServer const& vserv):
 	environment(server, vserver, client, location) {}
 
 job::RedirectionJob::RedirectionJob(job::Job const& todo, int redirindex):
-	destination(todo.vserver.getRedirections()[redirindex].to),
-	permanent(todo.vserver.getRedirections()[redirindex].permanent) {}
+	destination(todo.vserver.redirections()[redirindex].to),
+	permanent(todo.vserver.redirections()[redirindex].permanent) {}
 
 // Methods
 
 int
 job::is_httpredirect(job::Job const& job) {
-	std::vector<VirtualServer::Redirection> redirections = job.vserver.getRedirections();
-	for (size_t i = 0; i < redirections.size(); i++) {
-		if (job.location.from() == redirections[i].from.path()) {
+	auto const& redirs = job.vserver.redirections();
+	for (size_t i = 0; i < redirs.size(); i++) {
+		if (job.location.from() == redirs[i].from.path()) {
 			return i;
 		}
 	}

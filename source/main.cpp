@@ -46,7 +46,7 @@ main(int argc, char** argv, char** envp) {
 				Server serv(serverconfigs[i], dfl_backlog_size, access, error);
 				for (size_t j = 0; j < serverconfigs.size(); j++) {
 					if (serverconfigs[j].port == serverconfigs[i].port) {
-						serv.addVirtualServer(serverconfigs[j]);
+						serv.virtual_server_add(serverconfigs[j]);
 					}
 				}
 				servers.emplace_back(std::move(serv));

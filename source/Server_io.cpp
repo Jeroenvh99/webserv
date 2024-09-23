@@ -1,8 +1,7 @@
 #include "Server.hpp"
 #include "http/Response.hpp"
 
-static std::string	get_hostname(Client const&);
-static void			validate_body_size(http::Headers const&, int);
+static void	validate_body_size(Client const&, size_t);
 
 Server::IOStatus
 Server::_parse_request(Client& client) {
@@ -14,10 +13,9 @@ Server::_parse_request(Client& client) {
 		": Directing ", buf.len(), " bytes to request parser.");
 	try {
 		if (client.parse_request(buf)) {
-			http::Headers const&	headers = client.request().headers();	
-			VirtualServer const&	vserv = searchVirtualServer(get_hostname(client));
+			VirtualServer const&	vserv = virtual_server(client);
 
-			validate_body_size(headers, vserv.getMaxBodySize());
+			validate_body_size(client, vserv.max_body_size());
 			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
@@ -39,12 +37,12 @@ Server::_parse_request(Client& client) {
 	} catch (http::parse::VersionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
-		client.respond({http::Status::version_not_supported, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
+		client.respond({http::Status::version_not_supported, virtual_server(client)});
 		return (IOStatus::failure);
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": Parse error: ", e.what());
-		client.respond({http::Status::bad_request, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())}); // gaat dit goed?
+		client.respond({http::Status::bad_request, virtual_server(client)});
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
@@ -68,7 +66,7 @@ Server::_parse_response(Client& client) {
 	} catch (http::parse::Exception& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
 			": CGI parsing error: ", e.what());
-		client.respond({http::Status::internal_error, Server::searchVirtualServer(client.request().headers().at("Host").csvalue())});
+		client.respond({http::Status::internal_error, virtual_server(client)});
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
@@ -181,21 +179,19 @@ Server::_send(Client& client, webserv::Buffer const& buf) {
 	return (IOStatus::success);
 }
 
-static std::string
-get_hostname(Client const& client) {
-	std::string	hostname = client.request().headers().at("Host").csvalue();
-
-	hostname.erase(hostname.find_last_of(':'));
-	return (hostname);
-}
-
 static void
-validate_body_size(http::Headers const& headers, int max) {
+validate_body_size(Client const& client, size_t max) {
+	std::string	value;
 	if (max > 0) {
 		try {
-			if (std::stoi(headers.at("Content-Length").csvalue()) > max)
+			value = client.request().headers().at("Content-Length").csvalue();
+		} catch (std::out_of_range&) {
+			return;
+		}
+		try {
+			if (std::stoul(value) > max)
 				throw (Client::BodySizeException());
-		} catch (std::exception&) { // faulty or absent header
+		} catch (std::exception&) { // faulty header
 			throw (Client::BodySizeException());
 		}
 	}
