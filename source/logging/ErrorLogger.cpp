@@ -1,7 +1,5 @@
 #include "logging/logging.hpp"
 
-#include <cstring>
-
 using logging::ErrorLogger;
 
 // Basic operations

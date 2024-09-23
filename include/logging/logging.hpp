@@ -99,7 +99,7 @@ public:
 	static char const*			level_to_string(Level);
 	static ErrorLogger::Level	level_from_string(std::string const&);
 
-	static constexpr Level	default_level = error;
+	static constexpr Level	default_level = debug;
 	static const Literals	literals;
 
 private:
