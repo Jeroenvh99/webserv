@@ -20,4 +20,5 @@ Server::Server(Config::Server config, int backlog_size):
 							{webserv::Poller::EventType::read})),
 	_clients() {
 	acceptor().listen(backlog_size);
+	addVirtualServer(config);
 }
