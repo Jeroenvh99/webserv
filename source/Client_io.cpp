@@ -9,9 +9,10 @@ Client::parse_request(webserv::Buffer& buf) {
 		switch (body.type()) {
 		case http::Body::Type::none:
 			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
-			break;
+			return (true);
 		case http::Body::Type::by_length:
 			_impl._istate = InputState::deliver; // and set length indicator
+			_impl._body_size = body.length();
 			break;
 		case http::Body::Type::chunked:
 			_impl._istate = InputState::dechunk;
@@ -19,6 +20,7 @@ Client::parse_request(webserv::Buffer& buf) {
 		}
 		_impl._buffer_flush(buf);
 		return (true);
+		//return (deliver(buf) != OperationStatus::failure);
 	}
 	return (false);
 }
@@ -76,7 +78,6 @@ Client::respond(job::Job const& job) {
 		throw (Client::HTTPErrorException(*jstat));
 	} else {
 		_impl._response = http::Response(*jstat);
-		// todo: insert more headers based on file type
 		_impl._buffer_empty();
 		_impl._buffer.clear();
 		_impl._buffer << _impl._response;
@@ -109,6 +110,9 @@ Client::respond(job::ErrorJob const& job) {
 
 Client::OperationStatus
 Client::deliver(webserv::Buffer const& buf) {
+	if (buf.len() > _impl._body_size) // actual body size > Content-Length
+		return (OperationStatus::failure);
+	_impl._body_size -= buf.len();
 	switch (_impl._worker.deliver(buf)) {
 	case Worker::InputStatus::pending:
 		if (_impl._body_size == 0) {

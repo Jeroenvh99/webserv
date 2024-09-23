@@ -28,6 +28,28 @@ Server::_parse_request(Client& client) {
 			client.respond({client, *this, vserv});
 			_elog.log(LogLevel::debug, std::string(client.address()),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
+			if (buf.len() > 0) { // deliver trailing bytes to worker
+				switch (client.istate()) {
+				case Client::InputState::dechunk:
+				case Client::InputState::deliver:
+					switch (client.deliver(buf)) {
+					case Client::OperationStatus::success:
+					case Client::OperationStatus::pending:
+						_elog.log(LogLevel::debug, std::string(client.address()),
+							": Delivered ", buf.len(), " bytes.");
+						return (IOStatus::success);
+					case Client::OperationStatus::failure:
+						_elog.log(LogLevel::error, std::string(client.address()),
+							": Error delivering resource.");
+						// todo: inject error message into body
+						return (IOStatus::failure);
+					default: // timeout
+						__builtin_unreachable();
+					}
+				default:
+					return (IOStatus::failure); // trailing bytes, but client will not accept incoming data
+				}
+			}
 		}
 	} catch (Client::RedirectionException& e) {
 		_elog.log(LogLevel::error, std::string(client.address()),
