@@ -1,7 +1,9 @@
 #include "Server.hpp"
 #include "Poller.hpp"
+#include "logging/logging.hpp"
 
 using webserv::Poller;
+using Elog = logging::ErrorLogger;
 
 void
 Server::process() {
@@ -27,7 +29,7 @@ Server::_process_core(Poller::Event const& event, ClientIt it) {
 	Client	client(*it);
 
 	if (event.happened(Poller::EventType::hangup)) {
-		_elog.log(LogLevel::notice, client.address(),
+		logging::elog.log(Elog::notice, client.address(),
 			": Connection closed by peer.");
 		_to_graveyard(it);
 	}
