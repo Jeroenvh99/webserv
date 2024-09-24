@@ -15,6 +15,8 @@ static constexpr int	default_backlog = 5192;
 
 static size_t	get_envsize(char const* const*);
 static void		configure(Servers&, char const*);
+static void		configure_logs(Config const&);
+static void		configure_servers(Servers&, Config const&);
 
 logging::AccessLogger	logging::alog;
 logging::ErrorLogger	logging::elog;
@@ -59,8 +61,20 @@ configure(Servers& servers, char const* cpath) {
 	std::string		path(cpath);
 	Config const	conf(path);
 
-	// configure access and error log files
+	configure_logs(conf);
+	configure_servers(servers, conf);
+}
 
+static void
+configure_logs(Config const&) {
+	// for both logging::alog and logging::elog
+	// check if config specifies a path to a file
+	// if so: call .attach_file(path), this should throw an error if the file couldn't be opened
+	// else, do nothing (loggers remain attached to standard streams)
+}
+
+static void
+configure_servers(Servers& servers, Config const& conf) {
 	for (auto const& config: conf.getServers()) {
 		auto	it = std::find_if(servers.begin(), servers.end(),
 			[config](Servers::value_type const& server) {
