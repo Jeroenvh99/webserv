@@ -12,6 +12,8 @@ void
 ClientImpl::_clear() noexcept {
 	_istate = InputState::parse_request;
 	_ostate = OutputState::closed;
+	_body_size = 0;
+	// clear dechunker
 	_buffer_empty();
 	_parser.clear();
 	_request.clear();

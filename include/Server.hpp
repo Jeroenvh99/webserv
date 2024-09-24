@@ -23,23 +23,27 @@ class VirtualServer {
 			bool	permanent;
 		};
 		using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
+		using Redirections = std::vector<Redirection>;
+
 		VirtualServer(Config::Server config);
-		std::string const&						name() const noexcept;
-		route::Route const&						route() const noexcept;
-		route::Location							locate(std::filesystem::path const&) const;
-		route::Location							
-			locate(URI const&) const;
-		stdfs::path const&						locate_errpage(http::Status) const noexcept;
-		std::vector<VirtualServer::Redirection>	getRedirections() const;
-		int										getMaxBodySize() const;
-		void									add_httpredirect(std::string from, std::string to, bool permanent);
-		static stdfs::path const				no_errpage;
+
+		std::string const&	name() const noexcept;
+		route::Route const&	route() const noexcept;
+		route::Location		locate(std::filesystem::path const&) const;
+		route::Location		locate(URI const&) const;
+		stdfs::path const&	locate_errpage(http::Status) const noexcept;
+		size_t				max_body_size() const noexcept;
+		Redirections const&	redirections() const noexcept;
+
+		void				add_httpredirect(std::string const&, std::string const&, bool);
+
+		static stdfs::path const	no_errpage;
 	private:
-		std::string					_name;
-		route::Route				_route;
-		int							_maxbodysize;
-		ErrorPageMap				_error_pages;
-		std::vector<Redirection>	_redirections;
+		std::string		_name;
+		route::Route	_route;
+		size_t			_maxbodysize;
+		ErrorPageMap	_error_pages;
+		Redirections	_redirections;
 };
 
 class Server {
@@ -56,13 +60,14 @@ public:
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	in_port_t							port() const noexcept;
+	in_port_t				port() const noexcept;
 
-	Acceptor&							acceptor() noexcept;
-	Acceptor const&						acceptor() const noexcept;
+	Acceptor&				acceptor() noexcept;
+	Acceptor const&			acceptor() const noexcept;
 
-	void								addVirtualServer(Config::Server config);
-	VirtualServer const&				searchVirtualServer(std::string name);
+	void					virtual_server_add(Config::Server config);
+	VirtualServer const&	virtual_server(std::string const& name);
+	VirtualServer const&	virtual_server(Client const&);
 
 	void	process();
 
@@ -84,8 +89,9 @@ private:
 	IOStatus	_fetch(Client&, webserv::Buffer&);
 	IOStatus	_enchunk_and_send(Client&);
 	IOStatus	_fetch_and_send(Client&);
-	IOStatus	_deliver(Client&);
-	IOStatus	_dechunk_and_deliver(Client&);
+	IOStatus	_recv_and_deliver(Client&);
+	IOStatus	_deliver(Client&, webserv::Buffer const&);
+	IOStatus	_dechunk(Client&);
 	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);

@@ -83,7 +83,7 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 Worker::InputStatus
 Worker::deliver(webserv::Buffer const& wsbuf) {
 	try {
-		if (write(wsbuf) != wsbuf.size())
+		if (write(wsbuf) != wsbuf.len())
 			throw (job::BaseResource::IOException("incomplete write"));
 		return (InputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
