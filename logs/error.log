@@ -1,9 +1,0 @@
-[notice] [2024/09/24:15:11:06+0200] Established connection with peer at 127.0.0.1:33424.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Received 444 bytes.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Directing 444 bytes to request parser.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Request parsing finished; 444 trailing bytes.
-[error] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Error delivering resource.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Fetched 17 bytes.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Sent 17 bytes.
-[debug] [2024/09/24:15:11:06+0200] 127.0.0.1:33424: Resource fetched successfully.
-[notice] [2024/09/24:15:11:06+0200] Terminated connection with peer at 127.0.0.1:33424.
