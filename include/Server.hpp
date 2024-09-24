@@ -90,8 +90,8 @@ private:
 	IOStatus	_enchunk_and_send(Client&);
 	IOStatus	_fetch_and_send(Client&);
 	IOStatus	_recv_and_deliver(Client&);
+	IOStatus	_dechunk_and_deliver(Client&);
 	IOStatus	_deliver(Client&, webserv::Buffer const&);
-	IOStatus	_dechunk(Client&);
 	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);

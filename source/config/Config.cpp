@@ -137,7 +137,7 @@ int Config::ParseBodySize(std::stringstream &linestream) {
 		unsigned int res;
 		res = std::stoi(temp);
 		if (res < 0) {
-			throw std::invalid_argument();
+			throw std::invalid_argument("invalid body size limit");
 		}
 		return (maxbodysize * res);
 	} catch (std::exception &e) {
