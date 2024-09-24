@@ -10,6 +10,16 @@ ErrorLogger::ErrorLogger():
 
 // Public methods
 
+ErrorLogger::Level
+ErrorLogger::level() const noexcept {
+	return (_level);
+}
+
+ErrorLogger::Level&
+ErrorLogger::level() noexcept {
+	return (_level);
+}
+
 char const*
 ErrorLogger::level_to_string(Level level) {
 	switch (level) {

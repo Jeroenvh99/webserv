@@ -90,8 +90,8 @@ public:
 
 	ErrorLogger();
 
-	Level&			level() noexcept;
-	Level const&	level() const noexcept;
+	Level&	level() noexcept;
+	Level	level() const noexcept;
 
 	template<typename... Ts>
 	void log(Level, Ts...);
@@ -99,7 +99,7 @@ public:
 	static char const*			level_to_string(Level);
 	static ErrorLogger::Level	level_from_string(std::string const&);
 
-	static constexpr Level	default_level = debug;
+	static constexpr Level	default_level = error;
 	static const Literals	literals;
 
 private:

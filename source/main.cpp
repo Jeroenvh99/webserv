@@ -66,11 +66,16 @@ configure(Servers& servers, char const* cpath) {
 }
 
 static void
-configure_logs(Config const&) {
-	// for both logging::alog and logging::elog
-	// check if config specifies a path to a file
-	// if so: call .attach_file(path), this should throw an error if the file couldn't be opened
-	// else, do nothing (loggers remain attached to standard streams)
+configure_logs(Config const& conf) {
+	auto const& alog_conf = conf.getAccessLog();
+	auto const&	elog_conf = conf.getErrorLog();
+
+	if (alog_conf.filename.length() > 0)
+		logging::alog.attach_file(alog_conf.filename);
+	// configure access log formatting
+	if (elog_conf.filename.length() > 0)
+		logging::elog.attach_file(elog_conf.filename);
+	logging::elog.level() = elog_conf.level;
 }
 
 static void
