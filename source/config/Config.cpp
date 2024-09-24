@@ -174,7 +174,7 @@ void Config::Server::AddRedirect(std::stringstream &linestream) {
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	Server server{_errorlog, _accesslog, -1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
+	Server server{-1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -194,11 +194,7 @@ void Config::ParseServer(std::stringstream &s) {
 			_servers.push_back(server);
 			return;
 		}
-		if (temp == "error_log") {
-			server.errorlog = ParseLog(temp, linestream);
-		} else if (temp == "access_log") {
-			server.accesslog = ParseLog(temp, linestream);	
-		} else if (temp == "error_page") {
+		if (temp == "error_page") {
 			server.AddErrorPage(linestream);
 		} else if (temp == "location") {
 			std::vector<std::string> locs{""};
