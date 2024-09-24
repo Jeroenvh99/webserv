@@ -1,51 +1,53 @@
 #include "logging/logging.hpp"
 
-#include <cstring>
-
 using logging::ErrorLogger;
 
 // Basic operations
 
 ErrorLogger::ErrorLogger():
 	Logger(std::cerr),
-	_level(Level::error) {}
-
-ErrorLogger::ErrorLogger(std::ostream& os, Level level):
-	Logger(os),
-	_level(level) {}
+	_level(default_level) {}
 
 // Public methods
 
+ErrorLogger::Level
+ErrorLogger::level() const noexcept {
+	return (_level);
+}
+
+ErrorLogger::Level&
+ErrorLogger::level() noexcept {
+	return (_level);
+}
+
 char const*
-ErrorLogger::level_to_string(ErrorLogger::Level level) {
+ErrorLogger::level_to_string(Level level) {
 	switch (level) {
-		case ErrorLogger::Level::debug:
-			return ("debug");
-		case ErrorLogger::Level::info:
-			return ("info");
-		case ErrorLogger::Level::notice:
-			return ("notice");
-		case ErrorLogger::Level::warning:
-			return ("warning");
-		case ErrorLogger::Level::error:
-			return ("error");
-		case ErrorLogger::Level::critical:
-			return ("critical");
-		case ErrorLogger::Level::alert:
-			return ("alert");
-		case ErrorLogger::Level::emergency:
-			return ("emergency");
-		default: // unreachable
-			throw (std::invalid_argument(
-				"level does not correspond to string"));
+	case debug:
+		return ("debug");
+	case info:
+		return ("info");
+	case notice:
+		return ("notice");
+	case warning:
+		return ("warning");
+	case error:
+		return ("error");
+	case critical:
+		return ("critical");
+	case alert:
+		return ("alert");
+	case emergency:
+		return ("emergency");
+	default:
+		__builtin_unreachable();
 	}
 }
 
 ErrorLogger::Level
 ErrorLogger::level_from_string(std::string const& that) {
-	for (auto const& [level, string]: _levels)
-		if (that == string)
+	for (auto const& [level, literal]: literals)
+		if (that == literal)
 			return (level);
-	throw (std::invalid_argument(
-		"string does not correspond to ErrorLogger::level"));
+	throw (std::invalid_argument("string does not match error logger level"));
 }

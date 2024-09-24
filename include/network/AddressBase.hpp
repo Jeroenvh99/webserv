@@ -12,8 +12,8 @@ namespace network {
 	public:
 		virtual ~AddressBase() = default;
 
-		virtual sockaddr const*		raw() const noexcept = 0;
-		virtual socklen_t	size() const noexcept = 0;
+		virtual sockaddr const*	raw() const noexcept = 0;
+		virtual socklen_t		size() const noexcept = 0;
 	}; // class Address
 }; // namespace network
 

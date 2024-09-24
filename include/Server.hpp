@@ -5,7 +5,6 @@
 # include "network/Acceptor.hpp"
 # include "network/Handle.hpp"
 # include "network/Poller.hpp"
-# include "logging/logging.hpp"
 # include "http/Status.hpp"
 # include "Client.hpp"
 # include "route.hpp"
@@ -56,7 +55,7 @@ public:
 	~Server() = default;
 	Server(Server const&) = delete;
 	Server(Server&&) = default;
-	Server(Config::Server, int, std::ostream&, std::ostream&);
+	Server(Config::Server, int);
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
@@ -73,7 +72,6 @@ public:
 	void	process();
 
 private:
-	using LogLevel = logging::ErrorLogger::Level;
 	using ClientIt = ClientMap::iterator;
 
 	using IOStatus = webserv::GenericStatus;
@@ -102,8 +100,6 @@ private:
 	ClientMap					_clients;
 	ClientMap					_graveyard;
 	std::vector<VirtualServer>	_possibleservers;
-	logging::AccessLogger	_alog;
-	logging::ErrorLogger	_elog;
 }; // class Server
 
 #endif // SERVER_HPP

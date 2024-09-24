@@ -126,22 +126,21 @@ Client::deliver(webserv::Buffer const& buf) {
 }
 
 Client::OperationStatus
-Client::dechunk_and_deliver(webserv::Buffer&) {
-	// try {
-	// 	_impl._dechunker.dechunk(buf);
-	// } catch (http)
-	// switch (_impl._worker.deliver(buf)) {
-	// case Worker::InputStatus::pending:
-	// 	if (_impl._dechunker.done()) {
-	// 		_impl._istate = (_impl._ostate == OutputState::closed)
-	// 			? InputState::parse_request
-	// 			: InputState::closed;
-	// 		return (OperationStatus::success);
-	// 	}
-	// 	return (OperationStatus::pending);
-	// default: // failure
+Client::dechunk_and_deliver(webserv::Buffer& buf) {
+	http::Dechunker::Result	res = _impl._dechunker.dechunk(buf);
+
+	switch (_impl._worker.deliver(buf)) {
+	case Worker::InputStatus::pending:
+		if (res && *res == 0) {
+			_impl._istate = (_impl._ostate == OutputState::closed)
+				? InputState::parse_request
+				: InputState::closed;
+			return (OperationStatus::success);
+		}
+		return (OperationStatus::pending);
+	default: // failure
 		return (OperationStatus::failure);
-	// }
+	}
 }
 
 Client::OperationStatus
