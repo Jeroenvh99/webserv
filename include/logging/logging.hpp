@@ -33,7 +33,7 @@ public:
 private:
 	Type		_type;
 	std::string	_data;
-}; // class LogFormat::Element;
+}; // class Variable;
 
 class Logger {
 public:

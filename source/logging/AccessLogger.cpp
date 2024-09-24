@@ -28,7 +28,8 @@ AccessLogger::log(Client const&/* client*/) {
 		case Type::time_local:
 			out << timestamp();
 			break;
-		default: break; // unreachable
+		default:
+			__builtin_unreachable();
 		}
 	}
 	out << std::endl;
