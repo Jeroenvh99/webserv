@@ -13,9 +13,40 @@
 </header>
 <hr />
 <body>
-	<div class="buttons">
-		<button>upload something!</button>
-		<button>delete something!</button>
+	<div class="forms">
+		<div class="form-wrapper">
+			<h3>download</h3>
+			<p>Test the GET method by downloading a file.</p>
+			<div class="form-container">
+				<form>
+					<label for="fileNameDownload"></label>
+					<input type="text" id="fileNameDownload" name="fileNameDownload" required>
+					<button type="submit">download</button>
+				</form>
+			</div>
+		</div>
+		<div class="form-wrapper">
+			<h3>upload</h3>
+			<p>Test the POST method by uploading a file.</p>
+			<div class=form-container>
+				<form>
+					<label for="fileUpload"></label>
+					<input type="file" id="fileUpload" name="fileUpload" required>
+					<button type="submit">upload</button>
+				</form>
+			</div>
+		</div>
+		<div class="form-wrapper">
+			<h3>delete</h3>
+			<p>Test the DELETE method by removing a file.</p>
+			<div class="form-container">
+				<form>
+					<label for="fileNameDelete"></label>
+					<input type="text" id="fileNameDelete" name="fileNameDelete" required>
+					<button type="submit">delete</button>
+				</form>
+			</div>
+		</div>
 	</div>
 </body>
 <footer>

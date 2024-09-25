@@ -12,12 +12,20 @@ body {
 	padding: 20px 10px;
 }
 
-.buttons {
+.forms {
 	display: grid;
 	grid-auto-flow: column;
 }
 
+.form-container {
+	margin: 5px;
+	border: 1px solid var(--accent-color);
+	padding: 5px;
+}
+
 footer {
+	position: absolute;
+	bottom: 10px;
 	font-style: italic;
 	font-size: 0.8rem;
 }
@@ -29,11 +37,21 @@ h1 {
 	margin: 0;
 }
 
+h3 {
+	font-size: 1.1rem;
+	color: var(--accent-color-dark);
+	margin: 0 0 10px 10px;
+}
+
 sh1 {
 	font-size: 0.9rem;
 	font-style: italic;
 	font-weight: bold;
 	color: var(--accent-color);
+}
+
+p {
+	margin: 0;
 }
 
 hr {
