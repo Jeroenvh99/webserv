@@ -89,6 +89,8 @@ _to_string(PathIt begin, PathIt end) {
 
 static std::string_view
 _get_ext(std::string const& fname) {
+	if (fname.length() == 0)
+		return (std::string_view(fname));
 	auto	begin = std::next(fname.begin(), 1);
 
 	while (begin != fname.end()) {
