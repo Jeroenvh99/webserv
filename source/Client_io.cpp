@@ -3,6 +3,7 @@
 bool
 Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
+	buf.empty();
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		http::Body const	body = _impl._request.expects_body();
 

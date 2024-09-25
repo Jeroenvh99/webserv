@@ -2,7 +2,7 @@
 #include "Poller.hpp"
 #include "logging/logging.hpp"
 
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 // Accessors
 

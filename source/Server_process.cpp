@@ -3,7 +3,7 @@
 #include "logging/logging.hpp"
 
 using webserv::Poller;
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 void
 Server::process() {
