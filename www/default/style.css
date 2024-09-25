@@ -4,23 +4,18 @@
 	--accent-color: rgb(64, 98, 61);
 }
 
+header {
+	display: flex;
+	flex-direction: row;
+	height: fit-content;
+}
+
 body {
     font-family: "Open Sans", "Helvetica", "sans-serif";
 
 	max-width: 1800px;
 	margin: 0 auto;
 	padding: 20px 10px;
-}
-
-.forms {
-	display: grid;
-	grid-auto-flow: column;
-}
-
-.form-container {
-	margin: 5px;
-	border: 1px solid var(--accent-color);
-	padding: 5px;
 }
 
 footer {
@@ -60,4 +55,24 @@ hr {
 
 b {
 	color: var(--accent-color-dark);
+}
+
+.forms {
+	display: grid;
+	grid-auto-flow: column;
+}
+
+.form-container {
+	margin: 5px;
+	border: 1px solid var(--accent-color);
+	padding: 5px;
+}
+
+.header-text {
+	flex-grow: 1;
+}
+
+.header-logo {
+	aspect-ratio: 1 / 1;
+	min-height: 3rem;
 }
