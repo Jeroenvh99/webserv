@@ -9,6 +9,12 @@ body {
 
 	max-width: 1800px;
 	margin: 0 auto;
+	padding: 20px 10px;
+}
+
+.buttons {
+	display: grid;
+	grid-auto-flow: column;
 }
 
 footer {
@@ -27,9 +33,13 @@ sh1 {
 	font-size: 0.9rem;
 	font-style: italic;
 	font-weight: bold;
-	color: var(--accent-color)
+	color: var(--accent-color);
 }
 
 hr {
 	border: 2px outset var(--accent-color);
+}
+
+b {
+	color: var(--accent-color-dark);
 }
