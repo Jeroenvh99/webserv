@@ -25,6 +25,7 @@ class VirtualServer {
 		using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
 		VirtualServer(Config::Server config);
 		std::string const&						name() const noexcept;
+		int const&								port() const noexcept;
 		route::Route const&						route() const noexcept;
 		route::Location							locate(std::filesystem::path const&) const;
 		route::Location							
@@ -40,6 +41,7 @@ class VirtualServer {
 		int							_maxbodysize;
 		ErrorPageMap				_error_pages;
 		std::vector<Redirection>	_redirections;
+		int							_port;
 };
 
 class Server {

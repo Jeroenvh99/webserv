@@ -8,7 +8,7 @@ AccessLogger::AccessLogger():
 	_fmt(default_fmt) {}
 
 void
-AccessLogger::log(Client const&/* client*/) {
+AccessLogger::log(Client const&/* client*/, VirtualServer const& server) {
 	using Type = Variable::Type;
 
 	std::ostream&	out = os();
@@ -27,6 +27,12 @@ AccessLogger::log(Client const&/* client*/) {
 			break;
 		case Type::time_local:
 			out << timestamp();
+			break;
+		case Type::host:
+			out << server.name() << ":" server.port();
+			break;
+		case Type::client:
+			out << client.address();
 			break;
 		default:
 			__builtin_unreachable();

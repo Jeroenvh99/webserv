@@ -18,6 +18,8 @@ public:
 		time_local,
 		request,
 		status,
+		host,
+		client
 	}; // enum class Type
 	using enum Type;
 
