@@ -12,10 +12,10 @@ Variable::Variable(Type type, std::string&& data):
 	_type(type), _data(data) {}
 
 Variable::Variable(std::string const& data):
-	_type(literal), _data(data) {}
+	_type(Type::literal), _data(data) {}
 
 Variable::Variable(std::string&& data):
-	_type(literal), _data(data) {}
+	_type(Type::literal), _data(data) {}
 
 Variable::Type
 Variable::type() const noexcept {

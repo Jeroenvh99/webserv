@@ -2,7 +2,7 @@
 #include "Poller.hpp"
 #include "logging/logging.hpp"
 
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 // Accessors
 
@@ -66,61 +66,27 @@ Server::port() const noexcept {
 	return (addr.port());
 }
 
-route::Route const&
-VirtualServer::route() const noexcept {
-	return (_route);
-}
-
-route::Location
-VirtualServer::locate(std::filesystem::path const& path) const {
-	return (_route.follow(path));
-}
-
-route::Location
-VirtualServer::locate(URI const& uri) const {
-	return (locate(uri.path()));
-}
-
-stdfs::path const&
-VirtualServer::locate_errpage(http::Status status) const noexcept {
-	auto const	it = _error_pages.find(status);
-
-	if (it == _error_pages.end())
-		return (no_errpage);
-	return (it->second);
-}
+// Modifiers
 
 void
-VirtualServer::add_httpredirect(std::string from, std::string to, bool permanent) {
-	VirtualServer::Redirection redir;
-	redir.from = URI(from);
-	redir.to = URI(to);
-	redir.permanent = permanent;
-	_redirections.emplace_back(redir);
-}
-
-std::vector<VirtualServer::Redirection>
-VirtualServer::getRedirections() const {
-	return _redirections;
-}
-
-int
-VirtualServer::getMaxBodySize() const {
-	return _maxbodysize;
-}
-
-void
-Server::addVirtualServer(Config::Server config) {
+Server::virtual_server_add(Config::Server config) {
 	_possibleservers.emplace_back(VirtualServer(config));
 }
 
-VirtualServer const&	Server::searchVirtualServer(std::string name) {
-	for (size_t i = 0; i < _possibleservers.size(); i++) {
-		if (_possibleservers[i].name() == name) {
-			return (_possibleservers[i]);
-		}
-	}
+VirtualServer const&
+Server::virtual_server(std::string const& name) {
+	for (auto const& vserv: _possibleservers)
+		if (vserv.name() == name)
+			return (vserv);
 	return (_possibleservers[0]);
+}
+
+VirtualServer const&
+Server::virtual_server(Client const& client) {
+	std::string	hostname = client.request().headers().at("Host").csvalue();
+
+	hostname.erase(hostname.find_last_of(':'));
+	return (virtual_server(hostname));
 }
 
 // Private methods

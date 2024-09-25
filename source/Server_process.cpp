@@ -3,7 +3,7 @@
 #include "logging/logging.hpp"
 
 using webserv::Poller;
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 void
 Server::process() {
@@ -47,7 +47,7 @@ Server::_process_read(Client& client) {
 	case Client::InputState::parse_request:
 		return (_parse_request(client));
 	case Client::InputState::deliver:
-		return (_deliver(client));
+		return (_recv_and_deliver(client));
 	case Client::InputState::dechunk:
 		return (_dechunk_and_deliver(client));
 	case Client::InputState::closed:

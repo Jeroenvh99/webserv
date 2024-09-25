@@ -3,15 +3,17 @@
 bool
 Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
+	buf.empty();
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		http::Body const	body = _impl._request.expects_body();
 
 		switch (body.type()) {
 		case http::Body::Type::none:
 			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
-			break;
+			return (true);
 		case http::Body::Type::by_length:
-			_impl._istate = InputState::deliver; // and set length indicator
+			_impl._istate = InputState::deliver;
+			_impl._body_size = body.length();
 			break;
 		case http::Body::Type::chunked:
 			_impl._istate = InputState::dechunk;
@@ -34,8 +36,6 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (!_impl._buffer.eof()) {
 		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
-
-			// http::Body const	body = _impl._response.expects_body();
 			_impl._response_body = _impl._response.expects_body(); // replace by:
 			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
 			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
@@ -46,7 +46,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._buffer_flush(trail);
 			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
-			_impl._ostate = OutputState::fetch; // replace
+			_impl._ostate = OutputState::fetch;
 			return (true);
 		}
 		_impl._response.headers().insert(line);
@@ -76,7 +76,6 @@ Client::respond(job::Job const& job) {
 		throw (Client::HTTPErrorException(*jstat));
 	} else {
 		_impl._response = http::Response(*jstat);
-		// todo: insert more headers based on file type
 		_impl._buffer_empty();
 		_impl._buffer.clear();
 		_impl._buffer << _impl._response;
@@ -109,6 +108,9 @@ Client::respond(job::ErrorJob const& job) {
 
 Client::OperationStatus
 Client::deliver(webserv::Buffer const& buf) {
+	if (buf.len() > _impl._body_size) // actual body size > Content-Length
+		return (OperationStatus::failure);
+	_impl._body_size -= buf.len();
 	switch (_impl._worker.deliver(buf)) {
 	case Worker::InputStatus::pending:
 		if (_impl._body_size == 0) {

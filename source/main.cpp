@@ -90,6 +90,6 @@ configure_servers(Servers& servers, Config const& conf) {
 		if (it == servers.end())
 			servers.emplace_back(config, default_backlog);
 		else
-			it->addVirtualServer(config);
+			it->virtual_server_add(config);
 	}
 }
