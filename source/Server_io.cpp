@@ -2,7 +2,7 @@
 #include "http/Response.hpp"
 #include "logging/logging.hpp"
 
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 static void	validate_body_size(Client const&, size_t);
 

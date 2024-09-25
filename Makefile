@@ -66,7 +66,7 @@ SRC_FILES	:= Environment_build.cpp \
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
-CXX			:= clang++
+CXX			:= c++
 CXXFLAGS	:= -Wall -Wextra -Werror -I$(INCLUDE_DIR) --std=c++20
 DEBUG_FLAGS	:= -g -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
