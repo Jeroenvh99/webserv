@@ -9,8 +9,8 @@ SRC_FILES	:= Environment_build.cpp \
 			Environment_method.cpp \
 			Client.cpp \
 			Client_io.cpp \
-			config/Config.cpp \
 			ClientImpl.cpp \
+			config/Config.cpp \
 			main.cpp \
 			Poller.cpp \
 			Server_ctor.cpp \
