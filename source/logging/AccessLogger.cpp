@@ -3,33 +3,34 @@
 using logging::AccessLogger;
 using logging::Variable;
 
-AccessLogger::AccessLogger(std::ostream& os, Format const& fmt):
-	Logger(os),
-	_fmt(fmt) {}
-
-AccessLogger::AccessLogger(std::ostream& os, Format&& fmt):
-	Logger(os),
-	_fmt(fmt) {}
+AccessLogger::AccessLogger():
+	Logger(std::cout),
+	_fmt(default_fmt) {}
 
 void
 AccessLogger::log(Client const&/* client*/) {
+	using Type = Variable::Type;
+
+	std::ostream&	out = os();
+
 	timestamp_update();
 	for (Variable const& elem: _fmt) {
 		switch (elem.type()) {
-		case Variable::Type::literal:
-			os() << elem.data();
+		case Type::literal:
+			out << elem.data();
 			break;
-		case Variable::Type::request:
-			//os() << client.request();
+		case Type::request:
+			//out << client.request();
 			break;
-		case Variable::Type::status:
-			//os() << client.status();
+		case Type::status:
+			//out << client.status();
 			break;
-		case Variable::Type::time_local:
-			os() << timestamp();
+		case Type::time_local:
+			out << timestamp();
 			break;
-		default: break; // unreachable
+		default:
+			__builtin_unreachable();
 		}
 	}
-	os() << std::endl;
+	out << std::endl;
 }

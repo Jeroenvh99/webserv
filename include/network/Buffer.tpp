@@ -36,6 +36,15 @@ namespace network {
 	}
 
 	template<size_t SIZE>
+	bool
+	Buffer<SIZE>::push_back(char c) noexcept {
+		if (len() >= capacity())
+			return (false);
+		this->data()[_len++] = c;
+		return (true);
+	}
+
+	template<size_t SIZE>
 	size_t
 	Buffer<SIZE>::push_back(std::string const& str) noexcept {
 		if (str.size() > capacity() - len())

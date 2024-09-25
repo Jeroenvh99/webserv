@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Poller.hpp"
+
 /*
 Server::Server(RouteConfig&& config):
 	_poller(),
@@ -12,19 +13,12 @@ Server::Server(RouteConfig&& config):
 	_buffer() {}
 */
 
-using logging::Format;
-using logging::Variable;
-
 stdfs::path const	VirtualServer::no_errpage = "";
 
-Server::Server(Config::Server config, int backlog_size,
-		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
+Server::Server(Config::Server config, int backlog_size):
 	_acceptor(g_poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
 							{webserv::Poller::EventType::read})),
-	_clients(),
-	_alog(alog, Format{
-		Variable("["), Variable(Variable::Type::time_local), Variable("]")
-	}),
-	_elog(elog, config.errorlog.level) {
+	_clients() {
 	acceptor().listen(backlog_size);
+	virtual_server_add(config);
 }

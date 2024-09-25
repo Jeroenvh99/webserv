@@ -6,17 +6,14 @@
 using http::Dechunker;
 
 static std::string	_to_string_hex(size_t);
-static bool			_check_end(std::istream&);
 
-webserv::Buffer
-http::enchunk(webserv::ChunkBuffer const& chbuf) {
-	webserv::Buffer	buf;
-
-	buf.push_back(_to_string_hex(chbuf.len()));
-	buf.push_back("\r\n");
-	buf.push_back(chbuf);
-	buf.push_back("\r\n");
-	return (buf);
+webserv::Buffer&
+http::enchunk(webserv::Buffer& wsbuf, webserv::ChunkBuffer const& chbuf) {
+	wsbuf.push_back(_to_string_hex(chbuf.len()));
+	wsbuf.push_back("\r\n");
+	wsbuf.push_back(chbuf);
+	wsbuf.push_back("\r\n");
+	return (wsbuf);
 }
 
 static std::string
@@ -28,58 +25,94 @@ _to_string_hex(size_t num) {
 }
 
 Dechunker::Dechunker():
-	_size(std::nullopt) {}
+	_chunk_size(std::nullopt), _bytes_dechunked(0) {}
 
-Dechunker::Chunk
-Dechunker::dechunk(webserv::Buffer const& buf) { // DB: make more efficient?
-	buf.put(_buffer);
-	if (!_size && _get_size() == false)
-		return (std::nullopt);
-	if (_buffer.str().size() < *_size + 2) // trailing CRLF must be processed
-		return (std::nullopt);
-
-	std::string	chunk;
-
-	for (size_t i = 0; i < *_size; ++i)
-		chunk.push_back(_buffer.get());
-	if (_check_end(_buffer) == false)
-		throw (ChunkException("chunk size mismatch"));
-	_size = std::nullopt;
-	return (chunk);
+std::ostream&
+Dechunker::buffer() noexcept {
+	return (_buf);
 }
 
-bool
-Dechunker::_get_size() {
-	std::string	line;
+Dechunker::Result
+Dechunker::dechunk(webserv::Buffer& wsbuf) {
+	if (_chunk_size && _bytes_dechunked + wsbuf.len() <= _chunk_size)
+		return (_bytes_dechunked += wsbuf.len(), std::nullopt);
+	_buf.clear();
+	_buf << wsbuf;
+	wsbuf.empty();
+	
+	Result	res = dechunk(wsbuf, _buf);
 
+	if (res && *res == 0 && !_buf.eof())
+		throw (Exception("buffer contains bytes past final chunk"));
+	return (res);
+}
+
+Dechunker::Result
+Dechunker::dechunk(webserv::Buffer& wsbuf, std::istream& is) {
+	Result	res = std::nullopt;
+	
+	while (is) {
+		res = dechunk_single(wsbuf, is);
+		if (!res)
+			break;
+	}
+	return (res);
+}
+
+Dechunker::Result
+Dechunker::dechunk_single(webserv::Buffer& wsbuf, std::istream& is) {
 	try {
-		utils::getline<"\r\n">(_buffer, line);
-		try {
-			_size = std::stoul(line);
-			return (true);
-		} catch (std::out_of_range&) {
-			throw (ChunkException("bad chunk size format"));
+		if (!_chunk_size)
+			get_size(is);
+
+		while (_bytes_dechunked < *_chunk_size) {
+			if  (wsbuf.len() == wsbuf.capacity())
+				return (std::nullopt);
+
+			char const	c = is.get();
+
+			if (is.eof())
+				return (std::nullopt);
+			if (!wsbuf.push_back(c))
+				throw (std::out_of_range("Dechunker::dechunk_single"));
+			++_bytes_dechunked;
 		}
+		return (get_end(is));
 	} catch (utils::IncompleteLineException&) {
-		_size = std::nullopt;
-		return (false); // and try again after next read
+		return (std::nullopt);
 	}
 }
 
-static bool
-_check_end(std::istream& is) {
-	std::string	str;
+void
+Dechunker::get_size(std::istream& is) {
+	std::string	s;
 
-	utils::getline<"\r\n">(is, str);
-	return (!is.eof() && str.size() == 0);
+	try {
+		utils::getline<"\r\n">(is, s);
+		_chunk_size = std::stoul(s, nullptr, 16);
+		_bytes_dechunked = 0;
+	} catch (std::out_of_range&) {
+		throw (Exception("invalid chunk size format"));
+	}
 }
 
-/* ChunkException */
+size_t
+Dechunker::get_end(std::istream& is) {
+	std::string	s;
 
-Dechunker::ChunkException::ChunkException(char const* msg):
+	utils::getline<"\r\n">(is, s);
+	if (s.size() > 0)
+		throw (Exception("incorrectly sized chunk"));
+	_chunk_size = std::nullopt;
+	return (_bytes_dechunked);
+}
+
+/* Exception */
+
+Dechunker::Exception::Exception(char const* msg):
 	_msg(msg) {}
 
 char const*
-Dechunker::ChunkException::what() const noexcept {
+Dechunker::Exception::what() const noexcept {
 	return (_msg);
 }

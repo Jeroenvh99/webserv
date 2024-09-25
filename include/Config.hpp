@@ -39,8 +39,6 @@ public:
 	{
 		void AddErrorPage(std::stringstream &linestream);
 		void AddRedirect(std::stringstream &linestream);
-		struct ServerLog errorlog;
-		struct ServerLog accesslog;
 		int port;
 		int maxbodysize;
 		std::string servername;
