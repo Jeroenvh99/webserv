@@ -74,7 +74,8 @@ Route::allows_cgi(std::string const& ext) const noexcept {
 
 Location
 Route::follow(stdfs::path const& path) const {
-	if (path.root_path() != _fname)
+	auto const&	root = path.root_path();
+	if (root != _fname && root != "")
 		throw (std::invalid_argument("different root path"));
 	return (_follow_core(++path.begin(), path.end()));
 }
