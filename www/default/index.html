@@ -7,53 +7,80 @@
 	<link rel="favicon" href="logo.svg">
     <link rel="stylesheet" href="style.css">
 </head>
-<header>
-	<div class="header-text">
-		<h1>WebServ</h1>
-		<sh1>your favourite clunky HTTP server, made with love</sh1>
-	</div>
-	<img class="header-logo" src="favicon.svg" alt="DIY Logo" />
-</header>
-<hr />
 <body>
-	<div class="forms">
-		<div class="form-wrapper">
-			<h3>download</h3>
-			<p>Test the GET method by downloading a file.</p>
-			<div class="form-container">
+	<header>
+		<div class="header-content">
+			<div class="header-text">
+				<h1>WebServ</h1>
+				<sh1>your favourite clunky HTTP server, made with love</sh1>
+			</div>
+			<img class="header-logo" src="favicon.svg" alt="DIY Logo" />
+		</div>
+		<hr />
+	</header>
+	<main>
+		<h2>About WebServ</h2>
+		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <code>GET</code>, <code>POST</code> or <code>DELETE</code> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <b>Telnet</b> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download</h3>
 				<form>
-					<label for="fileNameDownload"></label>
-					<input type="text" id="fileNameDownload" name="fileNameDownload" required>
-					<button type="submit">download</button>
+					<label for="fileGet">Test the GET method by downloading a file.</label>
+					<div class="form-components">
+						<input type="text" id="fileGet" name="fileGet" required>
+						<button type="submit">download</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload</h3>
+				<form>
+					<label for="filePost">Test the POST method by uploading a file.</label>
+					<div class="form-components">
+						<input type="file" id="filePost" name="filePost" required>
+						<button type="submit">upload</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>delete</h3>
+				<form>
+					<label for="fileDelete">Test the DELETE method by removing a file.</label>
+					<div class="form-components">
+						<input type="text" id="fileDelete" name="fileDelete" required>
+						<button type="submit">delete</button>
+					</div>
 				</form>
 			</div>
 		</div>
-		<div class="form-wrapper">
-			<h3>upload</h3>
-			<p>Test the POST method by uploading a file.</p>
-			<div class=form-container>
-				<form>
-					<label for="fileUpload"></label>
-					<input type="file" id="fileUpload" name="fileUpload" required>
-					<button type="submit">upload</button>
+		<p>WebServ also natively offers <abbr title="Common Gateway Interface">CGI</abbr> functionality. Don't believe it? Then give these forms a go:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download from CGI</h3>
+				<form action="/cgi/env.py" target="requestOutput">
+					<label for="cgiGet">Test the GET method by inspecting the CGI execution environment.</label>
+					<div>
+						<button type="submit">download</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload to CGI</h3>
+				<form action="/cgi/square.py">
+					<label for="cgiPost">Test the POST method by squaring a number.</label>
+					<div class="form-components">
+						<input type="text" id="cgiPost" name="cgiPost" required>
+						<button type="submit">upload</button>
+					</div>
 				</form>
 			</div>
 		</div>
-		<div class="form-wrapper">
-			<h3>delete</h3>
-			<p>Test the DELETE method by removing a file.</p>
-			<div class="form-container">
-				<form>
-					<label for="fileNameDelete"></label>
-					<input type="text" id="fileNameDelete" name="fileNameDelete" required>
-					<button type="submit">delete</button>
-				</form>
-			</div>
+		<div class="iframe-wrapper">
+			<iframe name="requestOutput" title="Request output"></iframe>
 		</div>
-	</div>
-	<p>Webserv also natively supports <abbr title="Common Gateway Interface">CGI</abbr> functionality. Don't believe it? How about these forms:</p>
+	</main>
+	<footer>
+		<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
+	</footer>
 </body>
-<footer>
-	<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
-</footer>
 </html>
