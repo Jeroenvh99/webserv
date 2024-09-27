@@ -19,7 +19,7 @@ Logger::~Logger() {
 
 void
 Logger::attach_file(std::string const& file) {
-	std::ostream*	fp = new std::ofstream(file);
+	std::ostream*	fp = new std::ofstream(file, std::ios::app);
 
 	if (!fp->good()) {
 		delete fp;
