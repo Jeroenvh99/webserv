@@ -13,7 +13,13 @@
 </header>
 <hr />
 <body>
-	<button>upload something!</button>
+	<form action="/upload.txt" method="post" enctype="text/html">
+		<label for="file">Select a file to upload:</label>
+		<input type="file" id="file" name="file">
+		<input type="hidden" name="filename" value="dummy.txt">
+		<input type="hidden" name="filesize" value="1024">
+		<button type="submit">upload the thing!</button>
+	</form>
 </body>
 <footer>
 	<p>Brought to you by Team DIY: Connected Edition</p>
