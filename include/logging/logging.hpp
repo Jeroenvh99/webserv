@@ -18,6 +18,8 @@ public:
 		time_local,
 		request,
 		status,
+		host,
+		client
 	}; // enum class Type
 
 	Variable(Type = Type::literal);
@@ -64,7 +66,7 @@ public:
 	Format&			format() noexcept;
 	Format const&	format() const noexcept;
 
-	void	log(Client const&);
+	void	log(Client const&, VirtualServer const&);
 
 	static const Format	default_fmt;
 
@@ -108,6 +110,14 @@ inline const AccessLogger::Format		AccessLogger::default_fmt = {
 	{"["},
 	{Variable::Type::time_local},
 	{"] processed a request :)"},
+	{" this server is called: "},
+	{Variable::Type::host},
+	{" and the clients address is: "},
+	{Variable::Type::client},
+	{" with request: "},
+	{Variable::Type::request},
+	{" and the response status was: "},
+	{Variable::Type::status},
 };
 inline constexpr ErrorLogger::Literals	ErrorLogger::literals = {{
 	{Level::debug, "debug"},
