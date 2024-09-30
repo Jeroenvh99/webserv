@@ -4,6 +4,7 @@
 
 VirtualServer::VirtualServer(Config::Server config) :
 _name(config.servername),
+_port(config.port),
 _route("/"),
 _maxbodysize(config.maxbodysize) {
 	for (size_t i = 0; i < config.redirections.size(); i++) {
@@ -39,6 +40,11 @@ _maxbodysize(config.maxbodysize) {
 std::string const&
 VirtualServer::name() const noexcept {
 	return (_name);
+}
+
+int const&
+VirtualServer::port() const noexcept {
+	return (_port);
 }
 
 route::Route const&

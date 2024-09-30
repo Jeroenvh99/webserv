@@ -9,8 +9,8 @@ SRC_FILES	:= Environment_build.cpp \
 			Environment_method.cpp \
 			Client.cpp \
 			Client_io.cpp \
-			config/Config.cpp \
 			ClientImpl.cpp \
+			config/Config.cpp \
 			main.cpp \
 			Poller.cpp \
 			Server_ctor.cpp \
@@ -66,7 +66,7 @@ SRC_FILES	:= Environment_build.cpp \
 
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
-CXX			:= c++
+CXX			:= clang++ # On Codam machines, c++ is actually an alias to clang++.
 CXXFLAGS	:= -Wall -Wextra -Werror -I$(INCLUDE_DIR) --std=c++20
 DEBUG_FLAGS	:= -g -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
@@ -80,11 +80,13 @@ CXXFLAGS += $(DEBUG_FLAGS)
 debug: $(NAME)
 
 $(NAME): $(addprefix $(OBJ_DIR),$(OBJ_FILES))
+	@echo Compiling executable: $@.
 	@$(CXX) $(CXXFLAGS) $(EXEC_MAIN) $^ -o $@
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
 	@mkdir -p $(OBJ_DIR) $(addprefix $(OBJ_DIR),$(SRC_SUBDIRS))
-	$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
+	@echo Compiling object file: $@.
+	@$(CXX) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 
 clean:
 	@rm -rf $(OBJ_DIR)

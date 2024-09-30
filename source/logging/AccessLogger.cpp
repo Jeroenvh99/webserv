@@ -1,4 +1,5 @@
 #include "logging/logging.hpp"
+#include "Server.hpp"
 
 using logging::AccessLogger;
 using logging::Variable;
@@ -8,7 +9,7 @@ AccessLogger::AccessLogger():
 	_fmt(default_fmt) {}
 
 void
-AccessLogger::log(Client const&/* client*/) {
+AccessLogger::log(Client const& client, VirtualServer const& server) {
 	using Type = Variable::Type;
 
 	std::ostream&	out = os();
@@ -19,14 +20,20 @@ AccessLogger::log(Client const&/* client*/) {
 		case Type::literal:
 			out << elem.data();
 			break;
-		case Type::request:
-			//out << client.request();
-			break;
-		case Type::status:
-			//out << client.status();
-			break;
 		case Type::time_local:
 			out << timestamp();
+			break;
+		case Type::host:
+			out << server.name() << ":" << server.port();
+			break;
+		case Type::client:
+			out << std::string(client.address());
+			break;
+		case Type::request:
+			out << http::to_string(client.request().method()) << std::string(client.request().uri());
+			break;
+		case Type::status:
+			out << http::to_string(client.response().status());
 			break;
 		default:
 			__builtin_unreachable();
