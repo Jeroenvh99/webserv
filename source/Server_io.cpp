@@ -180,7 +180,7 @@ Server::_recv(Client& client, webserv::Buffer& buf) {
 			return (IOStatus::failure);
 		logging::elog.log(Elog::debug, client.address(),
 			": Received ", bytes, " bytes.");
-	} catch (Client::Socket::Exception& e) {
+	} catch (network::Exception& e) {
 		logging::elog.log(Elog::error, client.address(),
 			": Networking failure: ", e.what());
 		return (IOStatus::failure);
@@ -199,8 +199,9 @@ Server::_send(Client& client, webserv::Buffer const& buf) {
 			return (IOStatus::failure);
 		logging::elog.log(Elog::debug, client.address(),
 			": Sent ", bytes, " bytes.");
-	} catch (Client::Socket::Exception& e) {
-		logging::elog.log(Elog::error, e.what());
+	} catch (network::Exception& e) {
+		logging::elog.log(Elog::error, client.address(),
+			": Networking failure: ", e.what());
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);
