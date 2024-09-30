@@ -60,7 +60,7 @@ Logger::timestamp_update() {
 
 	(void) timezone;
 	_timestamp.clear();
-	updated << std::put_time(local_tm, "%Y/%m/%d:%H:%M:%S")
+	updated << std::put_time(local_tm, "%Y/%m/%d %H:%M:%S")
 		<< std::showpos << std::put_time(local_tm, "%z");
 	_timestamp = updated.str();
 } // this should be done without extra reallocations
