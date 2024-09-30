@@ -19,7 +19,8 @@ Logger::~Logger() {
 
 void
 Logger::attach_file(std::string const& file) {
-	std::ostream*	fp = new std::ofstream(file);
+	constexpr auto	open_mode = std::ios_base::out | std::ios_base::app;
+	std::ostream*	fp = new std::ofstream(file, open_mode);
 
 	if (!fp->good()) {
 		delete fp;
