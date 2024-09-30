@@ -7,15 +7,6 @@ using http::Dechunker;
 
 static std::string	_to_string_hex(size_t);
 
-webserv::Buffer&
-http::enchunk(webserv::Buffer& wsbuf, webserv::ChunkBuffer const& chbuf) {
-	wsbuf.push_back(_to_string_hex(chbuf.len()));
-	wsbuf.push_back("\r\n");
-	wsbuf.push_back(chbuf);
-	wsbuf.push_back("\r\n");
-	return (wsbuf);
-}
-
 static std::string
 _to_string_hex(size_t num) {
 	std::ostringstream	oss;
@@ -24,90 +15,100 @@ _to_string_hex(size_t num) {
 	return (oss.str());
 }
 
-Dechunker::Dechunker():
-	_chunk_size(std::nullopt), _bytes_dechunked(0) {}
+/* Dechunker */
 
-std::ostream&
-Dechunker::buffer() noexcept {
-	return (_buf);
+// Basic operations
+
+Dechunker::Dechunker():
+	_buf(""), _remaining(std::nullopt), _found_final(false) {}
+
+// Utility methods
+
+void
+Dechunker::clear() noexcept {
+	_buf.str() = "";
+	_buf.clear();
+	_remaining = std::nullopt;
+	_found_null = false;
 }
 
 Dechunker::Status
 Dechunker::dechunk(webserv::Buffer& wsbuf) {
-	if (_chunk_size && _bytes_dechunked + wsbuf.len() <= _chunk_size)
-		return (_bytes_dechunked += wsbuf.len(), Status::pending);
+	if (_remaining && wsbuf.len() <= _remaining) // wsbuf fits entirely within the current chunk, so no processing is required
+		return (_remaining -= wsbuf.len(), Status::pending);
 	_buf.clear();
 	_buf << wsbuf;
-	wsbuf.empty();
+	wsbuf.empty(); // move the contents of wsbuf into internal buffer
 	
-	Status	res = dechunk(wsbuf, _buf);
+	Status	status = dechunk_core(wsbuf);
 
-	if (res && *res == 0 && !_buf.eof())
-		throw (Exception("buffer contains bytes past final chunk"));
-	return (res);
+	if (status == Status::done) {
+		if (!_buf.eof())
+			throw (Exception("buffer contains bytes past final chunk"));
+		clear();
+	}
+	return (status);
 }
 
 Dechunker::Status
-Dechunker::dechunk(webserv::Buffer& wsbuf, std::istream& is) {
-	Result	res = std::nullopt;
+Dechunker::dechunk_core(webserv::Buffer& wsbuf) {
+	Status	status = Status::pending;
 	
-	while (is) {
-		res = dechunk_single(wsbuf, is);
-		if (!res)
+	while (_buf) {
+		res = dechunk_one(wsbuf);
+		if (res = Status::done)
 			break;
 	}
 	return (res);
 }
 
 Dechunker::Status
-Dechunker::dechunk_single(webserv::Buffer& wsbuf, std::istream& is) {
+Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
 	try {
-		if (!_chunk_size)
-			get_size(is);
+		if (!_remaining) // a new chunk is about to be processed
+			extract_size(is); 
+		while (*_remaining) {
+			if (wsbuf.len() == wsbuf.capacity()) // no more bytes can be put back into wsbuf
+				return (Status::pending);
 
-		while (_bytes_dechunked < *_chunk_size) {
-			if  (wsbuf.len() == wsbuf.capacity())
-				return (std::nullopt);
+			char const	c = _buf.get();
 
-			char const	c = is.get();
-
-			if (is.eof())
-				return (std::nullopt);
-			if (!wsbuf.push_back(c))
-				throw (std::out_of_range("Dechunker::dechunk_single"));
-			++_bytes_dechunked;
+			if (_buf.eof()) // internal buffer has been fully processed
+				return (Status::pending);
+			wsbuf.push_back(c);
 		}
-		return (get_end(is));
-	} catch (utils::IncompleteLineException&) {
-		return (std::nullopt);
+		get_end(is);
+		return (_found_null ? Status::done : Status::pending);
+	} catch (utils::IncompleteLineException&) { // size indicator or CRLF terminator could not be fully extracted
+		return (Status::pending);
 	}
 }
 
 void
-Dechunker::get_size(std::istream& is) {
+Dechunker::extract_size() {
 	std::string	s;
 
 	try {
-		utils::getline<"\r\n">(is, s);
-		_chunk_size = std::stoul(s, nullptr, 16);
-		_bytes_dechunked = 0;
+		utils::getline<"\r\n">(_buf, s);
+		_remaining = std::stoul(s, nullptr, 16);
+		if (*_remaining == 0)
+			_found_null = true;
 	} catch (std::out_of_range&) {
 		throw (Exception("invalid chunk size format"));
 	}
 }
 
-size_t
-Dechunker::get_end(std::istream& is) {
+void
+Dechunker::extract_terminator() {
 	std::string	s;
 
-	utils::getline<"\r\n">(is, s);
-	if (s.size() > 0)
+	utils::getline<"\r\n">(_buf, s);
+	if (s.length() > 0)
 		throw (Exception("incorrectly sized chunk"));
 	_chunk_size = std::nullopt;
-	return (_bytes_dechunked);
 }
 
-/* Exception */
+/* Dechunker::Exception */
 
 Dechunker::Exception::Exception(char const* msg):
 	_msg(msg) {}
@@ -115,4 +116,15 @@ Dechunker::Exception::Exception(char const* msg):
 char const*
 Dechunker::Exception::what() const noexcept {
 	return (_msg);
+}
+
+/* enchunk */
+
+webserv::Buffer&
+http::enchunk(webserv::Buffer& wsbuf, webserv::ChunkBuffer const& chbuf) {
+	wsbuf.push_back(_to_string_hex(chbuf.len()));
+	wsbuf.push_back("\r\n");
+	wsbuf.push_back(chbuf);
+	wsbuf.push_back("\r\n");
+	return (wsbuf);
 }

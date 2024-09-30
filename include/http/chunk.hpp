@@ -5,6 +5,7 @@
 
 # include <optional>
 # include <sstream>
+# include <stdexcept>
 
 namespace http {
 	constexpr size_t	chunk_margin = 8;
@@ -27,15 +28,18 @@ namespace http {
 
 		Dechunker();
 
+		void	clear() noexcept;
 		Status	dechunk(webserv::Buffer&);
 
 	private:
-		void	get_size(std::istream&);
-		size_t	get_end(std::istream&);
+		Status	dechunk_core(webserv::Buffer&);
+		Status	dechunk_one(webserv::Buffer&);
+		void	extract_size();
+		void	extract_terminator();
 
-		bool	_get_size();
-
-		std::stringstream	_buf;
+		std::stringstream		_buf;
+		std::optional<size_t>	_remaining;
+		bool					_found_null;
 	}; // class Dechunker
 
 	class Dechunker::Exception: public std::exception {
@@ -45,7 +49,7 @@ namespace http {
 		char const*	what() const noexcept;
 	private:
 		char const*	_msg;
-	}; // class Dechunker::ChunkException
+	}; // class Dechunker::Exception
 
 }; // namespace http
 
