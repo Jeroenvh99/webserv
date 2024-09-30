@@ -3,6 +3,7 @@
 
 # include <cstddef>
 # include <stdexcept>
+# include <string>
 
 extern "C" {
 # include <sys/socket.h>
@@ -10,39 +11,45 @@ extern "C" {
 }
 
 namespace network {
-	enum class Domain {
-		ipv4 = AF_INET,
-		ipv6 = AF_INET6,
-		local = AF_LOCAL,
-	}; // enum class Domain
 
-	enum class Type {
-		stream = SOCK_STREAM,
-	}; // enum class Type
+enum class Domain {
+	ipv4 = AF_INET,
+	ipv6 = AF_INET6,
+	local = AF_LOCAL,
+}; // enum class Domain
 
-	class Handle;
-		
-	template<Domain, Type>
-	class Socket;
+enum class Type {
+	stream = SOCK_STREAM,
+}; // enum class Type
 
-	template<Domain>
-	class Address;
-
-	template<Domain>
-	class StreamSocket;
-
-	template<Domain>
-	class Acceptor;
-
-	template<size_t>
-	class Buffer;
+class Handle;
 	
-	class Poller;
+template<Domain, Type>
+class Socket;
 
-	class Exception: public std::runtime_error {
-	public:
-		Exception(char const*, char const*);
-	}; // class Exception
+template<Domain>
+class Address;
+
+template<Domain>
+class StreamSocket;
+
+template<Domain>
+class Acceptor;
+
+template<size_t>
+class Buffer;
+
+class Poller;
+
+class Exception: public std::exception {
+public:
+	Exception(std::string const&);
+
+	char const*	what() const noexcept;
+private:
+	std::string	_msg;
+}; // class Exception
+
 }; // namespace network
 
 #endif // NETWORK_HPP
