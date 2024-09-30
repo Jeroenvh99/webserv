@@ -1,5 +1,8 @@
 #include "Worker.hpp"
 #include "job/CGI.hpp"
+#include "logging/logging.hpp"
+
+using Elog = logging::ErrorLogger::Level;
 
 std::optional<http::Status>
 Worker::start(job::Job const& job) {
@@ -87,7 +90,8 @@ Worker::deliver(webserv::Buffer const& wsbuf) {
 			throw (job::BaseResource::IOException("incomplete write"));
 		return (InputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
-		std::cerr << e.what() << std::endl;
+		logging::elog.log(Elog::error, "Error writing to file: ", e.what());
+		// logging::elog.log(Elog::debug, "Buffer contents: ", wsbuf);
 		return (stop(), InputStatus::failure);
 	}
 }
