@@ -116,8 +116,6 @@ inline const AccessLogger::Format		AccessLogger::default_fmt = {
 	{Variable::Type::client},
 	{" with request: "},
 	{Variable::Type::request},
-	{" and the response status was: "},
-	{Variable::Type::status},
 };
 inline constexpr ErrorLogger::Literals	ErrorLogger::literals = {{
 	{Level::debug, "debug"},
