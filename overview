@@ -1,0 +1,34 @@
+Hoe werkt 't nou?
+
+> Setup: lees alle config files en maak voor elke geconfigureerde port een poller en een acceptor socket. De acceptor socket wordt op de poller geregistreerd.
+> Hoofdlus: de poller produceert een lijst events (Poller::wait) ->
+	a. read op acceptor -> accepteer een nieuwe client socket, registreer hem op de poller en koppel hem aan een Client-object.
+	b. hangup op client -> verwijder client
+	c. read op client ->
+		1. client.istate == parse_request -> data wordt naar stringbuffer verplaatst en verwerkt tot request
+			I. request is af:
+				> bepaal istate (headers wijzen aan of nog een body verwacht wordt, en in wat voor vorm)
+				> start Worker (opent een file handle, en/of genereert bijkomende data, of start CGI)
+				> bepaal ostate (als request neerkomt op CGI -> parse_response, anders fetch)
+			
+		2. client.istate == dechunk -> data wordt door de dechunker gehaald; ga door naar 3
+		3. client.istate == deliver -> data wordt aan Worker verdergegeven
+			I. worker beheert CGI: data wordt via socket aan CGI-proces verdergegeven
+			II. worker beheert Resource: data wordt naar bestandssysteem geschreven
+		4. client.istate == closed -> client wordt verwijderd (data ontvangen terwijl geen data verwacht wordt, schendt HTTP-protocol)
+	d. write op client ->
+		1. client.ostate == parse_response -> haal data op van Worker (deze beheert in dit geval altijd CGI), stuur naar stringbuffer en verwerk tot response + headers
+			I. response is af:
+				> verwerk tot HTTP-tekst, plaats tekst in stringbuffer
+				> bepaal volgende ostate: als CGI headers niets omtrent body bepalen, moet server eventuele output zelf chunken
+				> ga door naar 2
+		2. client.ostate == fetch -> haal data op uit stringbuffer of, als die leeg is, uit Worker en verzend naar peer socket
+			I. worker beheert CGI: lees van socket
+				A. als 0 bytes gelezen worden: he bah hier komt dat geëikel met die poller om de hoek kijken
+				B. als ten minste 1 byte gelezen wordt: helemaal mooi
+			II. worker beheert Resource:
+				A. lees uit stringbuffer (deze bevat door server gegenereerde data; headers of standaard payloads)
+				B. als stringbuffer leeg is, lees uit bestandssysteem
+				C. als alles leeg is: doe niks; wait geeft vanaf nu `done` terug
+		3. client.ostate == enchunk -> haal data op uit stringbuffer of, als die leeg is, uit Worker, maak er een chunk van en verzend naar peer socket
+		4. client.ostate == closed -> doe niks (evt: tenzij sprake is van CGI en er nog steeds data uit het proces komt; dat is teken dat het script fout is)

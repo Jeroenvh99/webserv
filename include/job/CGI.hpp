@@ -6,63 +6,61 @@
 #include "network/StreamSocket.hpp"
 
 #include <iostream>
-#include <stdexcept>
 
 namespace job {
-	class CGI {
+	class CGI: public BaseResource {
 	public:
-		class Exception;
 		class WaitException;
 		class SocketException;
 		class ForkException;
+		enum class ProcessStatus;
 
 		CGI(Job const&);
 		~CGI();
 
-		size_t	write(webserv::Buffer const&) const;
-		size_t	read(webserv::Buffer&) const;
-		Status	wait();
-		void	kill() noexcept;
+		size_t			write(webserv::Buffer const&) const;
+		size_t			read(webserv::Buffer&) const;
+		ProcessStatus	wait();
+		ProcessStatus	kill() noexcept;
 
 	private:
 		using Socket = network::StreamSocket<network::Domain::local>;
 
-		void	_fork(Job const&);
-		void	_redirect_io(Socket&);
-		void	_exec(Job const&);
+		void			_fork(Job const&);
+		void			_redirect_io(Socket&);
+		void			_exec(Job const&);
+		Socket const&	socket() const;
 
 		static constexpr pid_t	_no_child = 0;
 
-		pid_t	_pid;
-		Socket	_socket;
+		pid_t					_pid;
+		network::SharedHandle	_socket;
 	}; // class CGI
-
-	class CGI::Exception: public std::exception {
-	public:
-		Exception(char const*);
-
-		char const*	what() const noexcept;
-	private:
-		char const*	_what;
-	};
 
 	class CGI::WaitException: public CGI::Exception {
 	public:
-		WaitException();
+		WaitException() = default;
 		WaitException(char const*);
 	}; // class CGI::WaitException
 
 	class CGI::SocketException: public CGI::Exception {
 	public:
-		SocketException();
+		SocketException() = default;
 		SocketException(char const*);
-	}; // class CGI::PipeException
+	}; // class CGI::SocketException
 
 	class CGI::ForkException: public CGI::Exception {
 	public:
-		ForkException();
+		ForkException() = default;
 		ForkException(char const*);
 	}; // class CGI::ForkException
+
+	enum class CGI::ProcessStatus {
+		busy,
+		success,
+		failure,
+		aborted,
+	}; // enum class CGI::Status
 }; // namespace job
 
 #endif // JOB_CGI_HPP

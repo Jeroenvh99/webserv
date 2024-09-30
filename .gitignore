@@ -1,10 +1,12 @@
 .vscode
 .cache
+compile_commands.json
 
 webserv
+object/
+logs/
 *.o
 *.a
 *.d
 *.gch
 *.backup
-

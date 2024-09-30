@@ -34,6 +34,7 @@ namespace network {
 		size_t	get(std::istream&);
 		size_t	put(std::ostream&) const;
 
+		bool	push_back(char) noexcept;
 		size_t	push_back(std::string const&) noexcept;
 		template<size_t TSIZE>
 		size_t	push_back(Buffer<TSIZE> const&) noexcept;

@@ -1,17 +1,20 @@
 #include "Client.hpp"
+#include "logging/logging.hpp"
 
 bool
 Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
+	buf.empty();
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		http::Body const	body = _impl._request.expects_body();
 
 		switch (body.type()) {
 		case http::Body::Type::none:
-			_impl._istate = InputState::closed;
-			break;
+			_impl._istate = InputState::closed; // fetch function will set it to parse_request when there's nothing left to fetch
+			return (true);
 		case http::Body::Type::by_length:
-			_impl._istate = InputState::deliver; // and set length indicator
+			_impl._istate = InputState::deliver;
+			_impl._body_size = body.length();
 			break;
 		case http::Body::Type::chunked:
 			_impl._istate = InputState::dechunk;
@@ -34,8 +37,6 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (!_impl._buffer.eof()) {
 		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
-
-			// http::Body const	body = _impl._response.expects_body();
 			_impl._response_body = _impl._response.expects_body(); // replace by:
 			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
 			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
@@ -46,7 +47,7 @@ Client::parse_response(webserv::Buffer const& buf) {
 			_impl._buffer_flush(trail);
 			_impl._buffer.clear();
 			_impl._buffer << _impl._response << trail;
-			_impl._ostate = OutputState::fetch; // replace
+			_impl._ostate = OutputState::fetch;
 			return (true);
 		}
 		_impl._response.headers().insert(line);
@@ -56,41 +57,77 @@ Client::parse_response(webserv::Buffer const& buf) {
 	return (false);
 }
 
-job::Status
+void
 Client::respond(job::Job const& job) {
+	int httpredirindex = job::is_httpredirect(job);
+	if (httpredirindex > -1){
+		job::RedirectionJob redirjob(job, httpredirindex);
+		respond(redirjob);
+		logging::alog.log(*this, job.vserver);
+		if (redirjob.permanent)
+			throw (Client::RedirectionException(http::Status::moved_permanently));
+		else
+			throw (Client::RedirectionException(http::Status::found));
+	}
 	std::optional<http::Status>	jstat = _impl._worker.start(job);
 
 	if (!jstat)						 // job is CGI; must be waited for first
 		_impl._ostate = OutputState::parse_response;
-	else if (http::is_error(*jstat)) // job couldn't be started
-		return (respond({*jstat, job}));
-	else {
+	else if (http::is_error(*jstat)) { // job couldn't be started
+		respond({*jstat, job});
+		logging::alog.log(*this, job.vserver);
+		throw (Client::HTTPErrorException(*jstat));
+	} else {
 		_impl._response = http::Response(*jstat);
-		// todo: insert more headers based on file type
 		_impl._buffer_empty();
 		_impl._buffer.clear();
 		_impl._buffer << _impl._response;
 		_impl._ostate = OutputState::fetch;
 	}
-	return (wait());
+	logging::alog.log(*this, job.vserver);
 }
 
-job::Status
-Client::respond(job::ErrorJob const& job) {
-	_impl._response = http::Response(job.status);
-	// todo: insert more headers based on file type
+void
+Client::respond(job::RedirectionJob const& job) {
+	if (job.permanent)
+		_impl._response = http::Response(http::Status::moved_permanently);
+	else
+		_impl._response = http::Response(http::Status::found);
 	_impl._buffer_empty();
+	_impl._buffer.clear();
 	_impl._buffer << _impl._response; // response line and headers
 	_impl._worker.start(job);
 	_impl._ostate = OutputState::fetch;
-	return (wait());
 }
 
-job::Status
-Client::deliver(webserv::Buffer const& buf) {
-	_impl._worker.write(buf);
+void
+Client::respond(job::ErrorJob const& job) {
+	_impl._response = http::Response(job.status);
+	_impl._buffer_empty();
+	_impl._buffer.clear();
+	_impl._buffer << _impl._response; // response line and headers
+	_impl._worker.start(job);
+	_impl._ostate = OutputState::fetch;
+}
 
-	return (wait()); // replace: job status should not depend on the same mechanism that determines end of worker output
+Client::OperationStatus
+Client::deliver(webserv::Buffer const& buf) {
+	if (buf.len() > _impl._body_size) // actual body size > Content-Length
+		return (OperationStatus::failure);
+	_impl._body_size -= buf.len();
+	switch (_impl._worker.deliver(buf)) {
+	case Worker::InputStatus::pending:
+		if (_impl._body_size == 0) {
+			if (_impl._ostate == OutputState::closed)
+				_impl._clear();
+			else
+				_impl._istate = InputState::closed;
+			return (OperationStatus::success);
+		}
+		return (OperationStatus::pending);
+	default: // failure
+		return (OperationStatus::failure);
+	}
 }
 
 job::Status
@@ -98,21 +135,23 @@ Client::dechunk(webserv::Buffer const&) {
 	return (job::Status::failure); // placeholder
 }
 
-job::Status
+Client::OperationStatus
 Client::fetch(webserv::Buffer& buf) {
 	if (!_impl._buffer.eof()) { // empty client buffer before fetching from worker
 		buf.get(_impl._buffer);
-		return (job::Status::pending);
+		return (OperationStatus::pending);
 	}
-	_impl._worker.read(buf); // todo: implement timeout; if read == 0 for too long, mark client to be closed
-	return (wait());
-}
-
-job::Status
-Client::wait() {
-	job::Status const	stat = _impl._worker.wait();
-
-	if (stat != job::Status::pending)
-		_impl._clear(); // this should only clear output-related variables
-	return (stat);
+	switch (_impl._worker.fetch(buf)) {
+	case Worker::OutputStatus::success:
+		_impl._ostate = OutputState::closed;
+		if (_impl._istate == InputState::closed)
+			_impl._clear();
+		return (OperationStatus::success);
+	case Worker::OutputStatus::pending:
+		return (OperationStatus::pending);
+	case Worker::OutputStatus::timeout:
+		return (OperationStatus::timeout);
+	default: // failure, aborted
+		return (OperationStatus::failure);
+	}
 }

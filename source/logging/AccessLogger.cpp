@@ -1,35 +1,43 @@
-#include "logging.hpp"
+#include "logging/logging.hpp"
+#include "Server.hpp"
 
 using logging::AccessLogger;
 using logging::Variable;
 
-AccessLogger::AccessLogger(std::ostream& os, Format const& fmt):
-	Logger(os),
-	_fmt(fmt) {}
-
-AccessLogger::AccessLogger(std::ostream& os, Format&& fmt):
-	Logger(os),
-	_fmt(fmt) {}
+AccessLogger::AccessLogger():
+	Logger(std::cout),
+	_fmt(default_fmt) {}
 
 void
-AccessLogger::log(Client const&/* client*/) {
+AccessLogger::log(Client const& client, VirtualServer const& server) {
+	using Type = Variable::Type;
+
+	std::ostream&	out = os();
+
 	timestamp_update();
 	for (Variable const& elem: _fmt) {
 		switch (elem.type()) {
-		case Variable::Type::literal:
-			os() << elem.data();
+		case Type::literal:
+			out << elem.data();
 			break;
-		case Variable::Type::request:
-			//os() << client.request();
+		case Type::time_local:
+			out << timestamp();
 			break;
-		case Variable::Type::status:
-			//os() << client.status();
+		case Type::host:
+			out << server.name() << ":" << server.port();
 			break;
-		case Variable::Type::time_local:
-			os() << timestamp();
+		case Type::client:
+			out << std::string(client.address());
 			break;
-		default: break; // unreachable
+		case Type::request:
+			out << http::to_string(client.request().method()) << std::string(client.request().uri());
+			break;
+		case Type::status:
+			out << http::to_string(client.response().status());
+			break;
+		default:
+			__builtin_unreachable();
 		}
 	}
-	os() << std::endl;
+	out << std::endl;
 }

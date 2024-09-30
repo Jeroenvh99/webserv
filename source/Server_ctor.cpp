@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Poller.hpp"
 
 /*
 Server::Server(RouteConfig&& config):
@@ -12,33 +13,12 @@ Server::Server(RouteConfig&& config):
 	_buffer() {}
 */
 
-using namespace logging;
+stdfs::path const	VirtualServer::no_errpage = "";
 
-stdfs::path const	Server::no_errpage = "";
-
-Server::Server(std::string const& name, in_port_t port, int backlog_size,
-		std::ostream& alog, std::ostream& elog): // remove this once config parser is done
-	_name(name),
-	_poller(),
-	_acceptor(),
-	_clients(),
-	_route("/"),
-	_error_pages(),
-	_alog(alog, Format{
-		Variable("["), Variable(Variable::Type::time_local), Variable("]")
-	}),
-	_elog(elog, ErrorLogger::Level::debug) {
-	_acceptor = _poller.add(Acceptor(Acceptor::Address(port, INADDR_ANY)),
-							{Poller::EventType::read},
-							{});
-	// if this can be moved to the initializer list, it'd be great
-	_route.allow_method(http::Method::GET)
-		.redirect("./www")
-		.set_directory_file("index.html");
-	_route.extend("/cgi")
-		.forbid_directory()
-		.allow_cgi("py");
-	_route.extend("/stuff")
-		.allow_method(http::Method::POST);
+Server::Server(Config::Server config, int backlog_size):
+	_acceptor(g_poller.add(Acceptor(Acceptor::Address(config.port, INADDR_ANY)),
+							{webserv::Poller::EventType::read})),
+	_clients() {
 	acceptor().listen(backlog_size);
+	virtual_server_add(config);
 }

@@ -7,9 +7,7 @@ Resource::_post(route::Location const& loc) {
 	stdfs::path const&	pt = loc.to();
 
 	_open_ofile(pt);
-	if (_ofs.bad()) {
-		_status = Status::failure;
+	if (_ofs.bad())
 		return (http::Status::internal_error);
-	}
 	return (http::Status::created);
 }

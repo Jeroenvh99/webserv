@@ -3,67 +3,83 @@
 
 # include "webserv.hpp"
 # include "network/Acceptor.hpp"
-# include "network/Address_IPv4.hpp"
 # include "network/Handle.hpp"
-# include "network/StreamSocket.hpp"
 # include "network/Poller.hpp"
-# include "logging.hpp"
 # include "http/Status.hpp"
-# include "http/Request.hpp"
-# include "Environment.hpp"
 # include "Client.hpp"
 # include "route.hpp"
+# include "Config.hpp"
 
 # include <filesystem>
 # include <string>
 # include <unordered_map>
 # include <vector>
 
+class VirtualServer {
+	public:
+		struct Redirection {
+			URI		from;
+			URI		to;
+			bool	permanent;
+		};
+		using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
+		using Redirections = std::vector<Redirection>;
+
+		VirtualServer(Config::Server config);
+		std::string const&			name() const noexcept;
+		int const&					port() const noexcept;
+		route::Route const&			route() const noexcept;
+		route::Location				locate(std::filesystem::path const&) const;
+		route::Location				locate(URI const&) const;
+		stdfs::path const&			locate_errpage(http::Status) const noexcept;
+		size_t						max_body_size() const noexcept;
+		Redirections const&			redirections() const noexcept;
+		void						add_httpredirect(std::string const& from, std::string const& to, bool permanent);
+		static stdfs::path const	no_errpage;
+	private:
+		std::string					_name;
+		int							_port;
+		route::Route				_route;
+		int							_maxbodysize;
+		ErrorPageMap				_error_pages;
+		std::vector<Redirection>	_redirections;
+};
+
 class Server {
 public:
 	using Acceptor = network::Acceptor<network::Domain::ipv4>;
-	using ErrorPageMap = std::unordered_map<http::Status, std::filesystem::path>;
-	using Poller = network::Poller;
 	using SharedHandle = network::SharedHandle;
 
 	Server() = delete;
 	~Server() = default;
 	Server(Server const&) = delete;
-	Server(Server&&);
-	Server(std::string const&, in_port_t, int, std::ostream& = std::cout, std::ostream& = std::cerr); // remove this once the config parser is done
+	Server(Server&&) = default;
+	Server(Config::Server, int);
 	// Server(Config&&);
 	Server&	operator=(Server const&) = delete;
 	Server&	operator=(Server&&);
 
-	Acceptor&			acceptor() noexcept;
-	Acceptor const&		acceptor() const noexcept;
-	std::string const&	name() const noexcept;
-	in_port_t			port() const noexcept;
-	route::Route const&	route() const noexcept;
+	in_port_t				port() const noexcept;
 
-	route::Location		locate(std::filesystem::path const&) const;
-	route::Location		locate(URI const&) const;
-	stdfs::path const&	locate_errpage(http::Status) const noexcept;
+	Acceptor&				acceptor() noexcept;
+	Acceptor const&			acceptor() const noexcept;
 
-	void	process(int);
+	void					virtual_server_add(Config::Server config);
+	VirtualServer const&	virtual_server(std::string const& name);
+	VirtualServer const&	virtual_server(Client const&);
 
-	static constexpr Poller::EventTypes	poller_events = {
-		Poller::EventType::read, Poller::EventType::write
-	};
-	static constexpr Poller::Modes		poller_mode = {};
-	static stdfs::path const			no_errpage;
+	void	process();
 
 private:
-	using LogLevel = logging::ErrorLogger::Level;
 	using ClientIt = ClientMap::iterator;
 
 	using IOStatus = webserv::GenericStatus;
 
 	void		_accept();
-	void		_process_core(Poller::Event const&, ClientIt);
+	void		_process_core(network::Poller::Event const&, ClientIt);
 	IOStatus	_process_read(Client&);
 	IOStatus	_process_write(Client&);
-	void		_process_graveyard(Poller::Event const&, ClientIt);
+	void		_process_graveyard(network::Poller::Event const&, ClientIt);
 	void		_to_graveyard(ClientIt);
 	void		_drop(ClientIt);
 
@@ -72,21 +88,17 @@ private:
 	IOStatus	_fetch(Client&, webserv::Buffer&);
 	IOStatus	_enchunk_and_send(Client&);
 	IOStatus	_fetch_and_send(Client&);
-	IOStatus	_deliver(Client&);
-	IOStatus	_dechunk(Client&);
+	IOStatus	_recv_and_deliver(Client&);
+	IOStatus	_dechunk_and_deliver(Client&);
+	IOStatus	_deliver(Client&, webserv::Buffer const&);
 	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
 
-	std::string				_name;
-	Poller					_poller;
-	SharedHandle			_acceptor;
-	ClientMap				_clients;
-	ClientMap				_graveyard;
-	route::Route			_route;
-	ErrorPageMap			_error_pages;
-	logging::AccessLogger	_alog;
-	logging::ErrorLogger	_elog;
+	SharedHandle				_acceptor;
+	ClientMap					_clients;
+	ClientMap					_graveyard;
+	std::vector<VirtualServer>	_possibleservers;
 }; // class Server
 
 #endif // SERVER_HPP

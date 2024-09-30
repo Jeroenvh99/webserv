@@ -49,3 +49,38 @@ Client::Address const&
 Client::address() const noexcept {
 	return (_impl._address);
 }
+
+bool
+Client::timeout(double interval) const noexcept {
+	return (::difftime(webserv::Time(), _impl._last_read) >= interval);
+}
+
+// Exceptions
+
+Client::RedirectionException::RedirectionException(const http::Status status):
+_message("This is no longer here, you will be sent somewhere else, code: ") {
+	_message += http::to_string(status);
+}
+
+const char*
+Client::RedirectionException::what() const throw() {
+	return _message.c_str();
+}
+
+Client::HTTPErrorException::HTTPErrorException(const http::Status status):
+_message("Please stand by, Something went wrong, code: ") {
+	_message += http::to_string(status);
+}
+
+const char*
+Client::HTTPErrorException::what() const throw() {
+	return _message.c_str();
+}
+
+Client::BodySizeException::BodySizeException():
+_message("request body is too big") {}
+
+const char*
+Client::BodySizeException::what() const throw() {
+	return _message.c_str();
+}

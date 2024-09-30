@@ -1,25 +1,23 @@
-#include "network.hpp"
-#include "network/Handle.hpp"
+#include "network/network.hpp"
 #include "network/Poller.hpp"
 
-using network::SharedHandle;
-using network::Poller;
-using Event = Poller::Event;
+using Event = network::Poller::Event;
 
-// Private basic operations
+Event::Event():
+	_raw({}) {}
 
-Event::Event(SharedHandle const& handle, Raw const& raw):
-	_handle(handle),
+Event::Event(Event::Raw raw):
 	_raw(raw) {}
-
-// Public methods
-
-SharedHandle
-Event::handle() const noexcept {
-	return (_handle);
-}
 
 bool
 Event::happened(EventType type) const noexcept {
 	return (_raw.events & static_cast<uint32_t>(type));
+}
+
+bool
+Event::expire(EventType type) noexcept {
+	bool	did_happen = happened(type);
+
+	_raw.events &= ~static_cast<uint32_t>(type);
+	return (did_happen);
 }

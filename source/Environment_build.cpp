@@ -22,12 +22,12 @@ Environment::build() {
 	_ctr.clear();
 	_ctr.reserve(dfl_size + _client.request().headers().size());
 
-	append("SERVER_NAME", _server.name()),
+	append("SERVER_NAME", _vserver.name()),
 	append("SERVER_PORT", std::to_string(_server.port()));
 
 	if (_location.path_info().size()) {
 		append("PATH_INFO", _location.path_info());
-		append("PATH_TRANSLATED", _location.translate(_server.route()).to());
+		append("PATH_TRANSLATED", _location.translate(_vserver.route()).to());
 	}
 	append("SCRIPT_NAME", _location.to());
 

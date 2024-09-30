@@ -19,7 +19,7 @@ Address<Domain::ipv4>::Address(int sd) {
 
 	if (::getsockname(sd, reinterpret_cast<sockaddr*>(&_addr), &asize) == -1
 		|| asize > size()) {
-		throw (network::Exception("address", "getsockname")); // dedicated exception?
+		throw (network::Exception("getsockname")); // dedicated exception?
 	}
 }
 
@@ -30,9 +30,9 @@ Address<Domain::ipv4>::operator std::string() const noexcept {
 	uint32_t const		addr = address();
 	uint8_t const*		octets = reinterpret_cast<uint8_t const*>(&addr);
 
-	for (size_t i = 0; i < 3; ++i)
+	for (size_t i = 3; i > 0; --i)
 		oss << std::to_string(octets[i]) << '.';
-	oss << std::to_string(octets[3]) << ':' << std::to_string(port());
+	oss << std::to_string(octets[0]) << ':' << std::to_string(port());
 	return (oss.str());
 }
 

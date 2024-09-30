@@ -1,17 +1,22 @@
 #include "Server.hpp"
+#include "Poller.hpp"
+#include "logging/logging.hpp"
+
+using webserv::Poller;
+using Elog = logging::ErrorLogger::Level;
 
 void
-Server::process(int poller_timeout) { // DB: this could be made configurable
-	for (auto const& event: _poller.wait<128>(poller_timeout)) {
-		SharedHandle	box = event.handle();
-
-		if (box == _acceptor)
+Server::process() {
+	for (auto const& [handle, event]: g_poller) {
+		if (handle == _acceptor)
 			_accept();
 		else {
-			ClientIt	it = _clients.find(box);
+			ClientIt	it = _clients.find(handle);
 
-			if (it == _clients.end()) {
-				it = _graveyard.find(box); // either contained in core or graveyard
+			if (it == _clients.end()) {		// not an active client
+				it = _graveyard.find(handle);
+				if (it == _graveyard.end())	// CGI or belongs to another server
+					continue;
 				_process_graveyard(event, it);
 			} else
 				_process_core(event, it);
@@ -21,17 +26,17 @@ Server::process(int poller_timeout) { // DB: this could be made configurable
 
 void
 Server::_process_core(Poller::Event const& event, ClientIt it) {
-	Client		client(*it);
+	Client	client(*it);
 
 	if (event.happened(Poller::EventType::hangup)) {
-		_elog.log(LogLevel::notice, std::string(client.address()),
-			"Connection closed by peer.");
+		logging::elog.log(Elog::notice, client.address(),
+			": Connection closed by peer.");
 		_to_graveyard(it);
 	}
-	if (event.happened(Poller::EventType::read)
+	else if (event.happened(Poller::EventType::read)
 		&& _process_read(client) == IOStatus::failure)
 		_to_graveyard(it);
-	if (event.happened(Poller::EventType::write)
+	else if (event.happened(Poller::EventType::write)
 		&& _process_write(client) == IOStatus::failure)
 		_to_graveyard(it);
 }
@@ -42,12 +47,13 @@ Server::_process_read(Client& client) {
 	case Client::InputState::parse_request:
 		return (_parse_request(client));
 	case Client::InputState::deliver:
-		return (_deliver(client));
+		return (_recv_and_deliver(client));
 	case Client::InputState::dechunk:
-		return (_dechunk(client));
-	default:	// closed
-		return (IOStatus::failure); // ?
+		return (_dechunk_and_deliver(client));
+	case Client::InputState::closed:
+		return (IOStatus::failure);
 	}
+	__builtin_unreachable();
 }
 
 Server::IOStatus

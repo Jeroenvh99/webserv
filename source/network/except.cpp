@@ -1,4 +1,4 @@
-#include "network.hpp"
+#include "network/network.hpp"
 #include "network/Handle.hpp"
 #include "network/Socket.hpp"
 #include "network/Poller.hpp"
@@ -14,26 +14,19 @@ using network::Handle;
 using network::Poller;
 using network::SocketException;
 
-static std::string	_concat(char const*, char const*);
+network::Exception::Exception(std::string const& msg):
+	_msg(msg + ": " + strerror(errno)) {}
 
-network::Exception::Exception(char const* hdr, char const* msg):
-	std::runtime_error(_concat(hdr, msg)) {}
+char const*
+network::Exception::what() const noexcept {
+	return (_msg.data());
+}
 
 Handle::Exception::Exception(char const* msg):
-	network::Exception("handle", msg) {}
+	network::Exception(msg) {}
 
 Poller::Exception::Exception(char const* msg):
-	network::Exception("poll", msg) {}
+	network::Exception(msg) {}
 
 SocketException::SocketException(char const* msg):
-	network::Exception("socket", msg) {}
-
-static std::string
-_concat(char const* hdr, char const* msg) {
-	if (hdr[0] == '\0')
-		return (std::string(msg));
-	std::ostringstream	oss(hdr);
-
-	oss << ": " << msg << ": " << strerror(errno);
-	return (oss.str());
-}
+	network::Exception(msg) {}

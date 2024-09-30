@@ -1,5 +1,6 @@
 #include "job/CGI.hpp"
 #include "Environment.hpp"
+#include "Poller.hpp"
 
 #include <cstdlib>
 #include <cstring>
@@ -10,37 +11,38 @@
 using job::CGI;
 using route::Location;
 
-static void	_dup2(int, int);
+static std::string	_filename_and_chdir(stdfs::path const&);
+static void			_dup2(int, int);
 
 // Public methods
 
-void
+CGI::ProcessStatus
 CGI::kill() noexcept {
 	if (_pid == _no_child)
-		return;
+		return (ProcessStatus::success);
 	::kill(_pid, SIGKILL);
-	_pid = _no_child;
+	return (wait());
 }
 
-job::Status
+CGI::ProcessStatus
 CGI::wait() {
 	if (_pid == _no_child)
-		return (Status::success);
+		return (ProcessStatus::success);
 
 	int wstat;
 
-	switch (waitpid(_pid, &wstat, WNOHANG)) {
+	switch (::waitpid(_pid, &wstat, WNOHANG)) {
 	case -1:
-		throw (WaitException());
+		throw (WaitException()); // whenever this happens...
 	case 0:
-		return (Status::pending);
+		return (ProcessStatus::busy);
 	default:
 		_pid = _no_child;
 		if (WIFSIGNALED(wstat))
-			return (Status::aborted);
+			return (ProcessStatus::aborted);
 		if (WEXITSTATUS(wstat) != EXIT_SUCCESS)
-			return (Status::failure);
-		return (Status::success);
+			return (ProcessStatus::failure);
+		return (ProcessStatus::success);
 	}
 }
 
@@ -48,6 +50,8 @@ CGI::wait() {
 
 void
 CGI::_fork(Job const& job) {
+	using EventType = webserv::Poller::EventType;
+
 	network::SocketPair<Socket>	pair;
 
 	_pid = ::fork();
@@ -60,7 +64,7 @@ CGI::_fork(Job const& job) {
 		_exec(job);
 		break;
 	default:
-		_socket = std::move(pair.first);
+		_socket = g_poller.add(std::move(pair.first), {EventType::read, EventType::write});
 		break;
 	}
 }
@@ -71,20 +75,19 @@ CGI::_redirect_io(Socket& socket) {
 
 	_dup2(fd, STDIN_FILENO);
 	_dup2(fd, STDOUT_FILENO);
-	_dup2(fd, STDERR_FILENO);
 	::close(fd);
 }
 
 void
 CGI::_exec(Job const& job) {
-	std::string		pathname(job.location.to());
+	std::string		filename(_filename_and_chdir(job.location.to()));
 	Environment		env(job.environment);
-	char* const		cpathname = pathname.data();
-	char* const		cargv[2] = {cpathname, nullptr};
+	char* const		cfilename = filename.data();
+	char* const		cargv[2] = {cfilename, nullptr};
 
 	env.build();
-	if (::execve(cpathname, cargv, env.cenv()) == -1) {
-		::perror("execve");
+	if (::execve(cfilename, cargv, env.cenv()) == -1) {
+		::perror("execve"); // print
 		::exit(EXIT_FAILURE);
 	}
 }
@@ -97,4 +100,17 @@ _dup2(int from, int to) {
 		::perror("dup2");
 		::exit(EXIT_FAILURE);
 	}
+}
+
+static std::string
+_filename_and_chdir(stdfs::path const& pathname) {
+	stdfs::path const	dir = pathname.parent_path();
+
+	try {
+		stdfs::current_path(dir);
+	} catch (stdfs::filesystem_error& e) {
+		std::cerr << e.code() << "; " << e.what() << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return (pathname.filename());
 }

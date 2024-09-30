@@ -1,5 +1,5 @@
 #include "job/Resource.hpp"
-#include "html.hpp"
+#include "http/html.hpp"
 
 using job::Resource;
 
@@ -11,6 +11,16 @@ Resource::_make_error_page(http::Status status) {
 	oss << "Content-Length: " << body.length() << "\r\n";
 	oss << "\r\n" << body;
 	return (oss.str());
+}
+
+std::string
+Resource::_make_redirection(URI const& to) {
+	std::string dest = to.path().string();
+	if (to.query() != "")
+		dest += "?" + to.query();
+	if (to.fragment() != "")
+		dest += "#" + to.fragment();
+	return (std::string("Location: ") + dest + "\r\n\r\n");
 }
 
 std::string
