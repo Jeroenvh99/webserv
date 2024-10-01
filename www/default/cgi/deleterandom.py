@@ -3,7 +3,7 @@
 import os
 import random
 
-def body:
+def body():
 	body = "<!DOCTYPE html>"
 	body += "<html>"
 	body += "<head><title>Random delete</title></head>"
