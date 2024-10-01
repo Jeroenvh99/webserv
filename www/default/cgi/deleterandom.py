@@ -9,7 +9,7 @@ def body():
 	body += "<head><title>Random delete</title></head>"
 	body += "<body>"
 	body += "<h1>Delete a random file</h1>"
-	body += "<p>delete a random file from the tests folder</p>"
+	body += "<p>delete a random file from the tests folder, use at your own risk</p>"
 	testfiles = []
 	for root, dirs, files in os.walk("/home/jvan-hal/Desktop/webserv/tests"):
 		for file in files:
