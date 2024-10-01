@@ -3,6 +3,153 @@ import os
 
 BASE_URL = "http://localhost:1100"
 
+def test_headers_1():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content Type': 'application/json', 'Content-Length': '27'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_headers_2():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'': 'application/json', 'Content-Length': '27'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_headers_3():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '-1'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_headers_4():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27', 'Host': 'localhost', 'Host': 'globalhost'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_headers_5():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27', 'Host': 'localhost', 'Host': 'localhost'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_headers_6():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27', 'Host': 'localhost@here.com'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
+def test_max_body_len():
+    expected_body = '''\
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>400 Bad Request</title>
+    </head>
+    <body>
+        <h1 align="center">
+            400 Bad Request</h1>
+        <hr />
+        <p align="center">webserv</p>
+    </body>
+</html>
+'''
+
+    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '1001'}, data='{ "title":"foo","body":"bar","id":1 }')
+
+    assert response.status_code == 400
+	assert response.text == expected_body
+
 def test_not_found():
     expected_body = '''\
 <!DOCTYPE html>
@@ -93,3 +240,9 @@ def test_post():
 
     assert response.status_code == 201
 	assert os.path.exists('/home/jvan-hal/Desktop/webserv/www/default/upload.txt')
+
+# long_text = 'A' * 10000000
+# response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'text/txt', 'Content-Length': '100001000'}, data='long_text')
+
+# print(response.status_code)
+# print(response.text)
