@@ -145,7 +145,8 @@ def test_max_body_len():
 </html>
 '''
 
-    response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '1001'}, data='{ "title":"foo","body":"bar","id":1 }')
+	long_text = 'a' * 1000001
+	response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'text/txt', 'Content-Length': '100001000'}, data=f'{long_text}')
 
     assert response.status_code == 400
 	assert response.text == expected_body
@@ -241,8 +242,12 @@ def test_post():
     assert response.status_code == 201
 	assert os.path.exists('/home/jvan-hal/Desktop/webserv/www/default/upload.txt')
 
-# long_text = 'A' * 10000000
-# response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'text/txt', 'Content-Length': '100001000'}, data='long_text')
+def test_delete():
+	file.create(f'{BASE_URL}/data/user/fulltest.sh')
+	response = requests.delete(f'{BASE_URL}/data/user/fulltest.sh')
 
+	assert response.status_code == 200
+
+# requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27'}, data='{ "title":"foo","body":"bar","id":1 }')
 # print(response.status_code)
 # print(response.text)
