@@ -23,21 +23,21 @@ ErrorLogger::level() noexcept {
 char const*
 ErrorLogger::level_to_string(Level level) {
 	switch (level) {
-	case debug:
+	case Level::debug:
 		return ("debug");
-	case info:
+	case Level::info:
 		return ("info");
-	case notice:
+	case Level::notice:
 		return ("notice");
-	case warning:
+	case Level::warning:
 		return ("warning");
-	case error:
+	case Level::error:
 		return ("error");
-	case critical:
+	case Level::critical:
 		return ("critical");
-	case alert:
+	case Level::alert:
 		return ("alert");
-	case emergency:
+	case Level::emergency:
 		return ("emergency");
 	default:
 		__builtin_unreachable();

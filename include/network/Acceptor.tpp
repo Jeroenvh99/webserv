@@ -47,7 +47,7 @@ namespace network {
 		if (raw_handle == StreamSocket<DOMAIN>::_invalid_handle)
 			throw (SocketException("accept"));
 		if (size != addr.size())
-			throw (network::Exception("address", "accept"));
+			throw (network::Exception("accept"));
 		return (StreamSocket<DOMAIN>(raw_handle));
 	}
 }; // namespace network

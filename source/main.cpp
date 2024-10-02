@@ -6,8 +6,9 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <signal.h>
 
 using Servers = std::vector<Server>;
 
@@ -31,6 +32,9 @@ main(int argc, char** argv, char** envp) {
 		return (EXIT_FAILURE);
 	}
 	try {
+		if (::signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+			throw (std::runtime_error("couldn't set signal handler"));
+
 		Servers servers;
 		
 		configure(servers, (argc == 2) ? argv[1] : "configs/default.conf");

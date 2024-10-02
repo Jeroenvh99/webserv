@@ -18,10 +18,11 @@ public:
 		time_local,
 		request,
 		status,
+		host,
+		client
 	}; // enum class Type
-	using enum Type;
 
-	Variable(Type = literal);
+	Variable(Type = Type::literal);
 	Variable(Type, std::string const&);
 	Variable(Type, std::string&&);
 	Variable(std::string const&);
@@ -65,7 +66,7 @@ public:
 	Format&			format() noexcept;
 	Format const&	format() const noexcept;
 
-	void	log(Client const&);
+	void	log(Client const&, VirtualServer const&);
 
 	static const Format	default_fmt;
 
@@ -85,7 +86,6 @@ public:
 		alert,
 		emergency,
 	}; // enum Level
-	using enum Level;
 	using Literals = std::array<std::pair<Level, char const *>, 8>;
 
 	ErrorLogger();
@@ -99,7 +99,7 @@ public:
 	static char const*			level_to_string(Level);
 	static ErrorLogger::Level	level_from_string(std::string const&);
 
-	static constexpr Level	default_level = error;
+	static constexpr Level	default_level = Level::error;
 	static const Literals	literals;
 
 private:
@@ -108,18 +108,23 @@ private:
 
 inline const AccessLogger::Format		AccessLogger::default_fmt = {
 	{"["},
-	{Variable::time_local},
-	{"] processed a request :)"},
+	{Variable::Type::time_local},
+	{"] Host: "},
+	{Variable::Type::host},
+	{"; Client: "},
+	{Variable::Type::client},
+	{"; Request: "},
+	{Variable::Type::request},
 };
 inline constexpr ErrorLogger::Literals	ErrorLogger::literals = {{
-	{debug, "debug"},
-	{info, "info"},
-	{notice, "notice"},
-	{warning, "warning"},
-	{error, "error"},
-	{critical, "critical"},
-	{alert, "alert"},
-	{emergency, "emergency"},
+	{Level::debug, "debug"},
+	{Level::info, "info"},
+	{Level::notice, "notice"},
+	{Level::warning, "warning"},
+	{Level::error, "error"},
+	{Level::critical, "critical"},
+	{Level::alert, "alert"},
+	{Level::emergency, "emergency"},
 }};
 
 extern AccessLogger	alog;

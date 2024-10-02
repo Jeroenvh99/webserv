@@ -2,7 +2,7 @@
 #include "http/Response.hpp"
 #include "logging/logging.hpp"
 
-using Elog = logging::ErrorLogger;
+using Elog = logging::ErrorLogger::Level;
 
 static void	validate_body_size(Client const&, size_t);
 
@@ -17,7 +17,6 @@ Server::_parse_request(Client& client) {
 	try {
 		if (client.parse_request(buf)) {
 			VirtualServer const&	vserv = virtual_server(client);
-
 			validate_body_size(client, vserv.max_body_size());
 			client.respond({client, *this, vserv});
 			logging::elog.log(Elog::debug, client.address(),
@@ -180,7 +179,7 @@ Server::_recv(Client& client, webserv::Buffer& buf) {
 			return (IOStatus::failure);
 		logging::elog.log(Elog::debug, client.address(),
 			": Received ", bytes, " bytes.");
-	} catch (Client::Socket::Exception& e) {
+	} catch (network::Exception& e) {
 		logging::elog.log(Elog::error, client.address(),
 			": Networking failure: ", e.what());
 		return (IOStatus::failure);
@@ -199,8 +198,9 @@ Server::_send(Client& client, webserv::Buffer const& buf) {
 			return (IOStatus::failure);
 		logging::elog.log(Elog::debug, client.address(),
 			": Sent ", bytes, " bytes.");
-	} catch (Client::Socket::Exception& e) {
-		logging::elog.log(Elog::error, e.what());
+	} catch (network::Exception& e) {
+		logging::elog.log(Elog::error, client.address(),
+			": Networking failure: ", e.what());
 		return (IOStatus::failure);
 	}
 	return (IOStatus::success);

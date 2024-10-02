@@ -19,7 +19,7 @@ Address<Domain::ipv4>::Address(int sd) {
 
 	if (::getsockname(sd, reinterpret_cast<sockaddr*>(&_addr), &asize) == -1
 		|| asize > size()) {
-		throw (network::Exception("address", "getsockname")); // dedicated exception?
+		throw (network::Exception("getsockname")); // dedicated exception?
 	}
 }
 

@@ -4,18 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebServ</title>
-	<link rel="favicon" href="favicon.svg">
+	<link rel="favicon" href="logo.svg">
     <link rel="stylesheet" href="style.css">
 </head>
-<header>
-	<h1>WebServ</h1>
-	<sh1>a clunky HTTP server, made with love</sh1>
-</header>
-<hr />
 <body>
-	<button>upload something!</button>
+	<header>
+		<div class="header-content">
+			<div class="header-text">
+				<h1>WebServ</h1>
+				<sh1>your favourite clunky HTTP server, made with love</sh1>
+			</div>
+			<img class="header-logo" src="favicon.svg" alt="DIY Logo" />
+		</div>
+		<hr />
+	</header>
+	<main>
+		<h2>About WebServ</h2>
+		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <code>GET</code>, <code>POST</code> or <code>DELETE</code> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <b>Telnet</b> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download</h3>
+				<form id="fileGetForm" method="GET">
+					<label for="fileGet">Test the GET method by downloading a file.</label>
+					<div class="form-components">
+						<input type="text" id="fileGet" name="fileGet" required onchange="updateDataForm('fileGet', 'fileGetForm')">
+						<button type="submit">download</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload</h3>
+				<form id="filePostForm" method="POST" enctype="multipart/form-data">
+					<label for="filePost">Test the POST method by uploading a file.</label>
+					<div class="form-components">
+						<input type="file" id="filePost" name="filePost" required onchange="updateDataForm('filePost', 'filePostForm')">
+						<button type="submit">upload</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>delete</h3>
+				<form id="fileDeleteForm">
+					<label for="fileDelete">Test the DELETE method by removing a file.</label>
+					<div class="form-components">
+						<input type="text" id="fileDelete" name="fileDelete" required>
+						<button type="submit">delete</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<p>WebServ also natively offers <abbr title="Common Gateway Interface">CGI</abbr> functionality. Don't believe it? Then give these forms a go:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download from CGI</h3>
+				<form id="cgiGetForm" action="/cgi/env.py" target="requestOutput">
+					<label for="cgiGet">Test the GET method by inspecting the CGI execution environment.</label>
+					<div>
+						<button type="submit">download</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload to CGI</h3>
+				<form id="cgiPostForm" action="/cgi/square.py">
+					<label for="cgiPost">Test the POST method by squaring a number.</label>
+					<div class="form-components">
+						<input type="text" id="cgiPost" name="cgiPost" required>
+						<button type="submit">upload</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div>
+			<button>upload something!</button>
+			<form action="/upload.txt" method="post" enctype="text/html">
+				<label for="file">Select a file to upload:</label>
+				<input type="file" id="file" name="file">
+				<input type="hidden" name="filename" value="dummy.txt">
+				<input type="hidden" name="filesize" value="1024">
+				<button type="submit">upload the thing!</button>
+			</form>
+		</div>
+		<div class="iframe-wrapper">
+			<iframe name="requestOutput" title="Request output"></iframe>
+		</div>
+	</main>
+	<footer>
+		<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
+	</footer>
 </body>
-<footer>
-	<p>Brought to you by Team DIY: Connected Edition</p>
-</footer>
+<script>
+function updateDataForm(inputId, formId) {
+	console.log(inputId, formId);
+	const inputElem = document.getElementById(inputId);
+	const formElem = document.getElementById(formId);
+	
+	if (inputElem.files.length > 0) {
+		formElem.action = "/data/user/" + encodeURIComponent(inputElem.files[0].name);
+	}	
+}
+</script>
 </html>

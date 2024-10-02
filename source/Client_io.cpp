@@ -1,8 +1,10 @@
 #include "Client.hpp"
+#include "logging/logging.hpp"
 
 bool
 Client::parse_request(webserv::Buffer& buf) {
 	_impl._buffer_fill(buf);
+	buf.empty();
 	if (_impl._parser.parse(_impl._buffer, _impl._request) == http::parse::RequestParser::State::done) {
 		http::Body const	body = _impl._request.expects_body();
 
@@ -61,6 +63,7 @@ Client::respond(job::Job const& job) {
 	if (httpredirindex > -1){
 		job::RedirectionJob redirjob(job, httpredirindex);
 		respond(redirjob);
+		logging::alog.log(*this, job.vserver);
 		if (redirjob.permanent)
 			throw (Client::RedirectionException(http::Status::moved_permanently));
 		else
@@ -72,6 +75,7 @@ Client::respond(job::Job const& job) {
 		_impl._ostate = OutputState::parse_response;
 	else if (http::is_error(*jstat)) { // job couldn't be started
 		respond({*jstat, job});
+		logging::alog.log(*this, job.vserver);
 		throw (Client::HTTPErrorException(*jstat));
 	} else {
 		_impl._response = http::Response(*jstat);
@@ -80,6 +84,7 @@ Client::respond(job::Job const& job) {
 		_impl._buffer << _impl._response;
 		_impl._ostate = OutputState::fetch;
 	}
+	logging::alog.log(*this, job.vserver);
 }
 
 void
