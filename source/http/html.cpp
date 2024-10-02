@@ -21,9 +21,9 @@ html::directory_list(std::filesystem::path const& path) {
 	std::ostringstream	oss;
 
 	oss << "!DOCTYPE html><html><meta charset=\"utf-8\" /><title>"
-		<< std::string(path) << "</title></head><body>";
+		<< std::string(path) << "</title></head><body><ul>";
 	for (auto const& entry: std::filesystem::directory_iterator(path))
-		oss << "<p>" << entry.path() << "</p>";
+		oss << "<li>" << entry.path() << "</li>";
 	oss << "</body></html>";
 	return (oss.str());
 }
