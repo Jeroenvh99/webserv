@@ -248,6 +248,6 @@ def test_delete():
 
 	assert response.status_code == 200
 
-# requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27'}, data='{ "title":"foo","body":"bar","id":1 }')
+# response = requests.post(f'{BASE_URL}/', headers={'Content-Type': 'application/json', 'Content-Length': '27'}, data='{ "title":"foo","body":"bar","id":1 }')
 # print(response.status_code)
 # print(response.text)
