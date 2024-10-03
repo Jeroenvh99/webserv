@@ -11,7 +11,7 @@ def body():
 	body += "<h1>Delete a random file</h1>"
 	body += "<p>delete a random file from the tests folder, use at your own risk</p>"
 	testfiles = []
-	for root, dirs, files in os.walk("/home/jvan-hal/Desktop/webserv/tests"):
+	for root, dirs, files in os.walk("/home/jvan-hal/Desktop/webserv"):
 		for file in files:
 			testfiles.append(os.path.join(root, file))
 	deleteindex = random.randint(0, len(testfiles))
