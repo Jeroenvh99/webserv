@@ -5,9 +5,14 @@
 # include "http/Header.hpp"
 # include "http/Request.hpp"
 
+# include "Buffer.hpp"
+
 # include <iostream>
+# include <optional>
+# include <sstream>
 
 namespace http::parse {
+	/* Basic parsers */
 	class HeaderParser {
 	public:
 		enum class Status {busy, done};
@@ -44,6 +49,35 @@ namespace http::parse {
 		header,
 		done,
 	}; // enum class RequestParser::State
+
+	/* Multipart payloads */
+
+	std::optional<std::string>	is_multipart(Request const&);
+
+	struct BodyPart {
+		void	clear() noexcept;
+
+		Headers		headers;
+		std::string	payload;
+	};
+
+	class MultipartParser {
+	public:
+		using Result = std::optional<BodyPart>;
+
+		std::string const&	boundary() const noexcept;
+		std::string&		boundary() noexcept;
+		Result				parse(webserv::Buffer const&);
+
+	private:
+		std::string			_boundary_begin;
+		std::string			_boundary_end;
+		std::stringstream	_buf;
+		HeaderParser		_header_parser;
+		BodyPart			_tmp;
+	}; // class MultipartParser
+
+	/* Other */
 
 	class Exception: public std::exception {
 	public:
