@@ -36,6 +36,7 @@ SRC_FILES	:= Environment_build.cpp \
 			http/parse/except.cpp \
 			http/parse/HeaderParser.cpp \
 			http/parse/RequestParser.cpp \
+			http/parse/MultipartParser.cpp \
 			job/CGI_ctor.cpp \
 			job/CGI_io.cpp \
 			job/CGI_spawn.cpp \

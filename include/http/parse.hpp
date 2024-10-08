@@ -12,7 +12,6 @@
 # include <sstream>
 
 namespace http::parse {
-	/* Basic parsers */
 	class HeaderParser {
 	public:
 		enum class Status {busy, done};
@@ -50,32 +49,46 @@ namespace http::parse {
 		done,
 	}; // enum class RequestParser::State
 
-	/* Multipart payloads */
-
-	std::optional<std::string>	is_multipart(Request const&);
+	/* Multipart body parsing */
 
 	struct BodyPart {
-		void	clear() noexcept;
+		BodyPart():
+			is_last(false) {};
 
 		Headers		headers;
-		std::string	payload;
-	};
+		std::string	body;
+		bool		is_last;
+	}; // struct BodyPart
 
 	class MultipartParser {
 	public:
 		using Result = std::optional<BodyPart>;
 
+		MultipartParser(std::string const& = "");
+
 		std::string const&	boundary() const noexcept;
-		std::string&		boundary() noexcept;
-		Result				parse(webserv::Buffer const&);
+		std::string&		boundary(std::string const&);
+		void				boundary_set(std::string&&);
+
+		void	clear();
+		Result	parse(webserv::Buffer const&);
 
 	private:
-		std::string			_boundary_begin;
-		std::string			_boundary_end;
+		enum class Status {first, headers, body, done};
+
+		void	parse_boundary();
+		void	parse_headers();
+		void	parse_body();
+		void	parse_end();
+
+		Status				_status;
+		std::string			_boundary;
 		std::stringstream	_buf;
 		HeaderParser		_header_parser;
 		BodyPart			_tmp;
 	}; // class MultipartParser
+
+	std::optional<std::string>	is_multipart(Request const&);
 
 	/* Other */
 
