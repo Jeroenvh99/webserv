@@ -62,7 +62,7 @@ namespace http::parse {
 
 	class MultipartParser {
 	public:
-		using Result = std::optional<BodyPart>;
+		using Result = std::optional<BodyPart&&>;
 
 		MultipartParser(std::string const& = "");
 

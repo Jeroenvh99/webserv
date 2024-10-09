@@ -18,6 +18,7 @@ SRC_FILES	:= Environment_build.cpp \
 			Server_method.cpp \
 			Server_process.cpp \
 			URI.cpp \
+			utils.cpp\
 			VirtualServer.cpp \
 			Worker_ctor.cpp \
 			Worker_method.cpp \

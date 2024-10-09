@@ -2,6 +2,8 @@
 
 using http::parse::MultipartParser;
 
+enum class MatchResult {full, possible, not};
+
 // Basic operations
 
 MultipartParser::MultipartParser(std::string const& boundary):
@@ -70,24 +72,18 @@ MultipartParser::parse_headers() {
 
 void
 MultipartParser::parse_body() {
+	auto	state = _buf.rdstate();
+	auto	pos = _buf.tellg();
+
 	std::string	body;
-
-	utils::getline<"\r\n">(_buf, body);
-
-	auto		state = _buf.rdstate();
-	auto		pos = _buf.tellg();
-	std::string	next_boundary;
-
-	_buf >> std::noskipws >> next_boundary;
-	if (next_boundary.starts_with(_boundary)) {
-		bool	is_final = next_boundary.ends_with("--");
-
-		_tmp.body += body;
-		_tmp.is_final = is_final;
-		_status = is_final ? Status::done : Status::headers;
+	
+	try {
+		utils::getline(_buf, _tmp.body, _boundary);
+	} catch (IncompleteLineException& e) {
+		_buf.clear(state);
+		_buf.seekg(pos);
+		throw (e);
 	}
-	is.clear(state);
-	is.seekg(pos);
 }
 
 // Helper functions
