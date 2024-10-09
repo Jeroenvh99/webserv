@@ -11,6 +11,7 @@ Resource::_post(route::Location const& loc) {
 		return (http::Status::internal_error);
 	_iss.clear();
 	_iss.str(make_headers_post(loc));
+	_iss.str("there is something new on you server\r\n");
 
 	return (http::Status::created);
 }

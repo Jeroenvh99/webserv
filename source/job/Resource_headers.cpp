@@ -46,6 +46,8 @@ Resource::make_headers_post(route::Location const& loc) {
 	std::ostringstream	oss;
 
 	oss << "Connection: keep-alive\r\n"
+		<< "Content-Type: text/plain"
+		<< "Content-Length: 38"
 		<< "Location: " << loc.from().c_str() << "\r\n";
 	oss << "\r\n";
 	return (oss.str());
