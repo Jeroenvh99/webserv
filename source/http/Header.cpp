@@ -60,7 +60,7 @@ Headers::at(Header::Key const& name) const {
 	auto const	it = find(name);
 
 	if (it == end())
-		throw (std::out_of_range(""));
+		throw (std::out_of_range("Headers::at"));
 	return {*it};
 }
 
@@ -69,7 +69,7 @@ Headers::at(Header::Key const& name) {
 	auto const	it = find(name);
 
 	if (it == end())
-		throw (std::out_of_range(""));
+		throw (std::out_of_range("Headers::at"));
 	return {*it};
 }
 
