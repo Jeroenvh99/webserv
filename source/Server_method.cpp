@@ -40,10 +40,15 @@ Server::virtual_server(std::string const& name) {
 
 VirtualServer const&
 Server::virtual_server(Client const& client) {
-	std::string	hostname = client.request().headers().at("Host").csvalue();
+	std::string	hostname;
 
-	hostname.erase(hostname.find_last_of(':'));
-	return (virtual_server(hostname));
+	try {
+		hostname = client.request().headers().at("Host").csvalue();
+		hostname.erase(hostname.find_last_of(':'));
+		return (virtual_server(hostname));
+	} catch (std::out_of_range&) {
+		return (_possibleservers[0]);
+	}
 }
 
 // Private methods
