@@ -31,12 +31,22 @@ static char const*	default_mime_type = "application/octet_stream";
 //   But that's probably not allowed.
 
 std::string
-Resource::_make_headers(stdfs::path const& pt) {
+Resource::make_headers_get(stdfs::path const& pt) {
 	std::ostringstream	oss;
 
 	oss << "Connection: keep-alive\r\n"
 		<< "Content-Type: " << _get_mime_type(pt) << "\r\n"
 		<< "Content-Length: " << std::filesystem::file_size(pt) << "\r\n";
+	oss << "\r\n";
+	return (oss.str());
+}
+
+std::string
+Resource::make_headers_post(route::Location const& loc) {
+	std::ostringstream	oss;
+
+	oss << "Connection: keep-alive\r\n"
+		<< "Location: " << loc.from();
 	oss << "\r\n";
 	return (oss.str());
 }

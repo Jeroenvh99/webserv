@@ -18,7 +18,7 @@ Resource::_get_file(stdfs::path const& pt) {
 	if (!_ifs.is_open())
 		return (http::Status::not_found);
 	_iss.clear();
-	_iss.str(_make_headers(pt));
+	_iss.str(make_headers_get(pt));
 	return (http::Status::ok);
 }
 
