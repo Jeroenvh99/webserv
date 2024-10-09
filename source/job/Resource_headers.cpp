@@ -46,7 +46,7 @@ Resource::make_headers_post(route::Location const& loc) {
 	std::ostringstream	oss;
 
 	oss << "Connection: keep-alive\r\n"
-		<< "Location: " << loc.from();
+		<< "Location: " << loc.from().c_str() << "\r\n";
 	oss << "\r\n";
 	return (oss.str());
 }
