@@ -39,7 +39,6 @@ MultipartParser::parse(webserv::Buffer const& wsbuf) {
 				parse_body();
 				break;
 			case Status::end:
-				parse_end();
 				return (std::move(tmp));
 			}
 		}
@@ -53,7 +52,7 @@ MultipartParser::parse_boundary() {
 	std::string	line;
 
 	utils::getline<"\r\n">(_buf, line);
-	if (rtrim_ws(line) != _boundary) // checks HT and SP!
+	if (rtrim_ws(line) != _boundary) // only trims HT and SP
 		throw (parse::Exception("incorrect multipart boundary"));
 }
 
@@ -81,16 +80,14 @@ MultipartParser::parse_body() {
 
 	_buf >> std::noskipws >> next_boundary;
 	if (next_boundary.starts_with(_boundary)) {
+		bool	is_final = next_boundary.ends_with("--");
+
 		_tmp.body += body;
-		_status = next_boundary.ends_with("--") ? Status::done : Status::headers;
+		_tmp.is_final = is_final;
+		_status = is_final ? Status::done : Status::headers;
 	}
 	is.clear(state);
 	is.seekg(pos);
-}
-
-void
-MultipartParser::parse_end() {
-
 }
 
 // Helper functions

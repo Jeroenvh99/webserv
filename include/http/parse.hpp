@@ -79,7 +79,6 @@ namespace http::parse {
 		void	parse_boundary();
 		void	parse_headers();
 		void	parse_body();
-		void	parse_end();
 
 		Status				_status;
 		std::string			_boundary;
