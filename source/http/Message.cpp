@@ -35,15 +35,19 @@ http::Body
 Message::expects_body() const {
 	auto	body_length = _get_body_length(*this);
 
-	if (body_length) {
+	try {
+		if (body_length) {
+			if (_headers.contains("Transfer-Encoding", "chunked"))
+				throw (parse::Exception("bad body description"));
+			if (*body_length > 0)
+				return {Body::Type::by_length, *body_length};
+		}
 		if (_headers.contains("Transfer-Encoding", "chunked"))
-			throw (parse::Exception("bad body description"));
-		if (*body_length > 0)
-			return {Body::Type::by_length, *body_length};
+			return (Body::Type::chunked);
+		return (Body::Type::none);
+	} catch (std::out_of_range&) {
+		return (Body::Type::none);
 	}
-	if (_headers.contains("Transfer-Encoding", "chunked"))
-		return (Body::Type::chunked);
-	return (Body::Type::none);
 }
 
 // Modifiers

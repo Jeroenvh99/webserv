@@ -20,6 +20,10 @@ namespace job {
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
 
+		static std::string	make_headers_get(stdfs::path const&);
+		static std::string	make_headers_post(route::Location const&);
+		static std::string	make_headers_delete(route::Location const&);
+
 	private:
 		http::Status	_get(route::Location const&);
 		http::Status	_get_file(stdfs::path const&);
@@ -32,7 +36,6 @@ namespace job {
 		void	_open_ofile(stdfs::path const&);
 		void	_open_builtin(std::string&&);
 
-		std::string	_make_headers(stdfs::path const&);
 		std::string	_make_directory_list(stdfs::path const&);
 		std::string	_make_redirection(URI const& to);
 		std::string	_make_error_page(http::Status);
