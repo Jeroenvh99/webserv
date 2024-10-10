@@ -38,8 +38,6 @@ public:
 	InputStatus		deliver(webserv::Buffer const&);
 
 private:
-	using MultipartOption = std::optional<MultipartParser>;
-
 	size_t	read(webserv::Buffer&);
 	size_t	write(webserv::Buffer const&);
 	size_t	write(BodyPart const&);
@@ -47,7 +45,6 @@ private:
 
 	State				_state;
 	webserv::Time		_last_read;
-	MultipartOption		_multipart_parser;
 	union {
 		job::Resource	_resource;
 		job::CGI		_cgi;

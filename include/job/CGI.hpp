@@ -20,7 +20,6 @@ namespace job {
 
 		size_t			read(webserv::Buffer&) const;
 		size_t			write(webserv::Buffer const&) const;
-		size_t			write(http::BodyPart const&) const;
 
 		ProcessStatus	wait();
 		ProcessStatus	kill() noexcept;

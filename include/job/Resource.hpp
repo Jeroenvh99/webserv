@@ -5,6 +5,7 @@
 # include "job.hpp"
 # include "Buffer.hpp"
 # include "http/Body.hpp"
+# include "http/parse.hpp"
 
 # include <fstream>
 # include <optional>
@@ -20,9 +21,10 @@ namespace job {
 		void			close_out() noexcept;
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
-		size_t			write(http::BodyPart const&);
 
 	private:
+		using MultipartOption = std::optional<MultipartParser>;
+
 		http::Status	_get(route::Location const&);
 		http::Status	_get_file(stdfs::path const&);
 		http::Status	_get_directory(route::Location const&);
@@ -37,6 +39,8 @@ namespace job {
 		std::string	_make_directory_list(stdfs::path const&);
 		std::string	_make_redirection(URI const& to);
 		std::string	_make_error_page(http::Status);
+
+		MultipartOption		_multipart_parser;
 
 		std::istringstream	_iss;
 		std::ifstream		_ifs;
