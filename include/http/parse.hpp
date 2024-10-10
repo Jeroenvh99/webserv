@@ -51,7 +51,7 @@ namespace http::parse {
 
 	class MultipartParser {
 	public:
-		using Result = std::optional<BodyPart&>;
+		using Result = std::optional<BodyPart>;
 
 		MultipartParser(std::string const& = "");
 
@@ -59,7 +59,7 @@ namespace http::parse {
 		std::string&		boundary(std::string const&);
 		void				boundary_set(std::string&&);
 
-		void	clear();
+		void	clear() noexcept;
 		Result	parse(webserv::Buffer const&);
 
 	private:

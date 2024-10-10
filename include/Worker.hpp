@@ -40,7 +40,6 @@ public:
 private:
 	size_t	read(webserv::Buffer&);
 	size_t	write(webserv::Buffer const&);
-	size_t	write(BodyPart const&);
 	bool	timeout() const noexcept;
 
 	State				_state;

@@ -5,7 +5,7 @@ utils::getline(std::istream& is, std::string& str, std::string const& delim) {
 	std::istream::iostate	state = is.rdstate();
 	auto					pos = is.tellg();
 
-	getline_core<DELIM>(is, str);
+	getline_core(is, str, delim);
 	if (is.good())
 		return (is);
 	is.clear(state);

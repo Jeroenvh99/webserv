@@ -21,8 +21,10 @@ namespace job {
 		void			close_out() noexcept;
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
+		size_t			parse_multipart_and_write(webserv::Buffer const&);
 
 	private:
+		using MultipartParser = http::parse::MultipartParser;
 		using MultipartOption = std::optional<MultipartParser>;
 
 		http::Status	_get(route::Location const&);
@@ -30,6 +32,7 @@ namespace job {
 		http::Status	_get_directory(route::Location const&);
 		http::Status	_get_directory_list(stdfs::path const&);
 		http::Status	_post(route::Location const&);
+		http::Status	_post_multipart(route::Location const&);
 		http::Status	_delete(route::Location const&);
 
 		void	_open_ifile(stdfs::path const&);
@@ -41,7 +44,7 @@ namespace job {
 		std::string	_make_error_page(http::Status);
 
 		MultipartOption		_multipart_parser;
-
+		stdfs::path			_multipart_directory;
 		std::istringstream	_iss;
 		std::ifstream		_ifs;
 		std::ofstream		_ofs;
