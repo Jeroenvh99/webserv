@@ -41,7 +41,7 @@ MultipartParser::parse(webserv::Buffer const& wsbuf) {
 				parse_body();
 				break;
 			case Status::end:
-				return (std::move(tmp));
+				return (_part);
 			}
 		}
 	} catch (utils::IncompleteLineException&) {
@@ -66,7 +66,7 @@ MultipartParser::parse_headers() {
 		utils::getline<"\r\n">(_buf, line);
 		if (line.length() == 0)
 			return;
-		_tmp.headers.insert(line);
+		_part.headers.insert(line);
 	}
 }
 
@@ -78,7 +78,7 @@ MultipartParser::parse_body() {
 	std::string	body;
 	
 	try {
-		utils::getline(_buf, _tmp.body, _boundary);
+		utils::getline(_buf, _part.body, _boundary);
 	} catch (IncompleteLineException& e) {
 		_buf.clear(state);
 		_buf.seekg(pos);

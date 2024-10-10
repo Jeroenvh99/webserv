@@ -4,6 +4,7 @@
 
 # include "job.hpp"
 # include "Buffer.hpp"
+# include "http/Body.hpp"
 
 # include <fstream>
 # include <optional>
@@ -19,10 +20,7 @@ namespace job {
 		void			close_out() noexcept;
 		size_t			read(webserv::Buffer&);
 		size_t			write(webserv::Buffer const&);
-
-		static std::string	make_headers_get(stdfs::path const&);
-		static std::string	make_headers_post(route::Location const&);
-		static std::string	make_headers_delete(route::Location const&);
+		size_t			write(http::BodyPart const&);
 
 	private:
 		http::Status	_get(route::Location const&);
