@@ -12,12 +12,14 @@ SRC_FILES	:= Environment_build.cpp \
 			ClientImpl.cpp \
 			config/Config.cpp \
 			main.cpp \
+			mime.cpp \
 			Poller.cpp \
 			Server_ctor.cpp \
 			Server_io.cpp \
 			Server_method.cpp \
 			Server_process.cpp \
 			URI.cpp \
+			utils.cpp\
 			VirtualServer.cpp \
 			Worker_ctor.cpp \
 			Worker_method.cpp \
@@ -45,7 +47,6 @@ SRC_FILES	:= Environment_build.cpp \
 			job/Resource_builtin.cpp \
 			job/Resource_delete.cpp \
 			job/Resource_get.cpp \
-			job/Resource_headers.cpp \
 			job/Resource_io.cpp \
 			job/Resource_post.cpp \
 			logging/Logger.cpp \

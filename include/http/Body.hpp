@@ -1,6 +1,8 @@
 #ifndef HTTP_BODY_HPP
 # define HTTP_BODY_HPP
 
+# include "http/Header.hpp"
+
 # include <cstddef>
 
 namespace http {
@@ -22,6 +24,15 @@ namespace http {
 		Type	_type;
 		size_t	_length;
     }; // class Body
+
+	struct BodyPart {
+		BodyPart():
+			is_last(false) {};
+
+		Headers		headers;
+		std::string	body;
+		bool		is_last;
+	}; // struct BodyPart
 }; // namespace http
 
 #endif // HTTP_BODY_HPP

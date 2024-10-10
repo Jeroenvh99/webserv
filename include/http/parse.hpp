@@ -49,17 +49,6 @@ namespace http::parse {
 		done,
 	}; // enum class RequestParser::State
 
-	/* Multipart body parsing */
-
-	struct BodyPart {
-		BodyPart():
-			is_last(false) {};
-
-		Headers		headers;
-		std::string	body;
-		bool		is_last;
-	}; // struct BodyPart
-
 	class MultipartParser {
 	public:
 		using Result = std::optional<BodyPart>;
@@ -70,7 +59,7 @@ namespace http::parse {
 		std::string&		boundary(std::string const&);
 		void				boundary_set(std::string&&);
 
-		void	clear();
+		void	clear() noexcept;
 		Result	parse(webserv::Buffer const&);
 
 	private:
@@ -84,7 +73,7 @@ namespace http::parse {
 		std::string			_boundary;
 		std::stringstream	_buf;
 		HeaderParser		_header_parser;
-		BodyPart			_tmp;
+		BodyPart			_part;
 	}; // class MultipartParser
 
 	std::optional<std::string>	is_multipart(Request const&);

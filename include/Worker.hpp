@@ -20,7 +20,7 @@ public:
 	enum class InputStatus;
 	enum class OutputStatus;
 
-	static constexpr double	timeout_interval = 10.0; // s
+	static constexpr double	timeout_interval = 10.0; // seconds
 
 	Worker();
 	~Worker();
