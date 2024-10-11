@@ -109,12 +109,11 @@ private:
 inline const AccessLogger::Format		AccessLogger::default_fmt = {
 	{"["},
 	{Variable::Type::time_local},
-	{"] processed a request :)"},
-	{" this server is called: "},
+	{"] Host: "},
 	{Variable::Type::host},
-	{" and the clients address is: "},
+	{"; Client: "},
 	{Variable::Type::client},
-	{" with request: "},
+	{"; Request: "},
 	{Variable::Type::request},
 };
 inline constexpr ErrorLogger::Literals	ErrorLogger::literals = {{
