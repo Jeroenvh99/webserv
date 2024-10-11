@@ -24,7 +24,7 @@
 		<div class="forms">
 			<div class="form-wrapper">
 				<h3>download</h3>
-				<form id="fileGetForm" method="GET">
+				<form id="fileGetForm" method="GET" action="/data/user" target="requestOutput">
 					<label for="fileGet">Test the GET method by downloading a file.</label>
 					<div class="form-components">
 						<input type="text" id="fileGet" name="fileGet" required onchange="updateDataForm('fileGet', 'fileGetForm')">
@@ -34,7 +34,7 @@
 			</div>
 			<div class="form-wrapper">
 				<h3>upload</h3>
-				<form id="filePostForm" method="POST" enctype="multipart/form-data">
+				<form id="filePostForm" method="POST" enctype="multipart/form-data" action="/data/user" target="requestOutput">
 					<label for="filePost">Test the POST method by uploading a file.</label>
 					<div class="form-components">
 						<input type="file" id="filePost" name="filePost" required onchange="updateDataForm('filePost', 'filePostForm')">
