@@ -125,7 +125,7 @@ Worker::read(webserv::Buffer& wsbuf) {
 	case State::resource:
 		return (_resource.read(wsbuf));
 	case State::multipart_resource:
-		return (_multipart_resource.write(wsbuf));
+		return (_multipart_resource.read(wsbuf));
 	case State::cgi:
 		return (_cgi.read(wsbuf));
 	default:

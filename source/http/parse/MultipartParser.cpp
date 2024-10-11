@@ -40,6 +40,7 @@ MultipartParser::parse(webserv::Buffer const& wsbuf) {
 				parse_body();
 				break;
 			case Status::done:
+				_status = Status::headers;
 				return (std::move(_part));
 			}
 		}
@@ -55,6 +56,7 @@ MultipartParser::parse_boundary() {
 	utils::getline<"\r\n">(_buf, line);
 	if (rtrim_ws(line) != _boundary) // only trims HT and SP
 		throw (parse::Exception("incorrect multipart boundary"));
+	_status = Status::headers;
 }
 
 void
@@ -63,8 +65,10 @@ MultipartParser::parse_headers() {
 
 	while (true) {
 		utils::getline<"\r\n">(_buf, line);
-		if (line.length() == 0)
+		if (line.length() == 0) { // all headers have been processed
+			_status = Status::body;
 			return;
+		}
 		_part.headers.insert(line);
 	}
 }
@@ -75,7 +79,19 @@ MultipartParser::parse_body() {
 	auto	pos = _buf.tellg();
 	
 	try {
+		std::string	terminator(2, '\0');
+
 		utils::getline(_buf, _part.body, _boundary);
+		_buf.read(&terminator[0], 2);
+		if (_buf.fail())
+			throw (utils::IncompleteLineException());
+		if (terminator != "\r\n") {
+			if (terminator == "--")
+				_part.is_last = true;
+			else
+				throw (parse::Exception("incorrect multipart boundary terminator"));
+		}
+		_status = Status::done;
 	} catch (utils::IncompleteLineException& e) {
 		_buf.clear(state);
 		_buf.seekg(pos);
