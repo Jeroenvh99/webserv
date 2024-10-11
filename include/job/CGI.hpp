@@ -1,8 +1,8 @@
 #ifndef JOB_CGI_HPP
 # define JOB_CGI_HPP
 
-#include "job.hpp"
 #include "Buffer.hpp"
+#include "job/resource.hpp"
 #include "network/StreamSocket.hpp"
 
 #include <iostream>
@@ -18,8 +18,9 @@ namespace job {
 		CGI(Job const&);
 		~CGI();
 
-		size_t			write(webserv::Buffer const&) const;
 		size_t			read(webserv::Buffer&) const;
+		size_t			write(webserv::Buffer const&) const;
+
 		ProcessStatus	wait();
 		ProcessStatus	kill() noexcept;
 

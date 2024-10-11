@@ -1,7 +1,8 @@
-#include "job/Resource.hpp"
+#include "job/resource.hpp"
 #include "Server.hpp"
 
 using job::Resource;
+using Elog = logging::ErrorLogger::Level;
 
 http::Status
 Resource::open(job::Job const& job) {
@@ -19,14 +20,14 @@ Resource::open(job::Job const& job) {
 
 void
 Resource::open(job::RedirectionJob const& job) {
-	_open_builtin(_make_redirection(job.destination));
+	_open_builtin(make_redirection(job.destination));
 }
 
 void
 Resource::open(job::ErrorJob const& job) {
 	if (job.file == VirtualServer::no_errpage
 		|| _get_file(job.file) == http::Status::not_found)
-		_open_builtin(_make_error_page(job.status));
+		_open_builtin(make_error_page(job.status));
 }
 
 void

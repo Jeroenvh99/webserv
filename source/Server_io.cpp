@@ -17,7 +17,6 @@ Server::_parse_request(Client& client) {
 	try {
 		if (client.parse_request(buf)) {
 			VirtualServer const&	vserv = virtual_server(client);
-
 			validate_body_size(client, vserv.max_body_size());
 			client.respond({client, *this, vserv});
 			logging::elog.log(Elog::debug, client.address(),
