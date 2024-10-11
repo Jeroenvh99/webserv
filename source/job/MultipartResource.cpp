@@ -87,12 +87,16 @@ static std::string
 get_filename(http::BodyPart const& bpart) {
 	std::string const		disposition = bpart.headers.at("Content-Disposition").csvalue();
 	std::string::size_type	begin = disposition.find("filename=");
+	std::string::size_type	end;
 
 	if (begin == std::string::npos)
 		throw (std::out_of_range("get_filename"));
 	begin += 9; // strlen("filename=")
-
-	std::string::size_type	end = disposition.find(';', begin);
-
-	return (disposition.substr(begin, end));
+	if (disposition[begin] == '\"') {
+		end = disposition.find('\"', begin + 1);
+		if (end != std::string::npos)
+			++begin;
+	} else
+		end = disposition.find(';', begin);
+	return (disposition.substr(begin, end - begin));
 }
