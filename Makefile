@@ -44,7 +44,8 @@ SRC_FILES	:= Environment_build.cpp \
 			job/CGI_spawn.cpp \
 			job/except.cpp \
 			job/Job.cpp \
-			job/Resource_builtin.cpp \
+			job/BaseResource.cpp \
+			job/MultipartResource.cpp \
 			job/Resource_delete.cpp \
 			job/Resource_get.cpp \
 			job/Resource_io.cpp \

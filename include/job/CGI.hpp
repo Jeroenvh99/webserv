@@ -1,8 +1,8 @@
 #ifndef JOB_CGI_HPP
 # define JOB_CGI_HPP
 
-#include "job.hpp"
 #include "Buffer.hpp"
+#include "job/resource.hpp"
 #include "network/StreamSocket.hpp"
 
 #include <iostream>

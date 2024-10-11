@@ -1,22 +1,29 @@
 #include "Worker.hpp"
 #include "job/CGI.hpp"
 
+// Initializer methods
+
 std::optional<http::Status>
 Worker::start(job::Job const& job) {
 	stop();
 	if (!job.location.allows_method(job.request.method()))
 		return (http::Status::method_not_allowed);
-	_state = job.is_cgi() ? State::cgi : State::resource;
-	switch (_state) {
-	case State::resource:
-		new (&_resource) job::Resource();
-		return (_resource.open(job));
-	case State::cgi:
+	if (job.is_cgi()) {
+		_state = State::cgi;
 		new (&_cgi) job::CGI(job);
 		return (std::nullopt);
-	default:
-		return (std::nullopt); // unreachable
 	}
+	
+	auto	multipart_boundary = http::parse::is_multipart(job.request);
+
+	if (multipart_boundary) {
+		_state = State::multipart_resource;
+		new (&_multipart_resource) job::MultipartResource();
+		return (_multipart_resource.open(job, *multipart_boundary));
+	}
+	_state = State::resource;
+	new (&_resource) job::Resource(); // job is neither CGI nor multipart
+	return (_resource.open(job));
 }
 
 void
@@ -42,6 +49,10 @@ Worker::stop() noexcept {
 		_resource.~Resource();
 		_state = State::none;
 		break;
+	case State::multipart_resource:
+		_multipart_resource.~MultipartResource();
+		_state = State::none;
+		break;
 	case State::cgi:
 		_cgi.~CGI();
 		_state = State::none;
@@ -49,6 +60,8 @@ Worker::stop() noexcept {
 	default: break;
 	}
 }
+
+// I/O methods
 
 Worker::OutputStatus
 Worker::fetch(webserv::Buffer& wsbuf) {
@@ -97,6 +110,8 @@ Worker::write(webserv::Buffer const& wsbuf) {
 	switch (_state) {
 	case State::resource:
 		return (_resource.write(wsbuf));
+	case State::multipart_resource:
+		return (_multipart_resource.write(wsbuf));
 	case State::cgi:
 		return (_cgi.write(wsbuf));
 	default:
@@ -109,12 +124,16 @@ Worker::read(webserv::Buffer& wsbuf) {
 	switch (_state) {
 	case State::resource:
 		return (_resource.read(wsbuf));
+	case State::multipart_resource:
+		return (_multipart_resource.write(wsbuf));
 	case State::cgi:
 		return (_cgi.read(wsbuf));
 	default:
 		return (0);
 	}
 }
+
+// Other methods
 
 bool
 Worker::timeout() const noexcept {
