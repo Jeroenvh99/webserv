@@ -1,5 +1,8 @@
 #include "Worker.hpp"
 #include "job/CGI.hpp"
+#include "logging/logging.hpp"
+
+using Elog = logging::ErrorLogger::Level;
 
 // Initializer methods
 
@@ -88,7 +91,7 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 			return (stop(), OutputStatus::timeout);
 		return (OutputStatus::pending);
 	} catch (job::BaseResource::Exception& e) {
-		std::cerr << e.what() << std::endl;
+		logging::elog.log(Elog::error, e.what());
 		return (stop(), OutputStatus::failure);
 	}
 }
@@ -100,7 +103,7 @@ Worker::deliver(webserv::Buffer const& wsbuf) {
 			throw (job::BaseResource::IOException("incomplete write"));
 		return (InputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
-		std::cerr << e.what() << std::endl;
+		logging::elog.log(Elog::error, e.what());
 		return (stop(), InputStatus::failure);
 	}
 }

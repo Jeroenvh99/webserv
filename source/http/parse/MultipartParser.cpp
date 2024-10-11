@@ -23,10 +23,14 @@ MultipartParser::clear() noexcept {
 
 // Whatchamacall this category methods
 
-MultipartParser::Result
-MultipartParser::parse(webserv::Buffer const& wsbuf) {
+void
+MultipartParser::load(webserv::Buffer const& wsbuf) {
 	_buf.clear();
 	_buf << wsbuf;
+}
+
+MultipartParser::Result
+MultipartParser::parse() {
 	try {
 		while (true) {
 			switch (_status) {

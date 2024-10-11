@@ -83,10 +83,8 @@ public:
 private:
 	using Parser = http::parse::MultipartParser;
 
-	http::Status	_post(route::Location const&);
-
-	void	_open_ofile(stdfs::path const&);
-	void	_open_builtin(std::string&&);
+	http::Status	post(route::Location const&);
+	void			write_core();
 
 	Parser				_parser;
 	stdfs::path			_directory;

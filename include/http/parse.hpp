@@ -60,7 +60,8 @@ namespace http::parse {
 		void				boundary_set(std::string&&);
 
 		void	clear() noexcept;
-		Result	parse(webserv::Buffer const&);
+		void	load(webserv::Buffer const&);
+		Result	parse();
 
 	private:
 		enum class Status {first, headers, body, done};
