@@ -1,21 +1,18 @@
 #!/usr/bin/python3
 
-import os
-import random
+from datetime import datetime, timedelta
+import pytz
 
 def body():
         body = "<!DOCTYPE html>"
         body += "<html>"
-        body += "<head><title>Random delete</title></head>"
+        body += "<head><title>Time</title></head>"
         body += "<body>"
-        body += "<h1>Delete a random file</h1>"
-        body += "<p>delete a random file from the tests folder, use at your own risk</p>"
-        testfiles = []
-        for root, dirs, files in os.walk("/home/jvan-hal/Desktop/webserv"):
-                for file in files:
-                        testfiles.append(os.path.join(root, file))
-        deleteindex = random.randint(0, len(testfiles))
-        os.remove(testfiles[deleteindex])
+        body += "<h1>Get the time</h1>"
+        body += "<p>this could be usefull, if the time wasn't in the old Amsterdam timezone</p>"
+        UTC = pytz.utc
+        datetime_utc = datetime.now(UTC) + timedelta(minutes=20)
+        body +=(f"The time used to be {datetime_utc.strftime('%Y:%m:%d %H:%M:%S')}")
         body += "</body>"
         body += "</html>"
         return body
