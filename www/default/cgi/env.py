@@ -2,9 +2,10 @@
 
 import os
 
-def element(tag, content):
+def element(tag, *nested):
 	body = "<" + tag + ">"
-	body += content
+	for e in nested:
+		body += e
 	body += "</" + tag + ">"
 	return body
 
@@ -17,24 +18,30 @@ def environ_value(key):
 	except KeyError:
 		return "&lt;undefined&gt;"
 
-def body():
-	body = "<!DOCTYPE html>"
-	body += "<html>"
-	body += "<head><title>ENV CGI</title></head>"
-	body += "<body>"
-	body += "<h1>ENV CGI</h1>"
-	body += element("p", "Directory: " + os.getcwd())
-	body += "<p>Host address is: " + environ_value('REMOTE_HOST') + "</p>"
-	body += "<p>User Agent: " + environ_value('HTTP_USER_AGENT') + "</p>"
-	body += "<p>Request Method: " + environ_value('REQUEST_METHOD') + "</p>"
-	body += "<p>Server Software: " + environ_value('SERVER_SOFTWARE') + "</p>"
-	body += "<p>Server Protocol: " + environ_value('SERVER_PROTOCOL') + "</p>"
-	body += "<p>Server Port: " + environ_value('SERVER_PORT') + "</p>"
-	body += "</body>"
-	body += "</html>"
-	return body
+def get_payload():
+	html = "<!DOCTYPE html>"
+	html += element("html",
+		element("head",
+			element("title", "CGI Execution Environment"),
+			"<meta charset=\"utf-8\"> \
+			<link rel=\"stylesheet\" href=\"/nested.css\">"
+		),
+		element("body",
+			element("h1", "CGI: Execution Environment"),
+			element("p", "Directory: ", element("code", os.getcwd())),
+			element("ul",
+				element("li", "Your IP address: ", element("code", environ_value('REMOTE_HOST'))),
+				element("li", "User agent: ", element("code", environ_value('HTTP_USER_AGENT'))),
+				element("li", "Request method: ", element("code", environ_value('REQUEST_METHOD'))),
+				element("li", "Server software: ", element("code", environ_value("SERVER_SOFTWARE"))),
+				element("li", "Server protocol: ", element("code", environ_value("SERVER_PROTOCOL"))),
+				element("li", "Server port: ", element("code", environ_value("SERVER_PORT")))
+			)
+		)
+	)
+	return html
 
-payload = body()
+payload = get_payload()
 print("Content-Type: text/html")
 print("Content-Length:", len(payload))
 print("")
