@@ -10,7 +10,7 @@ int main() {
 	std::cout << buf << "\n";
 	http::Dechunker chunkinator;
 	http::Dechunker::Status status = chunkinator.dechunk(buf);
-	std::cout << chunkinator.getbuf() << "\n";
+	std::cout << buf << "\n";
 	if (status == http::Dechunker::Status::done)
 		std::cout << "chunks parsed successfully" << "\n";
 	else if (status == http::Dechunker::Status::pending)

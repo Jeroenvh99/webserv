@@ -43,7 +43,9 @@ Dechunker::dechunk(webserv::Buffer& wsbuf) {
 	Status	status = dechunk_core(wsbuf);
 
 	if (status == Status::done) {
-		std::cout << wsbuf << std::endl;
+		std::string s;
+		std::getline(_buf, s);
+		std::cout << s << std::endl;
 		if (!_buf.eof())
 			throw (Exception("buffer contains bytes past final chunk"));
 		clear();
@@ -81,7 +83,6 @@ Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
 		}
 		_remaining = std::nullopt;
 		extract_terminator();
-		// get_end(is);
 		return (_found_null ? Status::done : Status::pending);
 	} catch (utils::IncompleteLineException&) { // size indicator or CRLF terminator could not be fully extracted
 		return (Status::pending);
@@ -107,6 +108,7 @@ Dechunker::extract_terminator() {
 	std::string	s;
 
 	utils::getline<"\r\n">(_buf, s);
+	std::cout << _buf.eof() << std::endl;
 	if (s.length() > 0)
 		throw (Exception("incorrectly sized chunk"));
 	// _chunk_size = std::nullopt;
@@ -126,14 +128,3 @@ char const*
 Dechunker::Exception::what() const noexcept {
 	return (_msg);
 }
-
-/* enchunk */
-
-// webserv::Buffer&
-// http::enchunk(webserv::Buffer& wsbuf, http::ChunkBuffer const& chbuf) {
-// 	wsbuf.push_back(_to_string_hex(chbuf.len()));
-// 	wsbuf.push_back("\r\n");
-// 	wsbuf.push_back(chbuf);
-// 	wsbuf.push_back("\r\n");
-// 	return (wsbuf);
-// }

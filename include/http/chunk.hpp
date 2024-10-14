@@ -15,9 +15,6 @@ namespace http {
 
 	using ChunkBuffer = network::Buffer<webserv::buffer_size - chunk_margin>;
 
-	// void	enchunk(ChunkBuffer const&, webserv::Buffer&);
-	// void	enchunk(std::ostream&, webserv::Buffer&);
-
 	class Dechunker {
 	public:
 		enum class Status {
