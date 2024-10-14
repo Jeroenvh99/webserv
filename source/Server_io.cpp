@@ -123,7 +123,6 @@ Server::_deliver(Client& client, webserv::Buffer const& buf) {
 	case Client::OperationStatus::failure:
 		logging::elog.log(Elog::error, client.address(),
 			": Error delivering resource.");
-		// todo: inject error message into body
 		return (IOStatus::failure);
 	default: // timeout
 		__builtin_unreachable();
