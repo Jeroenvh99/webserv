@@ -35,9 +35,9 @@
 			<div class="form-wrapper">
 				<h3>upload</h3>
 				<form id="filePostForm" method="POST" enctype="multipart/form-data">
-					<label for="filePost">Test the POST method by uploading a file.</label>
+					<label for="filePost">Test the POST method by uploading some files.</label>
 					<div class="form-components">
-						<input type="file" id="filePost" name="filePost" required>
+        				<input type="file" name="example3[]" multiple="multiple"/>
 						<button type="submit">upload</button>
 					</div>
 				</form>
@@ -78,10 +78,8 @@
 		<div>
 			<button>upload something!</button>
 			<form action="/upload.txt" method="post" enctype="text/html">
-				<label for="file">Select a file to upload:</label>
-				<input type="file" id="file" name="file">
-				<input type="hidden" name="filename" value="dummy.txt">
-				<input type="hidden" name="filesize" value="1024">
+				<label>Add files (multiple): </label><br/>
+        		<input type="file" name="example3[]" multiple="multiple"/>
 				<button type="submit">upload the thing!</button>
 			</form>
 		</div>
