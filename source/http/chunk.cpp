@@ -20,7 +20,7 @@ _to_string_hex(size_t num) {
 // Basic operations
 
 Dechunker::Dechunker():
-	_buf(""), _remaining(std::nullopt), _found_final(false) {}
+	_buf(""), _remaining(std::nullopt), _found_null(false) {}
 
 // Utility methods
 
@@ -35,7 +35,7 @@ Dechunker::clear() noexcept {
 Dechunker::Status
 Dechunker::dechunk(webserv::Buffer& wsbuf) {
 	if (_remaining && wsbuf.len() <= _remaining) // wsbuf fits entirely within the current chunk, so no processing is required
-		return (_remaining -= wsbuf.len(), Status::pending);
+		return (*_remaining -= wsbuf.len(), Status::pending);
 	_buf.clear();
 	_buf << wsbuf;
 	wsbuf.empty(); // move the contents of wsbuf into internal buffer
@@ -52,11 +52,11 @@ Dechunker::dechunk(webserv::Buffer& wsbuf) {
 
 Dechunker::Status
 Dechunker::dechunk_core(webserv::Buffer& wsbuf) {
-	Status	status = Status::pending;
+	Status	res = Status::pending;
 	
 	while (_buf) {
 		res = dechunk_one(wsbuf);
-		if (res = Status::done)
+		if (res == Status::done)
 			break;
 	}
 	return (res);
@@ -66,7 +66,7 @@ Dechunker::Status
 Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
 	try {
 		if (!_remaining) // a new chunk is about to be processed
-			extract_size(is); 
+			extract_size(); 
 		while (*_remaining) {
 			if (wsbuf.len() == wsbuf.capacity()) // no more bytes can be put back into wsbuf
 				return (Status::pending);
@@ -77,7 +77,8 @@ Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
 				return (Status::pending);
 			wsbuf.push_back(c);
 		}
-		get_end(is);
+		extract_terminator();
+		// get_end(is);
 		return (_found_null ? Status::done : Status::pending);
 	} catch (utils::IncompleteLineException&) { // size indicator or CRLF terminator could not be fully extracted
 		return (Status::pending);
@@ -105,7 +106,12 @@ Dechunker::extract_terminator() {
 	utils::getline<"\r\n">(_buf, s);
 	if (s.length() > 0)
 		throw (Exception("incorrectly sized chunk"));
-	_chunk_size = std::nullopt;
+	// _chunk_size = std::nullopt;
+}
+
+std::string
+Dechunker::getbuf() const {
+	return _buf.str();
 }
 
 /* Dechunker::Exception */
@@ -120,11 +126,11 @@ Dechunker::Exception::what() const noexcept {
 
 /* enchunk */
 
-webserv::Buffer&
-http::enchunk(webserv::Buffer& wsbuf, webserv::ChunkBuffer const& chbuf) {
-	wsbuf.push_back(_to_string_hex(chbuf.len()));
-	wsbuf.push_back("\r\n");
-	wsbuf.push_back(chbuf);
-	wsbuf.push_back("\r\n");
-	return (wsbuf);
-}
+// webserv::Buffer&
+// http::enchunk(webserv::Buffer& wsbuf, http::ChunkBuffer const& chbuf) {
+// 	wsbuf.push_back(_to_string_hex(chbuf.len()));
+// 	wsbuf.push_back("\r\n");
+// 	wsbuf.push_back(chbuf);
+// 	wsbuf.push_back("\r\n");
+// 	return (wsbuf);
+// }
