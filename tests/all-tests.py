@@ -1,5 +1,6 @@
 import requests
 import os
+import filecmp
 
 BASE_URL = "http://localhost:1100"
 
@@ -248,6 +249,17 @@ BASE_URL = "http://localhost:1100"
 
 # 	assert response.status_code == 200
 
-response = requests.post(f'{BASE_URL}/s.t', headers={'Content-Type': 'application/json', 'Content-Length': '37'}, data='{ "title":"foo","body":"bar","id":1 }')
-print(response.status_code)
+# def test_multipart():
+# 	files = {'upload_file': open('/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py','rb')}
+# 	response = requests.post(f'{BASE_URL}/upload.txt', files=files)
+
+# 	assert filecmp.cmp("/home/jvan-hal/Desktop/webserv/www/default/data/user/deleterandom.py", "/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py", shallow=False)
+
+
+files = {'upload_file': open('/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py','rb')}
+response = requests.post(f'{BASE_URL}/upload.txt', files=files)
+
+assert filecmp.cmp("/home/jvan-hal/Desktop/webserv/www/default/data/user/deleterandom.py", "/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py", shallow=False)
+# response = requests.post(f'{BASE_URL}/s.t', headers={'Content-Type': 'application/json', 'Content-Length': '37'}, data='{ "title":"foo","body":"bar","id":1 }')
+# print(response.status_code)
 # print(response.text)
