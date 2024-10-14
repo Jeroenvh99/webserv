@@ -43,10 +43,7 @@ Dechunker::dechunk(webserv::Buffer& wsbuf) {
 	Status	status = dechunk_core(wsbuf);
 
 	if (status == Status::done) {
-		std::string s;
-		std::getline(_buf, s);
-		std::cout << s << std::endl;
-		if (!_buf.eof())
+		if (_buf.peek() != std::stringstream::traits_type::eof())
 			throw (Exception("buffer contains bytes past final chunk"));
 		clear();
 	}
@@ -95,11 +92,16 @@ Dechunker::extract_size() {
 
 	try {
 		utils::getline<"\r\n">(_buf, s);
+		std::cout << s << std::endl;
 		_remaining = std::stoul(s, nullptr, 16);
+		if (s.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+			throw (Exception("this is not only a hexadecimal number"));
 		if (*_remaining == 0)
 			_found_null = true;
 	} catch (std::out_of_range&) {
 		throw (Exception("invalid chunk size format"));
+	} catch (std::invalid_argument&) {
+		throw (Exception("this is not a hexadecimal number"));
 	}
 }
 
@@ -108,7 +110,6 @@ Dechunker::extract_terminator() {
 	std::string	s;
 
 	utils::getline<"\r\n">(_buf, s);
-	std::cout << _buf.eof() << std::endl;
 	if (s.length() > 0)
 		throw (Exception("incorrectly sized chunk"));
 	// _chunk_size = std::nullopt;

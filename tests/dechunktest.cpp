@@ -15,5 +15,27 @@ int main() {
 		std::cout << "chunks parsed successfully" << "\n";
 	else if (status == http::Dechunker::Status::pending)
 		std::cout << "chunk parsing is still pending" << "\n";
+
+	// buf.empty();
+	// buf.push_back("4\r\nWiki\r\n7\r\npedia i\r\n9\r\nin chunks.\r\n0\r\n\r\n");
+	// std::cout << buf << "\n";
+	// chunkinator.clear();
+	// status = chunkinator.dechunk(buf);
+	// std::cout << buf << "\n";
+	// if (status == http::Dechunker::Status::done)
+	// 	std::cout << "chunks parsed successfully" << "\n";
+	// else if (status == http::Dechunker::Status::pending)
+	// 	std::cout << "chunk parsing is still pending" << "\n";
+
+	buf.empty();
+	buf.push_back("4\r\nWiki\r\n7\r\npedia i\r\n9l\r\nn chunks.\r\n0\r\n\r\n");
+	std::cout << buf << "\n";
+	chunkinator.clear();
+	status = chunkinator.dechunk(buf);
+	std::cout << buf << "\n";
+	if (status == http::Dechunker::Status::done)
+		std::cout << "chunks parsed successfully" << "\n";
+	else if (status == http::Dechunker::Status::pending)
+		std::cout << "chunk parsing is still pending" << "\n";
 	return 0;
 }
