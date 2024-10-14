@@ -43,6 +43,7 @@ Dechunker::dechunk(webserv::Buffer& wsbuf) {
 	Status	status = dechunk_core(wsbuf);
 
 	if (status == Status::done) {
+		std::cout << wsbuf << std::endl;
 		if (!_buf.eof())
 			throw (Exception("buffer contains bytes past final chunk"));
 		clear();
@@ -76,7 +77,9 @@ Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
 			if (_buf.eof()) // internal buffer has been fully processed
 				return (Status::pending);
 			wsbuf.push_back(c);
+			--*_remaining;
 		}
+		_remaining = std::nullopt;
 		extract_terminator();
 		// get_end(is);
 		return (_found_null ? Status::done : Status::pending);

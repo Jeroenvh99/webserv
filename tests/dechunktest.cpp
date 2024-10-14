@@ -6,7 +6,7 @@
 
 int main() {
 	webserv::Buffer buf;
-	buf.push_back("4\r\nWiki\r\n7\r\npedia i\r\n9\r\nn chunks.\r\n0\r\n");
+	buf.push_back("4\r\nWiki\r\n7\r\npedia i\r\n9\r\nn chunks.\r\n0\r\n\r\n");
 	std::cout << buf << "\n";
 	http::Dechunker chunkinator;
 	http::Dechunker::Status status = chunkinator.dechunk(buf);
