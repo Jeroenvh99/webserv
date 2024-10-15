@@ -61,6 +61,7 @@ namespace http {
 	std::string&	trim_ws(std::string&) noexcept;
 	std::string&	ltrim_ws(std::string&) noexcept;
 	std::string&	rtrim_ws(std::string&) noexcept;
+
 }; // namespace http
 
 #endif // HTTP_HPP

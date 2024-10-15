@@ -45,10 +45,14 @@ Environment::build() {
 	append("REMOTE_USER", ""); // implement
 	append("AUTH_TYPE", ""); // implement
 
-	if (req.headers().contains("Content-Type"))
-		append("CONTENT_TYPE", "<placeholder>");
-	if (req.headers().contains("Content-Length"))
-		append("CONTENT_LENGTH", "<placeholder>");
+	try {
+		// if (req.headers().contains("Content-Type"))
+		append("CONTENT_TYPE", req.headers().at("Content-Type").csvalue());
+	} catch (std::out_of_range&) {}
+	try {
+		// if (req.headers().contains("Content-Length"))
+		append("CONTENT_LENGTH", req.headers().at("Content-Length").csvalue());
+	} catch (std::out_of_range&) {}
 
 	for (auto const& kv: req.headers()) {
 		http::Header const	hdr(kv);

@@ -1,4 +1,4 @@
-#include "job/Resource.hpp"
+#include "job/resource.hpp"
 
 #include "mime.hpp"
 
@@ -31,7 +31,7 @@ Resource::_get_directory(route::Location const& loc) {
 	if (loc.forbids_directory())
 		return (http::Status::forbidden);
 	if (loc.lists_directory())
-		return (_open_builtin(_make_directory_list(loc.to())), http::Status::ok);
+		return (_open_builtin(make_directory_list(loc.to())), http::Status::ok);
 	return (_get_file(loc.to() / loc.directory_file()));
 }
 

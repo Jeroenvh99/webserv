@@ -1,4 +1,4 @@
-#include "job/Resource.hpp"
+#include "job/resource.hpp"
 
 using job::Resource;
 

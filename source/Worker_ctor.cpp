@@ -13,6 +13,8 @@ Worker::Worker(Worker&& that):
 	case State::resource:
 		new (&_resource) job::Resource(std::move(that._resource));
 		break;
+	case State::multipart_resource:
+		new (&_multipart_resource) job::MultipartResource(std::move(that._multipart_resource));
 	case State::cgi:
 		new (&_cgi) job::CGI(std::move(that._cgi));
 		break;
@@ -30,6 +32,8 @@ Worker::operator=(Worker&& that) {
 	case State::resource:
 		new (&_resource) job::Resource(std::move(that._resource));
 		break;
+	case State::multipart_resource:
+		new (&_multipart_resource) job::MultipartResource(std::move(that._multipart_resource));
 	case State::cgi:
 		new (&_cgi) job::CGI(std::move(that._cgi));
 		break;
