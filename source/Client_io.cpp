@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "logging/logging.hpp"
+#include "http/chunk.hpp"
 
 bool
 Client::parse_request(webserv::Buffer& buf) {
@@ -130,9 +131,11 @@ Client::deliver(webserv::Buffer const& buf) {
 	}
 }
 
-job::Status
-Client::dechunk(webserv::Buffer const&) {
-	return (job::Status::failure); // placeholder
+http::Status
+Client::dechunk(webserv::Buffer const& buf) {
+	http::Dechunker chunkinator;
+	http::Dechunker::Status status = chunkinator.dechunk(buf);
+	return (http::Status::success); // placeholder, should be successful
 }
 
 Client::OperationStatus
