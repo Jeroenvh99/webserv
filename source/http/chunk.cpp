@@ -54,36 +54,36 @@ Dechunker::Status
 Dechunker::dechunk_core(webserv::Buffer& wsbuf) {
 	Status	res = Status::pending;
 	
-	while (_buf) {
-		res = dechunk_one(wsbuf);
-		if (res == Status::done)
-			break;
+	try {
+		while (_buf) {
+			res = dechunk_one(wsbuf);
+			if (res == Status::done)
+				break;
+		}
+	} catch (utils::IncompleteLineException&) { // size indicator or CRLF terminator could not be fully extracted
+		return (Status::pending);
 	}
 	return (res);
 }
 
 Dechunker::Status
 Dechunker::dechunk_one(webserv::Buffer& wsbuf) {
-	try {
-		if (!_remaining) // a new chunk is about to be processed
-			extract_size(); 
-		while (*_remaining) {
-			if (wsbuf.len() == wsbuf.capacity()) // no more bytes can be put back into wsbuf
-				return (Status::pending);
+	if (!_remaining) // a new chunk is about to be processed
+		extract_size(); 
+	while (*_remaining) {
+		if (wsbuf.len() == wsbuf.capacity()) // no more bytes can be put back into wsbuf
+			return (Status::pending);
 
-			char const	c = _buf.get();
+		char const	c = _buf.get();
 
-			if (_buf.eof()) // internal buffer has been fully processed
-				return (Status::pending);
-			wsbuf.push_back(c);
-			--*_remaining;
-		}
-		_remaining = std::nullopt;
-		extract_terminator();
-		return (_found_null ? Status::done : Status::pending);
-	} catch (utils::IncompleteLineException&) { // size indicator or CRLF terminator could not be fully extracted
-		return (Status::pending);
+		wsbuf.push_back(c);
+		if (_buf.peek() == std::stringstream::traits_type::eof()) // internal buffer has been fully processed
+			return (Status::pending);
+		--*_remaining;
 	}
+	extract_terminator();
+	_remaining = std::nullopt;
+	return (_found_null ? Status::done : Status::pending);
 }
 
 void
