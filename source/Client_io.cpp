@@ -37,10 +37,10 @@ Client::parse_response(webserv::Buffer const& buf) {
 	while (!_impl._buffer.eof()) {
 		if (line.length() == 0) { // blank line was processed; end of headers
 			_impl._response.init_from_headers();
-			_impl._response_body = _impl._response.expects_body(); // replace by:
-			// if response specifies Content-Length, use that value, injecting an error if it is exceeded
-			// else if response specifies Transfer-Encoding = chunked, assume CGI output is already chunked
-			// else, the server enchunks the response data itself
+			_impl._response_body = _impl._response.expects_body();
+			if (_impl._response_body.type() == http::Body::Type::none) {
+				throw http::parse::Exception("cgi script doesn't indicate body length");
+			}
 
 			std::string	trail; // extract leftovers
 
