@@ -39,6 +39,9 @@ namespace utils {
 	std::istream&	getline(std::istream&, std::string&);
 	template<StringLiteral DELIM>
 	std::istream&	getline_core(std::istream&, std::string&);
+
+	std::istream&	getline(std::istream&, std::string&, std::string const&);
+	std::istream&	getline_core(std::istream&, std::string&, std::string const&);
 }; // namespace utils
 
 # include "utils.tpp"

@@ -20,24 +20,25 @@
 	</header>
 	<main>
 		<h2>About WebServ</h2>
-		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <code>GET</code>, <code>POST</code> or <code>DELETE</code> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <b>Telnet</b> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
+		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <i>GET</i>, <i>POST</i> or <i>DELETE</i> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <i>Telnet</i> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
 		<div class="forms">
 			<div class="form-wrapper">
 				<h3>download</h3>
-				<form id="fileGetForm" method="GET">
-					<label for="fileGet">Test the GET method by downloading a file.</label>
+				<form id="fileGetForm" method="GET" action="/data/user" target="requestOutput">
+					<label for="fileGet">Test the <i>GET</i> method by downloading a file.</label>
 					<div class="form-components">
-						<input type="text" id="fileGet" name="fileGet" required onchange="updateDataForm('fileGet', 'fileGetForm')">
+						<input type="text" id="fileGet" name="fileGet" required>
 						<button type="submit">download</button>
 					</div>
+					<small>Note that the fact that you're able to view this page, means that the <i>GET</i> method works. If you're still unsure however, this form is for you!</small>
 				</form>
 			</div>
 			<div class="form-wrapper">
 				<h3>upload</h3>
-				<form id="filePostForm" method="POST" enctype="multipart/form-data">
-					<label for="filePost">Test the POST method by uploading a file.</label>
+				<form id="filePostForm" method="POST" enctype="multipart/form-data" action="/data/user" target="requestOutput">
+					<label for="filePost">Test the <i>POST</i> method by uploading a file.</label>
 					<div class="form-components">
-						<input type="file" id="filePost" name="filePost" required onchange="updateDataForm('filePost', 'filePostForm')">
+						<input type="file" id="filePost" name="filePost" required>
 						<button type="submit">upload</button>
 					</div>
 				</form>
@@ -45,10 +46,10 @@
 			<div class="form-wrapper">
 				<h3>delete</h3>
 				<form id="fileDeleteForm">
-					<label for="fileDelete">Test the DELETE method by removing a file.</label>
+					<label for="fileDelete">Test the <i>DELETE</i> method by removing a file.</label>
 					<div class="form-components">
 						<input type="text" id="fileDelete" name="fileDelete" required>
-						<button type="submit">delete</button>
+						<button type="submit">remove</button>
 					</div>
 				</form>
 			</div>
@@ -58,18 +59,19 @@
 			<div class="form-wrapper">
 				<h3>download from CGI</h3>
 				<form id="cgiGetForm" action="/cgi/env.py" target="requestOutput">
-					<label for="cgiGet">Test the GET method by inspecting the CGI execution environment.</label>
-					<div>
+					<label for="cgiGet">Test the <i>GET</i> method by inspecting the <abbr title="Common Gateway Interface">CGI</abbr> execution environment.</label>
+					<div class="form-components">
+						<div></div>
 						<button type="submit">download</button>
 					</div>
 				</form>
 			</div>
 			<div class="form-wrapper">
 				<h3>upload to CGI</h3>
-				<form id="cgiPostForm" action="/cgi/square.py">
-					<label for="cgiPost">Test the POST method by squaring a number.</label>
+				<form id="cgiPostForm" method="POST" action="/cgi/square.py" enctype="multipart/form-data">
+					<label for="cgiPost">Test the <i>POST</i> method by squaring a number.</label>
 					<div class="form-components">
-						<input type="text" id="cgiPost" name="cgiPost" required>
+						<input type="text" id="cgiPost" name="toSquare" required>
 						<button type="submit">upload</button>
 					</div>
 				</form>
@@ -83,15 +85,4 @@
 		<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
 	</footer>
 </body>
-<script>
-function updateDataForm(inputId, formId) {
-	console.log(inputId, formId);
-	const inputElem = document.getElementById(inputId);
-	const formElem = document.getElementById(formId);
-	
-	if (inputElem.files.length > 0) {
-		formElem.action = "/data/user/" + encodeURIComponent(inputElem.files[0].name);
-	}	
-}
-</script>
 </html>

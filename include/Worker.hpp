@@ -7,7 +7,7 @@
 # include "Environment.hpp"
 # include "http/Request.hpp"
 # include "http/Response.hpp"
-# include "job/Resource.hpp"
+# include "job/resource.hpp"
 # include "job/CGI.hpp"
 # include "utils/time.hpp"
 
@@ -20,7 +20,7 @@ public:
 	enum class InputStatus;
 	enum class OutputStatus;
 
-	static constexpr double	timeout_interval = 10.0; // s
+	static constexpr double	timeout_interval = 10.0; // seconds
 
 	Worker();
 	~Worker();
@@ -42,17 +42,19 @@ private:
 	size_t	write(webserv::Buffer const&);
 	bool	timeout() const noexcept;
 
-	State				_state;
-	webserv::Time		_last_read;
+	State			_state;
+	webserv::Time	_last_read;
 	union {
-		job::Resource	_resource;
-		job::CGI		_cgi;
+		job::Resource			_resource;
+		job::MultipartResource	_multipart_resource;
+		job::CGI				_cgi;
 	}; // anonymous union
 }; // class Worker
 
 enum class Worker::State {
 	none,
 	resource,
+	multipart_resource,
 	cgi,
 }; // enum class Worker::State
 

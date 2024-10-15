@@ -1,4 +1,4 @@
-#include "job/Resource.hpp"
+#include "job/resource.hpp"
 
 using job::Resource;
 
@@ -20,12 +20,12 @@ Resource::_post(route::Location const& loc) {
 static std::string
 make_headers_and_body(route::Location const& loc) {
 	std::ostringstream	oss;
-	std::string			uri = loc.from().c_str();
+	std::string			representation = loc.from().c_str();
 
 	oss << "Connection: keep-alive\r\n"
 		<< "Content-Type: text/plain\r\n"
-		<< "Content-Length: " << uri.length() << "\r\n"
-		<< "Location: " << uri << "\r\n\r\n"
-		<< uri;
+		<< "Content-Length: " << representation.length() << "\r\n"
+		<< "Location: " << representation << "\r\n\r\n"
+		<< representation;
 	return (oss.str());
 }
