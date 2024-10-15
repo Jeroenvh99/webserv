@@ -105,7 +105,6 @@ public:
 	OperationStatus	dechunk_and_deliver(webserv::Buffer&);
 	OperationStatus	deliver(webserv::Buffer const&);
 	OperationStatus	fetch(webserv::Buffer&);
-	OperationStatus	fetch(webserv::ChunkBuffer&);
 
 	bool	timeout(double) const noexcept;
 

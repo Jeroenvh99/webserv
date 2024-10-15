@@ -5,30 +5,39 @@
 
 # include <optional>
 # include <sstream>
+# include <stdexcept>
 
 namespace http {
-	webserv::Buffer&	enchunk(webserv::Buffer&, webserv::ChunkBuffer const&);
+	constexpr size_t	chunk_margin = 8;
+	// 4 for two CRLF + 4 for hex length indicator
+	// As long as webserv::buffer_size does not exceed 65536 (0xFFFF), this
+	// value won't need to be adjusted.
+
+	using ChunkBuffer = network::Buffer<webserv::buffer_size - chunk_margin>;
 
 	class Dechunker {
 	public:
-		using Result = std::optional<size_t>;
+		enum class Status {
+			pending, done,
+		}; // enum class Status
+
 		class Exception;
 
 		Dechunker();
 
-		std::ostream&	buffer() noexcept;
-
-		Result	dechunk(webserv::Buffer&);
-		Result	dechunk(webserv::Buffer&, std::istream&);
-		Result	dechunk_single(webserv::Buffer&, std::istream&);
+		void	clear() noexcept;
+		Status	dechunk(webserv::Buffer&);
+		std::string	getbuf() const;
 
 	private:
-		void	get_size(std::istream&);
-		size_t	get_end(std::istream&);
+		Status	dechunk_core(webserv::Buffer&);
+		Status	dechunk_one(webserv::Buffer&);
+		void	extract_size();
+		void	extract_terminator();
 
-		std::optional<size_t>	_chunk_size;
-		size_t					_bytes_dechunked;
 		std::stringstream		_buf;
+		std::optional<size_t>	_remaining;
+		bool					_found_null;
 	}; // class Dechunker
 
 	class Dechunker::Exception: public std::exception {
@@ -38,7 +47,7 @@ namespace http {
 		char const*	what() const noexcept;
 	private:
 		char const*	_msg;
-	}; // class Dechunker::ChunkException
+	}; // class Dechunker::Exception
 
 }; // namespace http
 
