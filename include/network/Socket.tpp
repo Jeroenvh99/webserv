@@ -66,6 +66,17 @@ namespace network {
 	}
 
 	template<Domain DOMAIN, Type TYPE>
+	size_t
+	Socket<DOMAIN, TYPE>::write(std::string const& str, int flags) const {
+		ssize_t const	len = send(raw(), str.data(), str.length(), flags);
+
+		if (good() && len == -1) {
+			throw (SocketException("send"));
+		}
+		return (len);
+	}
+
+	template<Domain DOMAIN, Type TYPE>
 	template<size_t BSIZE>
 	size_t
 	Socket<DOMAIN, TYPE>::read(Buffer<BSIZE>& buf, int flags) const {

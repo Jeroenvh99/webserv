@@ -30,8 +30,15 @@ CGI::write(webserv::Buffer const& buf) const {
 	try {
 		if (!g_poller.event(_socket).happened(EventType::write))
 			throw (IOException("socket unavailable for writing"));
+		if (_ibuf.length() > 0) {
+			_ibuf += std::string(buf);
+			socket().write(_ibuf);
+			_ibuf = "";
+			return (buf.len());
+		}
 		return (socket().write(buf));
 	} catch (std::out_of_range&) {
-		throw (IOException("socket unavailable"));
+		_ibuf += std::string(buf);
+		return (buf.len());
 	}
 }

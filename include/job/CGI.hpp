@@ -35,6 +35,7 @@ namespace job {
 
 		pid_t					_pid;
 		network::SharedHandle	_socket;
+		std::string				_obuf;
 	}; // class CGI
 
 	class CGI::WaitException: public CGI::Exception {
