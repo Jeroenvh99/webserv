@@ -5,16 +5,6 @@
 
 using http::Dechunker;
 
-static std::string	_to_string_hex(size_t);
-
-static std::string
-_to_string_hex(size_t num) {
-	std::ostringstream	oss;
-
-	oss << std::hex << num;
-	return (oss.str());
-}
-
 /* Dechunker */
 
 // Basic operations

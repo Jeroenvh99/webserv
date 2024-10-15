@@ -49,7 +49,7 @@ Server::_process_read(Client& client) {
 	case Client::InputState::deliver:
 		return (_recv_and_deliver(client));
 	case Client::InputState::dechunk:
-		return (_dechunk_and_deliver(client));
+		return (_recv_dechunk_and_deliver(client));
 	case Client::InputState::closed:
 		return (IOStatus::failure);
 	}
@@ -63,8 +63,6 @@ Server::_process_write(Client& client) {
 		return (_parse_response(client));
 	case Client::OutputState::fetch:
 		return (_fetch_and_send(client));
-	case Client::OutputState::enchunk:
-		return (_enchunk_and_send(client));
 	default:	// closed
 		return (IOStatus::success); // ?
 	}

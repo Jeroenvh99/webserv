@@ -69,7 +69,6 @@ enum class ClientImpl::InputState {
 enum class ClientImpl::OutputState {
 	parse_response,	// directing worker output to response parser
 	fetch,			// directing worker output to socket
-	enchunk,		// enchunk worker output and direct it to socket
 	closed,			// not expecting further output (might need this to keep faulty CGI in check)
 }; // enum class ClientImpl::OutputState
 

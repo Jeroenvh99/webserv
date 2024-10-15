@@ -19,6 +19,7 @@ Client::parse_request(webserv::Buffer& buf) {
 			break;
 		case http::Body::Type::chunked:
 			_impl._istate = InputState::dechunk;
+			_impl._dechunker.clear();
 			break;
 		}
 		_impl._buffer_flush(buf);
@@ -131,11 +132,23 @@ Client::deliver(webserv::Buffer const& buf) {
 	}
 }
 
-http::Status
-Client::dechunk(webserv::Buffer const& buf) {
-	http::Dechunker chunkinator;
-	http::Dechunker::Status status = chunkinator.dechunk(buf);
-	return (http::Status::success); // placeholder, should be successful
+Client::OperationStatus
+Client::dechunk_and_deliver(webserv::Buffer& buf) {
+	auto	dechunker_status = _impl._dechunker.dechunk(buf);
+
+	switch (_impl._worker.deliver(buf)) {
+	case Worker::InputStatus::pending:
+		if (dechunker_status == http::Dechunker::Status::done) {
+			if (_impl._ostate == OutputState::closed)
+				_impl._clear();
+			else
+				_impl._istate = InputState::closed;
+			return (OperationStatus::success);
+		}
+		return (OperationStatus::pending);
+	default: // failure
+		return (OperationStatus::failure);
+	}
 }
 
 Client::OperationStatus
