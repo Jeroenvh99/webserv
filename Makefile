@@ -102,4 +102,4 @@ test:
 
 -include $(DEP_FILES)
 
-# c++ -I./include -std=c++20 tests/dechunktest.cpp source/http/chunk.cpp #dechunkertest
+# c++ -I./include -std=c++20 tests/dechunktest.cpp source/http/chunk.cpp && ./a.out #dechunkertest

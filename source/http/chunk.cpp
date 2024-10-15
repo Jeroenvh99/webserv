@@ -92,10 +92,9 @@ Dechunker::extract_size() {
 
 	try {
 		utils::getline<"\r\n">(_buf, s);
-		std::cout << s << std::endl;
-		_remaining = std::stoul(s, nullptr, 16);
 		if (s.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
 			throw (Exception("this is not only a hexadecimal number"));
+		_remaining = std::stoul(s, nullptr, 16);
 		if (*_remaining == 0)
 			_found_null = true;
 	} catch (std::out_of_range&) {
