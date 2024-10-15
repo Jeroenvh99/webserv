@@ -1,10 +1,10 @@
-#include "job/Resource.hpp"
+#include "job/resource.hpp"
 #include "http/html.hpp"
 
-using job::Resource;
+using job::BaseResource;
 
 std::string
-Resource::_make_error_page(http::Status status) {
+BaseResource::make_error_page(http::Status status) {
 	std::ostringstream	oss;
 	std::string			body = html::error_page(status);
 
@@ -14,8 +14,9 @@ Resource::_make_error_page(http::Status status) {
 }
 
 std::string
-Resource::_make_redirection(URI const& to) {
+BaseResource::make_redirection(URI const& to) {
 	std::string dest = to.path().string();
+
 	if (to.query() != "")
 		dest += "?" + to.query();
 	if (to.fragment() != "")
@@ -24,7 +25,7 @@ Resource::_make_redirection(URI const& to) {
 }
 
 std::string
-Resource::_make_directory_list(stdfs::path const& pt) {
+BaseResource::make_directory_list(stdfs::path const& pt) {
 	std::ostringstream	oss;
 	std::string			body = html::directory_list(pt);
 
