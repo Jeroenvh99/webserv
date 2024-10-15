@@ -26,19 +26,19 @@ CGI::read(webserv::Buffer& buf) const {
 }
 
 size_t
-CGI::write(webserv::Buffer const& buf) const {
+CGI::write(webserv::Buffer const& buf) {
 	try {
 		if (!g_poller.event(_socket).happened(EventType::write))
 			throw (IOException("socket unavailable for writing"));
-		if (_ibuf.length() > 0) {
-			_ibuf += std::string(buf);
-			socket().write(_ibuf);
-			_ibuf = "";
+		if (_obuf.length() > 0) {
+			_obuf += std::string(buf);
+			socket().write(_obuf);
+			_obuf = "";
 			return (buf.len());
 		}
 		return (socket().write(buf));
 	} catch (std::out_of_range&) {
-		_ibuf += std::string(buf);
+		_obuf += std::string(buf);
 		return (buf.len());
 	}
 }

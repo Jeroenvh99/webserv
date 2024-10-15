@@ -19,7 +19,7 @@ namespace job {
 		~CGI();
 
 		size_t			read(webserv::Buffer&) const;
-		size_t			write(webserv::Buffer const&) const;
+		size_t			write(webserv::Buffer const&);
 
 		ProcessStatus	wait();
 		ProcessStatus	kill() noexcept;

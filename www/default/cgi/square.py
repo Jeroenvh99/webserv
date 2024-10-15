@@ -1,13 +1,64 @@
-import cgi
+#!/usr/bin/env python3
 
-print("Content-Type: text/html\n")
+import sys
+import os
+import io
+import email
+import cgitb
 
-# Parse the form data
-form = cgi.FieldStorage()
+# Enable debugging for CGI errors
+cgitb.enable()
 
-# Extract the content of the input box using its name attribute
-if "textInput" in form:
-    user_input = form.getvalue("toSquare")
-    print(f"<p>You entered: {user_input}</p>")
+# Set the content-type for the response (HTML in this case)
+print("Content-Type: text/html")
+print()  # Blank line to indicate the end of the headers
+
+# Read the incoming data from the environment
+content_length = int(os.environ.get('CONTENT_LENGTH', 0))
+content_type = os.environ.get('CONTENT_TYPE', '')
+
+# Check if the content type is multipart/form-data
+if 'multipart/form-data' in content_type:
+    # Read the multipart form data
+    data = sys.stdin.read(content_length)
+    
+    # Use the email.parser to parse the multipart data
+    msg = email.message_from_bytes(data.encode('utf-8'), policy=email.policy.HTTP)
+
+    # Extract the value of the input box (assuming name="toSquare")
+    for part in msg.iter_parts():
+        if part.get_content_disposition() == 'form-data' and part.get_param('name') == 'toSquare':
+            input_value = part.get_payload(decode=True).decode('utf-8').strip()
+            
+            # Now handle the logic for squaring the input if it's a valid integer
+            try:
+                number = int(input_value)
+                squared_value = number ** 2
+                print(f"""
+                <html>
+                <body>
+                    <h1>Result</h1>
+                    <p>The square of {number} is {squared_value}.</p>
+                </body>
+                </html>
+                """)
+            except ValueError:
+                print(f"""
+                <html>
+                <body>
+                    <h1>Error</h1>
+                    <p>Please enter a valid integer.</p>
+                </body>
+                </html>
+                """)
+            break
 else:
-    print("<p>No input received!</p>")
+    # If not multipart/form-data, return an error
+    print(f"""
+    <html>
+    <body>
+        <h1>Error</h1>
+        <p>Invalid content type. Please submit the form using multipart/form-data.</p>
+    </body>
+    </html>
+    """)
