@@ -31,6 +31,7 @@ namespace network {
 
 		template<size_t BSIZE>
 		size_t	write(Buffer<BSIZE> const&, int = 0) const;
+		size_t	write(std::string const&, int = 0) const; // :(
 		template<size_t BSIZE>
 		size_t	read(Buffer<BSIZE>&, int = 0) const;
 

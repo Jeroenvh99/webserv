@@ -103,7 +103,8 @@ Worker::deliver(webserv::Buffer const& wsbuf) {
 			throw (job::BaseResource::IOException("incomplete write"));
 		return (InputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
-		logging::elog.log(Elog::error, e.what());
+		logging::elog.log(Elog::error, "Error writing to file: ", e.what());
+		// logging::elog.log(Elog::debug, "Buffer contents: ", wsbuf);
 		return (stop(), InputStatus::failure);
 	}
 }
