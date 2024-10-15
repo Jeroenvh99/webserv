@@ -15,7 +15,8 @@ CGI::socket() const {
 }
 
 size_t
-CGI::read(webserv::Buffer& buf) const {
+CGI::read(webserv::Buffer& buf) {
+	flush();
 	try {
 		if (!g_poller.event(_socket).happened(EventType::read))
 			throw (IOException("socket unavailable for reading"));
@@ -27,18 +28,18 @@ CGI::read(webserv::Buffer& buf) const {
 
 size_t
 CGI::write(webserv::Buffer const& buf) {
+	_obuf += std::string(buf);
+	return (buf.len());
+}
+
+void
+CGI::flush() {
+	if (_obuf.length() == 0)
+		return;
 	try {
 		if (!g_poller.event(_socket).happened(EventType::write))
 			throw (IOException("socket unavailable for writing"));
-		if (_obuf.length() > 0) {
-			_obuf += std::string(buf);
-			socket().write(_obuf);
-			_obuf = "";
-			return (buf.len());
-		}
-		return (socket().write(buf));
-	} catch (std::out_of_range&) {
-		_obuf += std::string(buf);
-		return (buf.len());
-	}
+		socket().write(_obuf);
+		_obuf.clear();
+	} catch (std::out_of_range&) {} // socket was not included in poller list
 }
