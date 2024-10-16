@@ -30,7 +30,7 @@ AccessLogger::log(Client const& client, VirtualServer const& server) {
 			out << std::string(client.address());
 			break;
 		case Type::request:
-			out << http::to_string(client.request().method()) << std::string(client.request().uri());
+			out << http::to_string(client.request().method()) << ' ' << std::string(client.request().uri());
 			break;
 		case Type::status:
 			out << http::to_string(client.response().status());
