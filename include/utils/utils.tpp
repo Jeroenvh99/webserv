@@ -30,9 +30,10 @@ namespace utils {
 			str.push_back(c);
 			if (str.length() >= DELIM.length && str.ends_with(DELIM.value)) {
 				str.erase(str.length() - DELIM.length);
-				break;
+				return (is);
 			}
 		}
+		is.setstate(std::ios_base::eofbit);
 		return (is);
 	}
 }; // namespace utils
