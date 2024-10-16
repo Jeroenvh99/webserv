@@ -69,7 +69,6 @@ enum class ClientImpl::InputState {
 enum class ClientImpl::OutputState {
 	parse_response,	// directing worker output to response parser
 	fetch,			// directing worker output to socket
-	enchunk,		// enchunk worker output and direct it to socket
 	closed,			// not expecting further output (might need this to keep faulty CGI in check)
 }; // enum class ClientImpl::OutputState
 
@@ -102,10 +101,10 @@ public:
 
 	bool			parse_request(webserv::Buffer&);
 	bool			parse_response(webserv::Buffer const&);
+	http::Status	dechunk(webserv::Buffer const&);
 	OperationStatus	dechunk_and_deliver(webserv::Buffer&);
 	OperationStatus	deliver(webserv::Buffer const&);
 	OperationStatus	fetch(webserv::Buffer&);
-	OperationStatus	fetch(webserv::ChunkBuffer&);
 
 	bool	timeout(double) const noexcept;
 

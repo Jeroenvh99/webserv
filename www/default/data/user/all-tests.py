@@ -255,16 +255,6 @@ BASE_URL = "http://localhost:1100"
 
 # 	assert filecmp.cmp("/home/jvan-hal/Desktop/webserv/www/default/data/user/deleterandom.py", "/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py", shallow=False)
 
-def test_multi_upload():
-	with open('app/tests/dechunktest.cpp', 'rb') as file1, open('app/tests/fulltest.sh', 'rb') as file2:
-		files = {
-			'text_file': (file1.name, file1, 'text/plain'),
-			'text_file': (file2.name, file2, 'text/plain')
-		}
-		response = requests.post(f'{BASE_URL}/', files=files)
-
-    assert response.status_code == 400
-	assert response.headers['Location'] == "/data/user"
 
 files = {'upload_file': open('/home/jvan-hal/Desktop/webserv/www/default/cgi/deleterandom.py','rb')}
 response = requests.post(f'{BASE_URL}/upload.txt', files=files)
@@ -273,3 +263,4 @@ assert filecmp.cmp("/home/jvan-hal/Desktop/webserv/www/default/data/user/deleter
 # response = requests.post(f'{BASE_URL}/s.t', headers={'Content-Type': 'application/json', 'Content-Length': '37'}, data='{ "title":"foo","body":"bar","id":1 }')
 # print(response.status_code)
 # print(response.text)
+

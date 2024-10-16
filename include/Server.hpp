@@ -85,15 +85,15 @@ private:
 
 	IOStatus	_parse_request(Client&);
 	IOStatus	_parse_response(Client&);
-	IOStatus	_fetch(Client&, webserv::Buffer&);
-	IOStatus	_enchunk_and_send(Client&);
-	IOStatus	_fetch_and_send(Client&);
-	IOStatus	_recv_and_deliver(Client&);
-	IOStatus	_dechunk_and_deliver(Client&);
-	IOStatus	_deliver(Client&, webserv::Buffer const&);
-	IOStatus	_recv(Client&, webserv::Buffer&);
 	IOStatus	_send(Client&);
 	IOStatus	_send(Client&, webserv::Buffer const&);
+	IOStatus	_fetch(Client&, webserv::Buffer&);
+	IOStatus	_fetch_and_send(Client&);
+	IOStatus	_recv(Client&, webserv::Buffer&);
+	IOStatus	_recv_and_deliver(Client&);
+	IOStatus	_recv_dechunk_and_deliver(Client&);
+	IOStatus	_deliver(Client&, webserv::Buffer const&);
+	IOStatus	_dechunk_and_deliver(Client&, webserv::Buffer&);
 
 	SharedHandle				_acceptor;
 	ClientMap					_clients;

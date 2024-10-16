@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "logging/logging.hpp"
+#include "http/chunk.hpp"
 
 bool
 Client::parse_request(webserv::Buffer& buf) {
@@ -18,6 +19,7 @@ Client::parse_request(webserv::Buffer& buf) {
 			break;
 		case http::Body::Type::chunked:
 			_impl._istate = InputState::dechunk;
+			_impl._dechunker.clear();
 			break;
 		}
 		_impl._buffer_flush(buf);
@@ -132,14 +134,15 @@ Client::deliver(webserv::Buffer const& buf) {
 
 Client::OperationStatus
 Client::dechunk_and_deliver(webserv::Buffer& buf) {
-	http::Dechunker::Result	res = _impl._dechunker.dechunk(buf);
+	auto	dechunker_status = _impl._dechunker.dechunk(buf);
 
 	switch (_impl._worker.deliver(buf)) {
 	case Worker::InputStatus::pending:
-		if (res && *res == 0) {
-			_impl._istate = (_impl._ostate == OutputState::closed)
-				? InputState::parse_request
-				: InputState::closed;
+		if (dechunker_status == http::Dechunker::Status::done) {
+			if (_impl._ostate == OutputState::closed)
+				_impl._clear();
+			else
+				_impl._istate = InputState::closed;
 			return (OperationStatus::success);
 		}
 		return (OperationStatus::pending);

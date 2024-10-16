@@ -21,8 +21,16 @@ Server::_parse_request(Client& client) {
 			client.respond({client, *this, vserv});
 			logging::elog.log(Elog::debug, client.address(),
 				": Request parsing finished; ", buf.len(), " trailing bytes.");
-			if (buf.len() > 0) // deliver trailing bytes to worker
-				return (_deliver(client, buf));
+			if (buf.len() > 0) { // deliver trailing bytes to worker
+				switch (client.istate()) {
+				case Client::InputState::deliver:
+					return (_deliver(client, buf));
+				case Client::InputState::dechunk:
+					return (_dechunk_and_deliver(client, buf));
+				default: // client won't accept input
+					return (IOStatus::failure);
+				}
+			}
 		}
 	} catch (Client::RedirectionException& e) {
 		logging::elog.log(Elog::error, client.address(),
@@ -76,11 +84,16 @@ Server::_parse_response(Client& client) {
 }
 
 Server::IOStatus
-Server::_dechunk_and_deliver(Client& client) {
+Server::_recv_dechunk_and_deliver(Client& client) {
 	webserv::Buffer	buf;
 
 	if (_recv(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
+	return (_dechunk_and_deliver(client, buf));
+}
+
+Server::IOStatus
+Server::_dechunk_and_deliver(Client& client, webserv::Buffer& buf) {
 	try {
 		switch (client.dechunk_and_deliver(buf)) {
 		case Client::OperationStatus::success:
@@ -91,7 +104,6 @@ Server::_dechunk_and_deliver(Client& client) {
 		case Client::OperationStatus::failure:
 			logging::elog.log(Elog::error, client.address(),
 				": Error delivering resource.");
-			// todo: inject error message into body
 			return (IOStatus::failure);
 		default: // timeout
 			__builtin_unreachable();
@@ -136,11 +148,6 @@ Server::_fetch_and_send(Client& client) {
 	if (_fetch(client, buf) == IOStatus::failure)
 		return (IOStatus::failure);
 	return (_send(client, buf));
-}
-
-Server::IOStatus
-Server::_enchunk_and_send(Client& client) {
-	return (_fetch_and_send(client)); // placeholder
 }
 
 Server::IOStatus
