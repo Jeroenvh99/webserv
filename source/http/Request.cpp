@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <utility>
 
 using http::Request;
 using http::Method;
@@ -13,9 +14,9 @@ Request::Request(Method method, Version version, std::string const& uri):
 	Message(),
 	_method(method), _version(version), _uri(uri) {}
 
-Request::Request(Method method, Version version, std::string&& uri):
+Request::Request(Method method, Version version, URI&& uri):
 	Message(),
-	_method(method), _version(version), _uri(uri) {}
+	_method(method), _version(version), _uri(std::move(uri)) {}
 
 // Conversions
 

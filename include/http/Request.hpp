@@ -19,7 +19,7 @@ namespace http {
 		Request(Method = Method::GET,
 			Version = Version(0, 0),
 			std::string const& = "");
-		Request(Method, Version, std::string&&);
+		Request(Method, Version, URI&&);
 
 		operator std::string() const;
 
