@@ -82,7 +82,7 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 					return (OutputStatus::failure);
 				}
 			}
-			return (stop(), OutputStatus::success);
+			return (OutputStatus::success);
 		}
 		_last_read = webserv::Time();
 		return (OutputStatus::pending);

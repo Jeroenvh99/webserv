@@ -95,6 +95,7 @@ MultipartParser::parse_body() {
 			else
 				throw (parse::Exception("incorrect multipart boundary terminator"));
 		}
+		_part.body.resize(_part.body.length() - 2); // remove CRLF between body and boundary
 		_status = Status::done;
 	} catch (utils::IncompleteLineException& e) {
 		_buf.clear(state);
