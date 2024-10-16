@@ -20,11 +20,11 @@
 	</header>
 	<main>
 		<h2>About WebServ</h2>
-		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <i>GET</i>, <i>POST</i> or <i>DELETE</i> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <i>Telnet</i> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
+		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <i>GET</i>, <i>POST</i> or <i>DELETE</i> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <code>telnet</code> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
 		<div class="forms">
 			<div class="form-wrapper">
 				<h3>download</h3>
-				<form id="fileGetForm" method="GET" action="/data/user" target="requestOutput">
+				<form id="fileGetForm" method="GET" target="requestOutput" onsubmit="submitDynamicForm(event)">
 					<label for="fileGet">Test the <i>GET</i> method by downloading a file.</label>
 					<div class="form-components">
 						<input type="text" id="fileGet" name="fileGet" required>
@@ -45,13 +45,7 @@
 			</div>
 			<div class="form-wrapper">
 				<h3>delete</h3>
-				<form id="fileDeleteForm">
-					<label for="fileDelete">Test the <i>DELETE</i> method by removing a file.</label>
-					<div class="form-components">
-						<input type="text" id="fileDelete" name="fileDelete" required>
-						<button type="submit">remove</button>
-					</div>
-				</form>
+				<p>Unfortunately, static <abbr>HTML</abbr> forms do not support <i>DELETE</i> methods. You'll have to find another way.</p>
 			</div>
 		</div>
 		<p>WebServ also natively offers <abbr title="Common Gateway Interface">CGI</abbr> functionality. Don't believe it? Then give these forms a go:</p>
@@ -85,4 +79,17 @@
 		<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
 	</footer>
 </body>
+<script>
+	function submitDynamicForm(event) {
+		event.preventDefault();
+
+		const form = event.target;
+		const input = form.querySelector("input[type='text']");
+		const new_action = '/data/' + input.value;
+
+		form.action = new_action;
+		form.submit();
+		console.log(form.action);
+	}
+</script>
 </html>
