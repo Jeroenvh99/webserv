@@ -18,11 +18,11 @@ _maxbodysize(config.maxbodysize) {
 			if (!loc.index.empty()) {
 				_route.seek(loc.paths.at(i)).set_directory_file(loc.index);
 			}
-			for (size_t j = 0; j < loc.allowedmethods.size(); j++) {
+			for (size_t j = 0; j < http::methods.size(); j++) {
 				if (loc.allowedmethods.at(j) != http::Method::NONE) {
-					_route.seek(loc.paths.at(i)).allow_method(loc.allowedmethods.at(j));
+					_route.seek(loc.paths.at(i)).allow_method(http::methods.at(j).first);
 				} else {
-					_route.seek(loc.paths.at(i)).disallow_method(loc.allowedmethods.at(j));
+					_route.seek(loc.paths.at(i)).disallow_method(http::methods.at(j).first);
 				}
 			}
 			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
