@@ -199,6 +199,11 @@ def test_unallowed_method():
 
 	assert response.status_code == 405
 
+def test_not_implemented():
+	response = requests.options(f'{BASE_URL}/')
+
+	assert response.status_code == 501
+
 
 def test_reponse_headers():
 	response = requests.get(f'{BASE_URL}/')
@@ -267,6 +272,12 @@ def test_multi_upload():
 		assert response.status_code == 400
 		assert response.headers['Location'] == "/data/user"
 
+def test_multi_hostname():
+	response = requests.get(f'{BASE_URL}/cgi/time.py')
+	assert response.status_code == 200
+	response = requests.get('http://fXrXsX.codam.nl/cgi/time.py')
+	assert response.text == ''
+
 # files = {'upload_file': open('www/default/cgi/deleterandom.py','rb')}
 # response = requests.post(f'{BASE_URL}/upload.txt', files=files)
 
@@ -275,3 +286,9 @@ def test_multi_upload():
 # response = requests.delete(f'{BASE_URL}/data/user/all-tests.py')
 # print(response.status_code)
 # print(response.text)
+
+# for i in {1..1000}; do curl localhost:1100; done
+# test with 1000 clients, sort of
+# tested with 14 terminals almost simultaneously
+
+# curl -X DELETE localhost:1100/data/server/navy_seal.txt does delete the file, but the delete method is specified as denied for that path in the config

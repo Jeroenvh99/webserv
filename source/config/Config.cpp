@@ -195,6 +195,15 @@ void Config::ParseServer(std::stringstream &s) {
 					throw Config::InvalidSyntaxException();
 				}
 			}
+			// for (auto location : server.locations) {
+			// 	std::cout << location.paths[0] << " ";
+			// 	for (auto method : location.allowedmethods) {
+			// 		try {
+			// 			std::cout << http::to_string(method) << " ";
+			// 		} catch (std::exception) {}
+			// 	}
+			// 	std::cout << "\n";
+			// }
 			_servers.push_back(server);
 			return;
 		}
@@ -233,6 +242,7 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, std:
 			if (word.find(http::methods.at(i).second) != std::string::npos) {
 				if (!allow) {
 					allowed.at(i) = http::Method::NONE;
+					continue;
 				}
 			} else if (allow) {
 				allowed.at(i) = http::Method::NONE;
