@@ -1,5 +1,6 @@
 #include "Worker.hpp"
 #include "job/CGI.hpp"
+#include "Server.hpp"
 #include "logging/logging.hpp"
 
 using Elog = logging::ErrorLogger::Level;
@@ -9,6 +10,7 @@ using Elog = logging::ErrorLogger::Level;
 std::optional<http::Status>
 Worker::start(job::Job const& job) {
 	stop();
+	_bytes_delivered_max = job.vserver.max_body_size();
 	if (!job.location.allows_method(job.request.method()))
 		return (http::Status::method_not_allowed);
 	if (job.is_cgi()) {
@@ -47,6 +49,8 @@ Worker::start(job::RedirectionJob const& job) {
 
 void
 Worker::stop() noexcept {
+	_bytes_delivered = 0;
+	_bytes_delivered_max = 0;
 	switch (_state) {
 	case State::resource:
 		_resource.~Resource();
@@ -99,6 +103,9 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 Worker::InputStatus
 Worker::deliver(webserv::Buffer const& wsbuf) {
 	try {
+		_bytes_delivered += wsbuf.len();
+		if (_bytes_delivered > _bytes_delivered_max)
+			throw (job::BaseResource::IOException("maximum configured body size was exceeded"));
 		if (write(wsbuf) != wsbuf.len())
 			throw (job::BaseResource::IOException("incomplete write"));
 		return (InputStatus::pending);
