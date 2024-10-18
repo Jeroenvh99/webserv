@@ -77,7 +77,7 @@ DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 
 .PHONY: all clean fclean re test debug
 
-all: $(NAME)
+all: $(NAME) default_file_system
 
 CXXFLAGS += $(DEBUG_FLAGS)
 debug: $(NAME)
@@ -98,6 +98,9 @@ fclean: clean
 	@rm -f $(NAME)
 
 re: fclean all
+
+default_file_system:
+	@mkdir -p www www/default www/default/cgi www/default/data www/default/data/server www/default/data/user
 
 test:
 	@docker build -t webserv-tests -f ./tests/Dockerfile .
