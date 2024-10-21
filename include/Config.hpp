@@ -12,6 +12,7 @@
 class Config
 {
 public:
+	using MethodBitmask = std::underlying_type<http::Method>::type;
 	struct ServerLog
 	{
 		std::string filename;
@@ -26,7 +27,7 @@ public:
 		std::string index;
 		int maxbodysize;
 		std::unordered_map<std::string, std::string> parameters;
-		std::vector<http::Method> allowedmethods;
+		MethodBitmask allowedmethods;
 	};
 
 	struct Redirection {
@@ -45,7 +46,7 @@ public:
 		std::unordered_map<int, std::string> errorpages;
 		std::vector<Location> locations;
 		std::vector<Redirection> redirections;
-		std::vector<http::Method> allowedmethods;
+		MethodBitmask allowedmethods;
 	};
 
 	class InvalidSyntaxException : public std::exception
@@ -64,7 +65,7 @@ public:
 	Config &operator=(const Config &src);
 
 	ServerLog ParseLog(std::string &word, std::stringstream &s);
-	void ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed);
+	void ParseMethods(std::string &word, std::stringstream &linestream, MethodBitmask &allowed);
 	void ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server);
 	static int ParseBodySize(std::stringstream &linestream);
 	void Parse();

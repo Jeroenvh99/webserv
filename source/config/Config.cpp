@@ -178,7 +178,7 @@ void Config::Server::AddRedirect(std::stringstream &linestream) {
 }
 
 void Config::ParseServer(std::stringstream &s) {
-	Server server{-1, 0, "", {}, {}, {}, {http::Method::GET, http::Method::HEAD, http::Method::POST, http::Method::PUT, http::Method::DELETE, http::Method::CONNECT, http::Method::OPTIONS, http::Method::TRACE}};
+	Server server{-1, 0, "", {}, {}, {}, 0};
 	std::string line;
 	while (!s.eof()) {
 		std::getline(s, line);
@@ -206,7 +206,7 @@ void Config::ParseServer(std::stringstream &s) {
 			ParseLocation(locs, initroot, linestream, s, server);
 		} else if (temp == "rewrite") {
 			server.AddRedirect(linestream);
-		} else if (temp == "allow_methods" || temp == "deny_methods"){
+		} else if (temp == "deny_methods"){
 			ParseMethods(temp, linestream, server.allowedmethods);
 		} else if (temp == "listen") {
 			std::getline(linestream, temp, ' ');
@@ -222,22 +222,17 @@ void Config::ParseServer(std::stringstream &s) {
 	}
 }
 
-void Config::ParseMethods(std::string &word, std::stringstream &linestream, std::vector<http::Method> &allowed) {
-	int allow = 0;
-	if (word.find("allow_") != std::string::npos) {
-		allow = 1;
-	}
+void Config::ParseMethods(std::string &word, std::stringstream &linestream, MethodBitmask &allowed) {
 	do {
 		std::getline(linestream, word, ' ');
-		for (size_t i = 0; i < http::methods.size(); i++) {
-			if (word.find(http::methods.at(i).second) != std::string::npos) {
-				if (!allow) {
-					allowed.at(i) = http::Method::NONE;
-					continue;
-				}
-			} else if (allow) {
-				allowed.at(i) = http::Method::NONE;
-			}
+		try {
+			std::string method = word;
+			size_t end = word.find_last_of(';');
+			if (end != std::string::npos)
+				method.erase(end);
+			allowed |= static_cast<MethodBitmask>(http::to_method(method));
+		} catch (http::parse::MethodException) {
+			throw Config::InvalidSyntaxException();
 		}
 	} while (word.find(';') == std::string::npos);
 }
@@ -268,7 +263,7 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &
 		std::getline(linestream, temp, ' ');
 		if (temp == "location") {
 			ParseLocation(loc.paths, loc.root, linestream, s, server);
-		} else if (temp == "allow_methods" || temp == "deny_methods"){
+		} else if (temp == "deny_methods"){
 			ParseMethods(temp, linestream, loc.allowedmethods);
 		} else if (temp == "root"){
 			std::getline(linestream, temp, ' ');
