@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ</title>
+	<link rel="favicon" href="logo.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<header>
+		<div class="header-content">
+			<div class="header-text">
+				<h1>WebServ</h1>
+				<sh1>your favourite clunky HTTP server, made with love</sh1>
+			</div>
+			<img class="header-logo" src="favicon.svg" alt="DIY Logo" />
+		</div>
+		<hr />
+	</header>
+	<main>
+		<h2>About WebServ</h2>
+		<p>WebServ is fully partially HTTP-compliant! This means you are free to send any <i>GET</i>, <i>POST</i> or <i>DELETE</i> request its way, and it'll provide you with a nice response. At least, it does so on our machine. You can even mess up part of your request via clever use of <code>telnet</code> or <code>curl</code>, and with any luck, it will not falter.</p><p>Or if you value convenience, feel free to use any of the forms below:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download</h3>
+				<form id="fileGetForm" method="GET" target="requestOutput" onsubmit="submitDynamicForm(event)">
+					<label for="fileGet">Test the <i>GET</i> method by downloading a file.</label>
+					<div class="form-components">
+						<input type="text" id="fileGet" name="fileGet" required>
+						<button type="submit">download</button>
+					</div>
+					<small>Note that the fact that you're able to view this page, means that the <i>GET</i> method works. If you're still unsure however, this form is for you!</small>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload</h3>
+				<form id="filePostForm" method="POST" enctype="multipart/form-data" action="/data/user" target="requestOutput">
+					<label for="filePost">Test the <i>POST</i> method by uploading some files.</label>
+					<div class="form-components">
+        				<input type="file" name="example3[]" multiple="multiple"/>
+						<button type="submit">upload</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>delete</h3>
+				<p>Unfortunately, static <abbr>HTML</abbr> forms do not support <i>DELETE</i> methods. You'll have to find another way.</p>
+			</div>
+		</div>
+		<p>WebServ also natively offers <abbr title="Common Gateway Interface">CGI</abbr> functionality. Don't believe it? Then give these forms a go:</p>
+		<div class="forms">
+			<div class="form-wrapper">
+				<h3>download from CGI</h3>
+				<form id="cgiGetForm" action="/cgi/env.js" target="requestOutput">
+					<label for="cgiGet">Test the <i>GET</i> method by inspecting the <abbr title="Common Gateway Interface">CGI</abbr> execution environment.</label>
+					<div class="form-components">
+						<div></div>
+						<button type="submit">download</button>
+					</div>
+				</form>
+			</div>
+			<div class="form-wrapper">
+				<h3>upload to CGI</h3>
+				<form id="cgiPostForm" method="POST" action="/cgi/square.py" enctype="multipart/form-data" target="requestOutput">
+					<label for="cgiPost">Test the <i>POST</i> method by squaring a number.</label>
+					<div class="form-components">
+						<input type="text" id="cgiPost" name="toSquare" required>
+						<button type="submit">upload</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="iframe-wrapper">
+			<iframe name="requestOutput" title="Request output"></iframe>
+		</div>
+	</main>
+	<footer>
+		<p>Brought to you by Team DIY: Connected Edition (<b>jvan-hal</b>, <b>dbasting</b>)</p>
+	</footer>
+</body>
+<script>
+	function submitDynamicForm(event) {
+		event.preventDefault();
+
+		const form = event.target;
+		const input = form.querySelector("input[type='text']");
+		const new_action = '/data/' + input.value;
+
+		form.action = new_action;
+		form.submit();
+		console.log(form.action);
+	}
+</script>
+</html>

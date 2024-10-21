@@ -1,0 +1,113 @@
+:root {
+	background-color: rgb(158, 172, 178);
+	--accent-color-dark: rgb(19, 28, 56);
+	--accent-color: rgb(61, 64, 98);
+	--accent-color-light: rgb(106, 106, 121);
+}
+
+body {
+    font-family: "Open Sans", "Helvetica", "sans-serif";
+	box-sizing: border-box;
+
+	max-width: 1800px;
+	height: 100vh;
+	margin: 0 auto;
+	padding: 20px 10px;
+}
+
+footer {
+	font-style: italic;
+	font-size: 0.8rem;
+}
+
+h1 {
+	font-size: 2rem;
+	font-weight: bold;
+	color: var(--accent-color-dark);
+	margin: 0;
+}
+
+h2 {
+	font-size: 1.4rem;
+	font-weight: bold;
+	color: var(--accent-color-dark);
+	margin: 1rem 0;
+}
+
+h3 {
+	font-size: 1.1rem;
+	font-weight: bold;
+	margin: 0.5rem 10px;
+}
+
+sh1 {
+	font-size: 0.9rem;
+	font-style: italic;
+	font-weight: bold;
+	color: var(--accent-color);
+}
+
+p {
+	margin: 0.5rem 0;
+}
+
+hr {
+	flex-grow: 0;
+	width: 100%;
+	border: 2px outset var(--accent-color);
+}
+
+b {
+	color: var(--accent-color-dark);
+}
+
+.header-content {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	height: fit-content;
+}
+
+.forms {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 10px;
+	max-width: 90%;
+	margin: 0 auto;
+}
+
+.form-wrapper {
+	border: 2px solid var(--accent-color);
+	padding: 5px;
+	background-color: lightgray;
+}
+
+.form-components {
+	display: grid;
+	grid-template-columns: 1fr 100px;
+	gap: 5px;
+	padding: 5px;
+}
+
+.header-text {
+	flex-grow: 1;
+}
+
+.header-logo {
+	aspect-ratio: 1 / 1;
+	min-height: 3rem;
+}
+
+.iframe-wrapper {
+	display: flex;
+	margin: 10px auto;
+	height: 512px;
+	width: 80%;
+}
+
+iframe {
+	height: auto;
+	width: 100%;
+	border: 2px solid var(--accent-color);
+	background-color: white;
+}

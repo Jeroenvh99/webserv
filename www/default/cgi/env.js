@@ -32,7 +32,7 @@ function getPayload() {
             <link rel=\"stylesheet\" href=\"/nested.css\">"
         ),
         element("body",
-            element("h1", "CGI: Execution Environment"),
+            element("h1", "CGI: Execution Environment: JavaScript edition"),
             element("p", "Directory: ", element("code", process.cwd())),
             element("ul",
                 element("li", "Your IP address: ", element("code", environValue('REMOTE_HOST'))),
@@ -51,4 +51,5 @@ const payload = getPayload();
 
 console.log('Content-Type: text/html');
 console.log(`Content-Length: ${payload.length}`);
+console.log("");
 console.log(payload);
