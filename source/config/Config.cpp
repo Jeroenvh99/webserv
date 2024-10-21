@@ -15,8 +15,7 @@ Config::InvalidFileException::what() const throw()
 
 Config::Config(std::string &filename) :
 	_config("") {
-	size_t extension = filename.find_last_of(".");
-	if (extension == std::string::npos || filename.substr(extension + 1) != "conf") {
+	if (filename.substr(filename.size() - 5) != ".conf") {
 		throw Config::InvalidFileException();
 	}
 	std::ifstream in(filename);
