@@ -22,12 +22,12 @@ def get_payload():
 	html = "<!DOCTYPE html>"
 	html += element("html",
 		element("head",
-			element("title", "CGI Execution Environment"),
+			element("title", "CGI Execution Environment: Python edition"),
 			"<meta charset=\"utf-8\"> \
 			<link rel=\"stylesheet\" href=\"/nested.css\">"
 		),
 		element("body",
-			element("h1", "CGI: Execution Environment"),
+			element("h1", "CGI: Execution Environment: Python edition"),
 			element("p", "Directory: ", element("code", os.getcwd())),
 			element("ul",
 				element("li", "Your IP address: ", element("code", environ_value('REMOTE_HOST'))),
