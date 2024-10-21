@@ -19,10 +19,10 @@ _maxbodysize(config.maxbodysize) {
 				_route.seek(loc.paths.at(i)).set_directory_file(loc.index);
 			}
 			for (size_t j = 0; j < http::methods.size(); j++) {
-				if (loc.allowedmethods.at(j) != http::Method::NONE) {
-					_route.seek(loc.paths.at(i)).allow_method(http::methods.at(j).first);
-				} else {
+				if (loc.allowedmethods & static_cast<Config::MethodBitmask>(http::methods.at(j).first)) {
 					_route.seek(loc.paths.at(i)).disallow_method(http::methods.at(j).first);
+				} else {
+					_route.seek(loc.paths.at(i)).allow_method(http::methods.at(j).first);
 				}
 			}
 			for (size_t j = 0; j < loc.allowedcgi.size(); j++) {
