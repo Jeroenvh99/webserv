@@ -1,17 +1,20 @@
 #include "Config.hpp"
 #include <iostream>
 
-const char* Config::InvalidSyntaxException::what() const throw()
+const char*
+Config::InvalidSyntaxException::what() const throw()
 {
 	return "configException: syntax error in config file";
 }
 
-const char* Config::InvalidFileException::what() const throw()
+const char*
+Config::InvalidFileException::what() const throw()
 {
 	return "configException: invalid config file";
 }
 
-Config::Config(std::string &filename) {
+Config::Config(std::string &filename) :
+	_config("") {
 	size_t extension = filename.find_last_of(".");
 	if (extension == std::string::npos || filename.substr(extension + 1) != "conf") {
 		throw Config::InvalidFileException();
@@ -30,7 +33,8 @@ Config::Config(const Config& src) {
 	*this = src;
 }
 
-Config &Config::operator=(const Config& src) {
+Config&
+Config::operator=(const Config& src) {
 	if (this != &src) {
 		_errorlog = src.getErrorLog();
 		_accesslog = src.getAccessLog();
@@ -39,9 +43,9 @@ Config &Config::operator=(const Config& src) {
 	return *this;
 }
 
-void Config::PreParse(std::ifstream &in) {
+void
+Config::PreParse(std::ifstream &in) {
 	std::string line;
-	std::string res = "";
 	unsigned int openbrackets = 0;
 	while (!in.eof()) {
 		std::getline(in, line);
@@ -49,11 +53,11 @@ void Config::PreParse(std::ifstream &in) {
 		if (comment != std::string::npos) {
 			line.erase(comment);
 		}
+		if (line == "") {
+			continue;
+		}
 		size_t lastchar = line.find_last_not_of(" \n\r\t");
 		if (lastchar == std::string::npos) {
-			line.erase(lastchar + 1);
-		}
-		if (line == "") {
 			continue;
 		}
 		size_t open = line.find('{');
@@ -77,15 +81,15 @@ void Config::PreParse(std::ifstream &in) {
 		if (line.back() != '{' && line.back() != '}' && line.back() != ';') {
 			throw Config::InvalidSyntaxException();
 		}
-		res += line + "\n";
+		_config += line + "\n";
 	}
 	if (openbrackets > 0) {
 		throw Config::InvalidSyntaxException();
 	}
-	_config = res;
 }
 
-void Config::Parse() {
+void
+Config::Parse() {
 	std::stringstream s(_config);
 	std::string line;
 	_errorlog = {"", logging::ErrorLogger::Level::error};
@@ -106,7 +110,8 @@ void Config::Parse() {
 	MatchErrorPages();
 }
 
-Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
+Config::ServerLog
+Config::ParseLog(std::string &word, std::stringstream &s) {
 	ServerLog log = {"", logging::ErrorLogger::Level::error};
 	std::getline(s, word, ' ');
 	word.erase(word.find_last_not_of(";") + 1);
@@ -123,7 +128,8 @@ Config::ServerLog Config::ParseLog(std::string &word, std::stringstream &s) {
 	return log;
 }
 
-int Config::ParseBodySize(std::stringstream &linestream) {
+int
+Config::ParseBodySize(std::stringstream &linestream) {
 	std::string temp;
 	int maxbodysize = 1000;
 	std::getline(linestream, temp, ' ');
@@ -133,7 +139,7 @@ int Config::ParseBodySize(std::stringstream &linestream) {
 	}
 	temp.pop_back();
 	try {
-		unsigned int res;
+		int res;
 		res = std::stoi(temp);
 		if (res < 0) {
 			throw std::invalid_argument("invalid body size limit");
@@ -145,7 +151,8 @@ int Config::ParseBodySize(std::stringstream &linestream) {
 	return (0);
 }
 
-void Config::Server::AddErrorPage(std::stringstream &linestream) {
+void
+Config::Server::AddErrorPage(std::stringstream &linestream) {
 	std::vector<int> codes;
 	std::string temp;
 	while (1) {
@@ -162,7 +169,8 @@ void Config::Server::AddErrorPage(std::stringstream &linestream) {
 	}
 }
 
-void Config::Server::AddRedirect(std::stringstream &linestream) {
+void
+Config::Server::AddRedirect(std::stringstream &linestream) {
 	std::string temp;
 	std::getline(linestream, temp, ' ');
 	Config::Redirection redirect{temp, "", false};
@@ -177,7 +185,8 @@ void Config::Server::AddRedirect(std::stringstream &linestream) {
 	this->redirections.emplace_back(redirect);
 }
 
-void Config::ParseServer(std::stringstream &s) {
+void
+Config::ParseServer(std::stringstream &s) {
 	Server server{-1, 0, "", {}, {}, {}, 0};
 	std::string line;
 	while (!s.eof()) {
@@ -222,7 +231,8 @@ void Config::ParseServer(std::stringstream &s) {
 	}
 }
 
-void Config::ParseMethods(std::string &word, std::stringstream &linestream, MethodBitmask &allowed) {
+void
+Config::ParseMethods(std::string &word, std::stringstream &linestream, MethodBitmask &allowed) {
 	do {
 		std::getline(linestream, word, ' ');
 		try {
@@ -237,7 +247,8 @@ void Config::ParseMethods(std::string &word, std::stringstream &linestream, Meth
 	} while (word.find(';') == std::string::npos);
 }
 
-void Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server) {
+void
+Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server) {
 	Location loc {{}, {}, previousroot, "", server.maxbodysize, {}, server.allowedmethods};
 	std::string word;
 	std::getline(startstream, word, ' ');
@@ -295,7 +306,8 @@ void Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &
 	}
 }
 
-void Config::MatchErrorPages() {
+void
+Config::MatchErrorPages() {
 	for (size_t i = 0; i < _servers.size(); i++) {
 		for (auto errorpage : _servers.at(i).errorpages) {
 			for (Config::Location loc : _servers.at(i).locations) {
@@ -309,19 +321,23 @@ void Config::MatchErrorPages() {
 	}
 }
 
-const Config::ServerLog &Config::getErrorLog() const {
+const Config::ServerLog&
+Config::getErrorLog() const {
 	return _errorlog;
 }
 
-const Config::ServerLog &Config::getAccessLog() const {
+const Config::ServerLog&
+Config::getAccessLog() const {
 	return _accesslog;
 }
 
-const std::vector<Config::Server> &Config::getServers() const {
+const std::vector<Config::Server>&
+Config::getServers() const {
 	return _servers;
 }
 
-const std::string &Config::getConfig() const {
+const std::string&
+Config::getConfig() const {
 	return _config;
 }
 
