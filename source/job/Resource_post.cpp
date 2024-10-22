@@ -14,7 +14,7 @@ Resource::_post(route::Location const& loc) {
 	_iss.clear();
 	_iss.str(make_headers_and_body(loc));
 
-	return (http::Status::created);
+	return (http::Status::accepted);
 }
 
 static std::string

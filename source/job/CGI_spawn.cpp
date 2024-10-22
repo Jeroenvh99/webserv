@@ -50,9 +50,10 @@ CGI::wait() {
 
 void
 CGI::_fork(Job const& job) {
+	using Option = network::SocketOption;
 	using EventType = webserv::Poller::EventType;
 
-	network::SocketPair<Socket>	pair;
+	network::SocketPair<Socket>	pair({Option::nonblock, Option::cloexec});
 
 	_pid = ::fork();
 	switch (_pid) {
