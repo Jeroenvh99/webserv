@@ -70,7 +70,7 @@ SRC_FILES	:= Environment_build.cpp \
 OBJ_FILES	:= $(patsubst %.cpp,%.o,$(SRC_FILES))
 
 CXX			:= clang++ # On Codam machines, c++ is actually an alias to clang++.
-CXXFLAGS	:= -Wall -Wextra -Werror -I$(INCLUDE_DIR) --std=c++20
+CXXFLAGS	:= -Wall -Wextra -Werror -I$(INCLUDE_DIR) --std=c++20 -o3
 DEBUG_FLAGS	:= -g -fsanitize=address
 DEPFLAGS	:= -MMD $(@.o=.d) -MP
 DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
@@ -79,7 +79,7 @@ DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 
 all: $(NAME) default_file_system
 
-CXXFLAGS += $(DEBUG_FLAGS)
+# CXXFLAGS += $(DEBUG_FLAGS)
 debug: $(NAME)
 
 $(NAME): $(addprefix $(OBJ_DIR),$(OBJ_FILES))

@@ -203,6 +203,9 @@ Config::ParseServer(std::stringstream &s) {
 					throw Config::InvalidSyntaxException();
 				}
 			}
+			for (auto loc : server.locations) {
+				std::cout << loc.paths[0] << " " << loc.allowedmethods << "\n";
+			}
 			_servers.push_back(server);
 			return;
 		}
@@ -211,7 +214,7 @@ Config::ParseServer(std::stringstream &s) {
 		} else if (temp == "location") {
 			std::vector<std::string> locs{""};
 			std::string initroot = "";
-			ParseLocation(locs, initroot, linestream, s, server);
+			ParseLocation(locs, initroot, linestream, s, server, server.allowedmethods);
 		} else if (temp == "rewrite") {
 			server.AddRedirect(linestream);
 		} else if (temp == "deny_methods"){
@@ -247,8 +250,8 @@ Config::ParseMethods(std::string &word, std::stringstream &linestream, MethodBit
 }
 
 void
-Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server) {
-	Location loc {{}, {}, previousroot, "", server.maxbodysize, {}, server.allowedmethods};
+Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server, MethodBitmask &allowedmethods) {
+	Location loc {{}, {}, previousroot, "", server.maxbodysize, {}, allowedmethods};
 	std::string word;
 	std::getline(startstream, word, ' ');
 	while (word != "{") {
@@ -272,7 +275,7 @@ Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previ
 		std::string temp;
 		std::getline(linestream, temp, ' ');
 		if (temp == "location") {
-			ParseLocation(loc.paths, loc.root, linestream, s, server);
+			ParseLocation(loc.paths, loc.root, linestream, s, server, loc.allowedmethods);
 		} else if (temp == "deny_methods"){
 			ParseMethods(temp, linestream, loc.allowedmethods);
 		} else if (temp == "root"){
