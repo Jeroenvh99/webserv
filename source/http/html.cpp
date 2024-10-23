@@ -23,7 +23,7 @@ html::directory_list(std::filesystem::path const& path) {
 	oss << "<!DOCTYPE html><html><meta charset=\"utf-8\" /><title>"
 		<< std::string(path) << "</title></head><body><ul>";
 	for (auto const& entry: std::filesystem::directory_iterator(path))
-		oss << "<li>" << entry.path() << "</li>";
+		oss << "<li>" << entry.path().filename() << "</li>";
 	oss << "</body></html>";
 	return (oss.str());
 }
