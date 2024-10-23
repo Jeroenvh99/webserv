@@ -10,6 +10,7 @@ using Elog = logging::ErrorLogger::Level;
 std::optional<http::Status>
 Worker::start(job::Job const& job) {
 	stop();
+	_last_read = webserv::Time();
 	_bytes_delivered_max = job.vserver.max_body_size();
 	if (!job.location.allows_method(job.request.method()))
 		return (http::Status::method_not_allowed);
