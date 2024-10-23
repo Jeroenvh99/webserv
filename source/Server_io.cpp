@@ -43,7 +43,7 @@ Server::_parse_request(Client& client) {
 	} catch (Client::BodySizeException& e) {
 		logging::elog.log(Elog::error, client.address(),
 			": That didn't work: ", e.what());
-		// respond Payload Too Large
+		client.respond({http::Status::content_too_large, virtual_server(client)});
 		return (IOStatus::failure);
 	} catch (http::parse::VersionException& e) {
 		logging::elog.log(Elog::error, client.address(),
@@ -165,6 +165,7 @@ Server::_fetch(Client& client, webserv::Buffer& buf) {
 	case Client::OperationStatus::timeout:
 		logging::elog.log(Elog::error, client.address(),
 			": Timeout occurred whilst fetching resource.");
+		client.respond({http::Status::gateway_timeout, virtual_server(client)});
 		return (IOStatus::failure);
 	case Client::OperationStatus::failure:
 		logging::elog.log(Elog::error, client.address(),

@@ -13,7 +13,7 @@ namespace http {
 		no_content = 204,
 
 		moved_permanently = 301,
-		found = 302, // ?
+		found = 302,
 
 		bad_request = 400,
 		unauthorized = 401,
@@ -29,6 +29,7 @@ namespace http {
 		internal_error = 500,
 		not_implemented = 501,
 		service_unavailable = 503,
+		gateway_timeout = 504,
 		version_not_supported = 505,
 	}; // enum Status
 
@@ -40,7 +41,7 @@ namespace http {
 	bool			is_server_error(Status) noexcept;
 	bool			is_error(Status) noexcept;
 
-	using StatusDescriptionMap = std::array<std::pair<Status, char const*>, 20>;
+	using StatusDescriptionMap = std::array<std::pair<Status, char const*>, 21>;
 	constexpr StatusDescriptionMap	_descriptions = {{
 		{Status::ok, "OK"},
 		{Status::created, "Created"},
@@ -61,6 +62,7 @@ namespace http {
 		{Status::internal_error, "Internal Server Error"},
 		{Status::not_implemented, "Not Implemented"},
 		{Status::service_unavailable, "Service Unavailable"},
+		{Status::gateway_timeout, "Gateway Timeout"},
 		{Status::version_not_supported, "Version Not Supported"},
 	}};
 }; // namespace http

@@ -23,7 +23,6 @@ Config::Config(std::string &filename) :
         throw std::exception();
     }
 	PreParse(in);
-	// std::cout << _config;
 	Parse();
 	in.close();
 }
@@ -202,9 +201,6 @@ Config::ParseServer(std::stringstream &s) {
 				if (server.servername == _servers[i].servername && server.port == _servers[i].port) {
 					throw Config::InvalidSyntaxException();
 				}
-			}
-			for (auto loc : server.locations) {
-				std::cout << loc.paths[0] << " " << loc.allowedmethods << "\n";
 			}
 			_servers.push_back(server);
 			return;

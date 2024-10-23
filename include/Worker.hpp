@@ -46,6 +46,7 @@ private:
 	webserv::Time	_last_read;
 	size_t			_bytes_delivered;
 	size_t			_bytes_delivered_max;
+	size_t			_bytes_fetched;
 	union {
 		job::Resource			_resource;
 		job::MultipartResource	_multipart_resource;

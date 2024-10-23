@@ -1,7 +1,7 @@
 #include "Worker.hpp"
 
 Worker::Worker():
-	_state(State::none) {}
+	_state(State::none), _bytes_delivered(0), _bytes_delivered_max(0), _bytes_fetched(0) {}
 
 Worker::~Worker() {
 	stop();

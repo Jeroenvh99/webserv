@@ -51,6 +51,7 @@ void
 Worker::stop() noexcept {
 	_bytes_delivered = 0;
 	_bytes_delivered_max = 0;
+	_bytes_fetched = 0;
 	switch (_state) {
 	case State::resource:
 		_resource.~Resource();
@@ -75,7 +76,8 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 	using ProcessStatus = job::CGI::ProcessStatus;
 
 	try {
-		if (read(wsbuf) == 0) {
+		size_t const	bytes = read(wsbuf);
+		if (bytes == 0) {
 			if (_state == State::cgi) {
 				switch (_cgi.wait()) {
 				case ProcessStatus::busy: // CGI running with closed stdout
@@ -88,11 +90,15 @@ Worker::fetch(webserv::Buffer& wsbuf) {
 			}
 			return (OutputStatus::success);
 		}
+		_bytes_fetched += bytes;
 		_last_read = webserv::Time();
 		return (OutputStatus::pending);
 	} catch (job::BaseResource::IOException& e) {
-		if (timeout())
-			return (stop(), OutputStatus::timeout);
+		if (timeout()) {
+			if (_bytes_fetched == 0)
+				return (stop(), OutputStatus::timeout);
+			return (stop(), OutputStatus::failure);
+		}
 		return (OutputStatus::pending);
 	} catch (job::BaseResource::Exception& e) {
 		logging::elog.log(Elog::error, e.what());
