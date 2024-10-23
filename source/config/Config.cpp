@@ -252,7 +252,10 @@ Config::ParseLocation(std::vector<std::string> &previouslocs, std::string &previ
 	std::getline(startstream, word, ' ');
 	while (word != "{") {
 		for (size_t i = 0; i < previouslocs.size(); i++) {
-			loc.paths.push_back(previouslocs[i] + word);
+			if (previouslocs[i] == "/")
+				loc.paths.push_back(word);
+			else
+				loc.paths.push_back(previouslocs[i] + word);
 		}
 		if (!previousroot.empty()) {
 			loc.root += "/" + word;
