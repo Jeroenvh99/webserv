@@ -35,6 +35,7 @@ Worker::start(job::Job const& job) {
 void
 Worker::start(job::ErrorJob const& job) {
 	stop();
+	_last_read = webserv::Time();
 	_state = State::resource;
 	new (&_resource) job::Resource();
 	_resource.open(job);
@@ -43,6 +44,7 @@ Worker::start(job::ErrorJob const& job) {
 void
 Worker::start(job::RedirectionJob const& job) {
 	stop();
+	_last_read = webserv::Time();
 	_state = State::resource;
 	new (&_resource) job::Resource();
 	_resource.open(job);
