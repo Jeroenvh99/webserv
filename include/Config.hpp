@@ -38,8 +38,8 @@ public:
 
 	struct Server
 	{
-		void AddErrorPage(std::stringstream &linestream);
-		void AddRedirect(std::stringstream &linestream);
+		void AddErrorPage(std::stringstream &);
+		void AddRedirect(std::stringstream &);
 		int port;
 		int maxbodysize;
 		std::string servername;
@@ -59,18 +59,18 @@ public:
 		virtual const char *what() const throw();
 	};
 
-	Config(std::string &filename);
-	Config(const Config &src);
+	Config(std::string &);
+	Config(const Config &);
 	~Config();
-	Config &operator=(const Config &src);
+	Config &operator=(const Config &);
 
-	ServerLog ParseLog(std::string &word, std::stringstream &s);
-	void ParseMethods(std::string &word, std::stringstream &linestream, MethodBitmask &allowed);
-	void ParseLocation(std::vector<std::string> &previouslocs, std::string &previousroot, std::stringstream &startstream, std::stringstream &s, Server &server, MethodBitmask &allowedmethods);
-	static int ParseBodySize(std::stringstream &linestream);
+	ServerLog ParseLog(std::string &, std::stringstream &);
+	void ParseMethods(std::string &, std::stringstream &, MethodBitmask &);
+	void ParseLocation(std::vector<std::string> &, std::string &, std::stringstream &, std::stringstream &, Server &, MethodBitmask &);
+	static int ParseBodySize(std::stringstream &);
 	void Parse();
-	void ParseServer(std::stringstream &s);
-	void PreParse(std::ifstream &in);
+	void ParseServer(std::stringstream &);
+	void PreParse(std::ifstream &);
 	void MatchErrorPages();
 	const ServerLog &getErrorLog() const;
 	const ServerLog &getAccessLog() const;
