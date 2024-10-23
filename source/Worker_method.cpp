@@ -148,5 +148,8 @@ Worker::read(webserv::Buffer& wsbuf) {
 
 bool
 Worker::timeout() const noexcept {
-	return (::difftime(webserv::Time(), _last_read) >= timeout_interval);
+	auto	now = webserv::Time();
+	auto	diff = ::difftime(now, _last_read);
+	return (diff >= timeout_interval);
+	// return (::difftime(webserv::Time(), _last_read) >= timeout_interval);
 }

@@ -77,7 +77,7 @@ DEP_FILES	:= $(patsubst %.o,%.d,$(addprefix $(OBJ_DIR), $(OBJ_FILES)))
 
 .PHONY: all clean fclean re test debug
 
-all: $(NAME) default_file_system
+all: $(NAME)
 
 # CXXFLAGS += $(DEBUG_FLAGS)
 debug: $(NAME)
